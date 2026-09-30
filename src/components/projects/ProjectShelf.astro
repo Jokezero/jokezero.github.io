@@ -347,6 +347,8 @@ const linksOf = (item: ProjectItem) => [
         if (event.ctrlKey) return; // 缩放手势不拦截
         if (matchMedia("(hover: none)").matches) return; // 触屏走页码按钮
         if (Math.abs(event.deltaY) < 4) return;
+        // 页面切换进行中：交还给页面，别让触控板惯性触发第二次动效（§10 第 4 条坑）
+        if (document.documentElement.classList.contains("is-transitioning")) return;
 
         const total = pageCount(visibleItems().length);
         if (total <= 1) return; // 只有一页 = 不拦，正常滚动页面

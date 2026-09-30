@@ -10,6 +10,16 @@
  *   · 覆盖与揭开首尾相接、缓动互补，合成"一次连续下扫"（中间不留停顿）
  *   · 每次切换前把幕布无动画地复位到画面上方，保证方向永远一致
  *   · 换页必须回到顶部，否则首屏文案会停在"淡出"状态
+ *
+ * 三个已经踩过的坑（2026-09-30 修复，别再改回去）：
+ *   1. **首帧覆盖必须由 CSS 保证**：客户端脚本现在是外部文件（P4 起不再内联），
+ *      执行时机可能在首次绘制之后。所以 `html.is-arriving #curtain { transform: none }`
+ *      写在 motion.css 里，JS 只负责"下一帧释放它"，否则会先闪一下新页面。
+ *   2. **到达页也必须注册点击拦截**：早期版本在到达分支里 return，
+ *      导致"跳到新页后，从这一页再点导航就不播动效了"，表现为动效时有时无。
+ *   3. **收尾时绝不能复位幕布**：幕布离开后要停在视口下方（is-pass 保留）。
+ *      一旦在收尾时摘掉 is-pass，它会带着过渡从下方动画回到上方，穿过整个视口 ——
+ *      看起来就是"动效结束后幕布又出现了一次"。复位只在下一次切换开始时用 no-anim 做。
  */
 
 /** 离开页写入、到达页读取的一次性标记 */
@@ -67,6 +77,15 @@ export function initPageTransition(): void {
   const titleEl = document.querySelector<HTMLElement>("[data-title-split]");
   let switching = false;
 
+  /** 把幕布无动画地停到画面上方（视口外），保证下一次永远是同一个方向下扫 */
+  const park = () => {
+    if (!curtain) return;
+    curtain.classList.add("no-anim");
+    curtain.classList.remove("is-pass", "is-cover");
+    void curtain.offsetWidth;
+    curtain.classList.remove("no-anim");
+  };
+
   // ── 到达页：把幕布"接着往下扫完"，新标题从反方向归位 ──
   if (html.classList.contains("is-arriving") && curtain) {
     if (label) label.textContent = labelFor(location.pathname);
@@ -74,10 +93,9 @@ export function initPageTransition(): void {
     // 换页一律从顶部开始：否则首屏文案会停在"淡出"状态，看起来像标题消失
     window.scrollTo(0, 0);
 
-    // 复位到"完全覆盖"的位置，且这一帧不动画
-    curtain.classList.add("no-anim", "is-cover");
-    void curtain.offsetWidth;
-    curtain.classList.remove("no-anim");
+    // 首帧的"盖满画面"由 CSS（html.is-arriving #curtain）保证，这里不再动它，
+    // 只在下一帧释放：去掉 is-arriving、接上 is-pass，幕布就继续向下扫出画面。
+    switching = true; // 到达动画期间不接受新的切换
 
     window.requestAnimationFrame(() => {
       // 先让新页标题停在"反方向、不可见"的位置，再放它归位
@@ -87,25 +105,31 @@ export function initPageTransition(): void {
         void titleEl.offsetWidth;
       }
 
-      curtain.classList.remove("is-cover");
-      curtain.classList.add("is-pass");
       html.classList.remove("is-arriving");
+      curtain.classList.add("is-pass");
 
       window.requestAnimationFrame(() => {
         titleEl?.classList.remove("is-in");
       });
 
       window.setTimeout(() => {
-        // 幕布停在视口下方（不可见），下一次切换开始时再悄悄复位
-        curtain.classList.remove("is-pass");
+        // 幕布停在视口下方（is-pass 保留，绝不在这里复位 —— 见文件头的坑位 3）
         html.classList.remove("is-transitioning");
+        switching = false;
       }, 660);
     });
-
-    return;
+  } else if (titleEl) {
+    splitTitle(titleEl);
   }
 
-  if (titleEl) splitTitle(titleEl);
+  // 浏览器"后退"可能直接从 bfcache 恢复整页（脚本不会再跑一遍）：
+  // 那时页面还带着 is-transitioning、幕布还停在视口外，必须复位，否则这一页再也不播动效。
+  window.addEventListener("pageshow", (event) => {
+    if (!event.persisted) return;
+    switching = false;
+    html.classList.remove("is-transitioning");
+    park();
+  });
 
   // ── 离开页：拦下站内链接，先播动画再跳转 ──
   document.addEventListener("click", (event) => {
@@ -129,7 +153,11 @@ export function initPageTransition(): void {
     }
     if (url.origin !== location.origin) return;
     if (url.pathname === location.pathname && url.hash) return;
-    if (url.href === location.href) return;
+    if (url.href === location.href) {
+      // 点的是当前页面自己的链接（例如在首页点"首页"）：不播动效，但回到顶部
+      window.scrollTo({ top: 0, behavior: reduced.matches ? "auto" : "smooth" });
+      return;
+    }
     if (!curtain) return;
 
     event.preventDefault();
@@ -154,15 +182,20 @@ export function initPageTransition(): void {
     }
 
     // 无论幕布此前停在哪，先无动画复位到画面上方，保证每次方向一致
-    curtain.classList.add("no-anim");
-    curtain.classList.remove("is-pass", "is-cover");
-    void curtain.offsetWidth;
-    curtain.classList.remove("no-anim");
+    park();
     curtain.classList.add("is-cover");
 
     // 覆盖 540ms 后跳转；到达页接上"揭开"那一段
     window.setTimeout(() => {
       location.href = url.href;
     }, 540);
+
+    // 兜底：万一跳转没发生（例如链接被拦截、下载弹窗），4 秒后把页面交还给用户
+    window.setTimeout(() => {
+      if (!switching) return;
+      switching = false;
+      html.classList.remove("is-transitioning");
+      park();
+    }, 4000);
   });
 }
