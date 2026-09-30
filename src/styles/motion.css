@@ -51,11 +51,22 @@ html[data-theme="light"] canvas[data-scene] {
  * （表现就是偶发没有动效、或者闪一下）。动画则永远从 keyframes 的第一帧开始播。
  */
 #curtain.is-cover {
-  animation: curtain-cover 520ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  /* 静态位置兜底：即使动画没能生效，幕布也停在"盖满画面"的位置 */
+  transform: translate3d(0, 0, 0);
+  /*
+   * fill-mode 必须是 both（不是 forwards）：
+   * forwards 只保证"动画结束后"保持末帧，而**动画开始前/刚开始的那一帧**元素会退回
+   * 自己的静态样式 —— 对揭开那一帧来说就是"退回画面上方"，于是幕布会消失一瞬间
+   * （用户看到的就是"盖住之后闪一下"）。both 会把 0% 关键帧也一起填上，
+   * 动画一挂上就已经处于"盖满画面"的状态，中间不留空档。
+   */
+  animation: curtain-cover 520ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 #curtain.is-pass {
-  animation: curtain-pass 560ms cubic-bezier(0.8, 0, 0.85, 0.55) forwards;
+  /* 静态位置兜底：动画结束后停在画面下方（视口之外） */
+  transform: translate3d(0, 100%, 0);
+  animation: curtain-pass 560ms cubic-bezier(0.8, 0, 0.85, 0.55) both;
 }
 
 @keyframes curtain-cover {

@@ -97,26 +97,31 @@ export function initPageTransition(): void {
     // 只在下一帧释放：去掉 is-arriving、接上 is-pass，幕布就继续向下扫出画面。
     switching = true; // 到达动画期间不接受新的切换
 
+    // 双 rAF：先让"幕布盖满画面"这一帧真正被绘制出来（而不是只算完样式），
+    // 再开始揭开。多等一帧（约 16ms）肉眼看不出来，
+    // 却能从根上避免"盖住之后闪一下"这类只在时序上出现的空档。
     window.requestAnimationFrame(() => {
-      // 先让新页标题停在"反方向、不可见"的位置，再放它归位
-      if (titleEl) {
-        splitTitle(titleEl);
-        titleEl.classList.add("is-in");
-        void titleEl.offsetWidth;
-      }
-
-      html.classList.remove("is-arriving");
-      curtain.classList.add("is-pass");
-
       window.requestAnimationFrame(() => {
-        titleEl?.classList.remove("is-in");
-      });
+        // 先让新页标题停在"反方向、不可见"的位置，再放它归位
+        if (titleEl) {
+          splitTitle(titleEl);
+          titleEl.classList.add("is-in");
+          void titleEl.offsetWidth;
+        }
 
-      window.setTimeout(() => {
-        // 幕布停在视口下方（is-pass 保留，绝不在这里复位 —— 见文件头的坑位 3）
-        html.classList.remove("is-transitioning");
-        switching = false;
-      }, 660);
+        html.classList.remove("is-arriving");
+        curtain.classList.add("is-pass");
+
+        window.requestAnimationFrame(() => {
+          titleEl?.classList.remove("is-in");
+        });
+
+        window.setTimeout(() => {
+          // 幕布停在视口下方（is-pass 保留，绝不在这里复位 —— 见文件头的坑位 3）
+          html.classList.remove("is-transitioning");
+          switching = false;
+        }, 660);
+      });
     });
   } else if (titleEl) {
     splitTitle(titleEl);
