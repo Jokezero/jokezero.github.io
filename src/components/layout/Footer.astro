@@ -2,6 +2,9 @@
 /**
  * 页脚：社交链接 + 版权 + 构建戳。
  * 全部使用等宽微标签，与顶栏同一套语言；不引入卡片、不做底色填充。
+ *
+ * 这里**不放导航**：顶栏已经承担了信息架构，页脚再放一份就是重复的导览条。
+ * 页脚只留三类信息：版权、顶栏没有的入口（全文搜索）、元信息（GitHub / 构建戳）。
  */
 import { SITE } from "../../config/site";
 import { externalAttrs } from "../../lib/url";
@@ -13,7 +16,7 @@ const buildStamp = new Date().toISOString().slice(0, 10);
 
 // 过滤掉没有填写的链接（例如邮箱暂时为空）。
 const socials = SITE.social.filter((item) => item.href);
-const navLinks = SITE.footerNav;
+const utilityLinks = SITE.footerLinks;
 ---
 
 <footer class="relative z-[2] mt-24 border-t border-line-0">
@@ -22,8 +25,8 @@ const navLinks = SITE.footerNav;
       © {year} {SITE.name} · Built with Astro
     </p>
 
-    <nav class="flex flex-wrap items-center gap-x-6 gap-y-3" aria-label="页脚链接">
-      {navLinks.map((item) => (
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+      {utilityLinks.map((item) => (
         <a
           href={item.href}
           class="tap font-mono text-micro tracking-[0.12em] text-fg-3 uppercase no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-1"
@@ -44,6 +47,6 @@ const navLinks = SITE.footerNav;
       <span class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase">
         Build {buildStamp}
       </span>
-    </nav>
+    </div>
   </div>
 </footer>

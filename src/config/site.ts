@@ -60,17 +60,14 @@ export const SITE = {
   social: [{ label: "GitHub", href: "https://github.com/Jokezero" }],
 
   /**
-   * 页脚导航：站内入口放在这里，顶栏只保留主信息架构（§4.5.1 明确"右上角不放按钮"）。
-   * 搜索入口按产品判断放在页脚 + 文章索引栏，不占顶栏位置。
+   * 页脚工具链接：**只放顶栏没有的入口**。
+   * 早期版本把「文章 / 项目」也放了一份，于是每个页面底部都出现第二条导航条，
+   * 与顶栏完全重复 —— 2026-09-30 已删除。
    *
-   * 注意：RSS **刻意不放**在界面上（06-content-model.md §6 已确认）——
+   * 说明：RSS **刻意不放**在界面上（06-content-model.md §6 已确认）——
    * 只在 <head> 保留自动发现标记，读者把 /rss.xml 直接丢进阅读器即可。
    */
-  footerNav: [
-    { label: "文章", href: "/blog" },
-    { label: "项目", href: "/projects" },
-    { label: "搜索", href: "/search" },
-  ],
+  footerLinks: [{ label: "全文搜索", href: "/search" }],
 
   /**
    * 功能开关（docs/01-design-spec.md §3.3 的"保险丝"）。
