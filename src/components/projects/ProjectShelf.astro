@@ -20,6 +20,8 @@ interface ProjectItem {
   href: string;
   repo?: string;
   video?: string;
+  /** GitHub star 数（构建期抓取，可能没有） */
+  stars?: number;
   links: { label: string; url: string }[];
 }
 
@@ -148,6 +150,9 @@ const linksOf = (item: ProjectItem) => [
 
           <p class="mt-3 font-mono text-micro tracking-[0.1em] text-fg-3 uppercase">
             {item.tags.join(" · ")} · {item.date}
+            {typeof item.stars === "number" && item.stars > 0 && (
+              <span class="ml-3">★ {item.stars}</span>
+            )}
           </p>
 
           {linksOf(item).length > 0 && (

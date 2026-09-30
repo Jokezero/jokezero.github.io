@@ -17,11 +17,14 @@ import Background from "../components/effects/Background.astro";
 import { SITE } from "../config/site";
 import { getPosts, getProjects } from "../lib/posts";
 import { formatDate } from "../lib/format";
+import { siteLastPush } from "../lib/github";
 
 const posts = await getPosts();
 const projects = await getProjects();
 
 const latest = posts[0]?.data.pubDate;
+// 构建期抓到的本站最近提交日期（没有数据时整段不显示）
+const lastPush = siteLastPush(SITE.repo);
 const days = Math.max(
   0,
   Math.floor((Date.now() - new Date(SITE.startDate).valueOf()) / 86_400_000),
@@ -29,10 +32,13 @@ const days = Math.max(
 
 const status = [
   latest ? `最近更新 ${formatDate(latest).replace(/-/g, ".")}` : "还没有更新",
+  lastPush ? `最近提交 ${lastPush.replace(/-/g, ".")}` : null,
   `文章 ${posts.length}`,
   `项目 ${projects.length}`,
   `运行 T+${days}d`,
-].join(" · ");
+]
+  .filter(Boolean)
+  .join(" · ");
 ---
 
 <BaseLayout>

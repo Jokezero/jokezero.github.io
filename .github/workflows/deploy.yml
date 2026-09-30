@@ -4,6 +4,10 @@ name: Deploy to GitHub Pages
 on:
   push: { branches: [main] }
   workflow_dispatch:
+  # 每日定时重建：刷新构建期抓取的 GitHub 动态数据（star 数、最近提交）与页脚的构建戳。
+  # 03:10 UTC = 北京时间 11:10，避开整点的高峰。
+  schedule:
+    - cron: "10 3 * * *"
 
 # Pages 部署所需的最小权限。
 permissions: { contents: read, pages: write, id-token: write }
@@ -22,7 +26,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
+      # 构建期抓取 GitHub 动态数据需要 token；抓取失败不会中断构建（脚本内部会保留旧数据）
       - run: pnpm build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-pages-artifact@v3
         with: { path: dist }
 

@@ -8,6 +8,7 @@ import Container from "../../components/ui/Container.astro";
 import ProjectShelf from "../../components/projects/ProjectShelf.astro";
 import Background from "../../components/effects/Background.astro";
 import { getProjects } from "../../lib/posts";
+import { repoStat } from "../../lib/github";
 
 const projects = await getProjects();
 
@@ -21,6 +22,7 @@ const items = projects.map((project) => ({
   repo: project.data.repo,
   video: project.data.video,
   links: project.data.links,
+  stars: repoStat(project.data.repo)?.stars,
 }));
 ---
 

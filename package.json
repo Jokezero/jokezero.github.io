@@ -10,11 +10,12 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && pagefind --site dist",
+    "build": "node scripts/fetch-github-data.mjs && astro build && pagefind --site dist",
     "preview": "astro preview",
     "check": "astro check",
     "index:search": "pagefind --site dist",
     "new:post": "node scripts/new-post.mjs",
+    "data:github": "node scripts/fetch-github-data.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
