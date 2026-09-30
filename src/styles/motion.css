@@ -7,6 +7,15 @@
  * 颜色一律走令牌，所以亮色主题下幕布自动变成白底黑线。
  */
 
+/* 到达页的**首帧**：幕布必须已经盖满画面。
+   这段逻辑不放在 JS 里：客户端脚本现在是外部文件，可能晚于首次绘制才执行，
+   由 CSS 兜底才不会"先闪一下新页面"。JS 在下一帧移除 is-arriving 并接上
+   is-pass，幕布就从这里继续向下扫出画面。 */
+html.is-arriving #curtain {
+  transform: translate3d(0, 0, 0);
+  transition: none;
+}
+
 /* 亮色主题：画布上的白线整体反转成黑线，底色透明不受影响
    （模拟本身不用关心主题，只有这一条规则在切换） */
 html[data-theme="light"] canvas[data-scene] {
