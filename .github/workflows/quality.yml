@@ -51,6 +51,18 @@ jobs:
       - name: Lighthouse CI
         run: pnpm lhci
 
+      # 失败时把"哪一条断言没过"直接打印到日志里，方便一眼定位（不用去翻报告）
+      - name: 打印未通过的 Lighthouse 断言
+        if: failure()
+        run: |
+          node -e "
+            const fs = require('fs');
+            const p = '.lighthouseci/assertion-results.json';
+            if (!fs.existsSync(p)) { console.log('没有断言结果文件（可能失败在更早的步骤）'); process.exit(0); }
+            const rows = JSON.parse(fs.readFileSync(p, 'utf8')).filter((r) => r.level === 'error');
+            console.log(rows.length ? rows.map((r) => \`✗ \${r.auditId}  \${r.url}\n    期望 \${r.operator} \${r.expected}，实际 \${r.actual}\`).join('\n') : '没有 level=error 的断言');
+          "
+
       # 失败时把报告留成制品，方便点开看是哪一条挂了
       - name: Upload Lighthouse report
         if: always()
