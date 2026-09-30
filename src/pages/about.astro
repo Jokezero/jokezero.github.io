@@ -211,12 +211,12 @@ const sections = [
     min-height: 100dvh;
     flex-direction: column;
     /*
-     * 文字落位：屏幕自上而下约 1/3 处（不是几何正中 —— 顶上有吸顶栏与分节导航，
-     * 居中看起来会明显偏低）。
+     * 文字落位：屏幕自上而下约 1/4 处，下方留白给背景动效（不是几何正中 ——
+     * 顶上有吸顶栏与分节导航，居中看起来会明显偏低）。
      * 分节对齐到视口顶部时，区块顶部本来就在 scroll-margin-top 的位置（6.5rem），
-     * 所以这里要把它减掉，才是"文字真正落在 1/3 处"。
+     * 所以这里要把它减掉，才是"文字真正落在 1/4 处"。
      */
-    padding-block: max(var(--space-6), calc(33dvh - 6.5rem)) var(--space-10);
+    padding-block: max(var(--space-6), calc(25dvh - 6.5rem)) var(--space-12);
     /* 吸顶顶栏 + 分节导航会盖住内容，用 scroll-margin 补偿 */
     scroll-margin-top: 6.5rem;
     scroll-snap-align: start;
