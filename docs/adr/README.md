@@ -18,5 +18,8 @@
 | [0010](./0010-client-side-filtering.md) | 筛选、排序与分页放在客户端 | 已采纳 |
 | [0011](./0011-pagefind-search-entry.md) | 全文搜索用 Pagefind，入口在页脚与文章索引栏 | 已采纳 |
 | [0012](./0012-comments-analytics-default-off.md) | 评论与统计默认关闭，配置留空即不加载 | 已采纳 |
+| [0013](./0013-per-page-canvas.md) | 四套背景模拟的画布形态（每页一个主体） | 已采纳 |
+| [0014](./0014-transition-on-static-site.md) | 多页静态站上的页面切换动效 | 已采纳 |
+| [0015](./0015-motion-degradation-and-budget.md) | 动效的降级策略与首屏预算 | 已采纳 |
 
 新增记录时直接续号，**不要修改历史记录**——改主意就新写一条并标注"取代 00XX"。

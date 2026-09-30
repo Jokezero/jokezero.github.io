@@ -1,0 +1,203 @@
+/*
+ * P3 动效层：页面切换幕布（E9）、首次进入的字符绘制、首屏滚动特效（E10）、
+ * 以及标题逐字飞出／归位。
+ *
+ * 与设计规范的对应关系见 docs/01-design-spec.md §4.5 与
+ * docs/04-reference-motion-study.md §4（时序与缓动都来自那里）。
+ * 颜色一律走令牌，所以亮色主题下幕布自动变成白底黑线。
+ */
+
+/* 亮色主题：画布上的白线整体反转成黑线，底色透明不受影响
+   （模拟本身不用关心主题，只有这一条规则在切换） */
+html[data-theme="light"] canvas[data-scene] {
+  filter: invert(1);
+}
+
+/* ── 页面切换幕布 ───────────────────────────────────────────────
+ * 平时停在画面上方；切换时向下扫过，随即继续向下离开。
+ * 覆盖用"快入慢停"，揭开用"慢起快走"，两段首尾相接读成一次连续下扫。
+ */
+#curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  background-color: var(--color-bg-0);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--color-line-0) 0px,
+    var(--color-line-0) 1px,
+    transparent 1px,
+    transparent 44px
+  );
+  border-bottom: 1px solid var(--color-line-2);
+  transform: translate3d(0, -100%, 0);
+  transition: transform 520ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#curtain.is-cover {
+  transform: translate3d(0, 0, 0);
+}
+
+#curtain.is-pass {
+  transform: translate3d(0, 100%, 0);
+  transition: transform 560ms cubic-bezier(0.8, 0, 0.85, 0.55);
+}
+
+#curtain.no-anim {
+  transition: none;
+}
+
+#curtain span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: 0.34em;
+  color: var(--color-fg-3);
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+
+#curtain.is-cover span {
+  opacity: 1;
+  transition-delay: 300ms;
+}
+
+/* 幕布上的加载进度线：进入画面时从左向右画满 */
+#curtain i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, 26px);
+  width: 132px;
+  height: 1px;
+  overflow: hidden;
+  background: var(--color-line-1);
+}
+
+#curtain i::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--color-fg-2);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+#curtain.is-cover i::after {
+  animation: curtain-load 760ms cubic-bezier(0.4, 0, 0.2, 1) 120ms forwards;
+}
+
+@keyframes curtain-load {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ── 首次进入的字符绘制（独立遮罩，不用幕布） ────────────────── */
+#boot {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: var(--color-bg-0);
+  display: grid;
+  place-items: center;
+  transition: opacity 640ms ease;
+}
+
+#boot.is-gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#boot pre {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  letter-spacing: 0.06em;
+  color: var(--color-fg-0);
+  white-space: pre;
+}
+
+#boot .la-ch {
+  opacity: 0;
+  transition: opacity 200ms linear;
+}
+
+#boot.is-draw .la-ch {
+  opacity: 1;
+  transition-delay: calc(var(--n) * 13ms);
+}
+
+/* 到达页 / 已播过 / 减少动态效果：遮罩直接不显示（首帧就生效，不会闪） */
+html.is-arriving #boot,
+html.no-intro #boot {
+  display: none;
+}
+
+/* ── 标题逐字飞出／归位 ─────────────────────────────────────── */
+[data-title-split] .ch {
+  display: inline-block;
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+  transition:
+    transform 640ms cubic-bezier(0.86, 0, 0.07, 1),
+    opacity 300ms linear;
+  transition-delay: calc(var(--n) * 16ms);
+}
+
+[data-title-split].is-out .ch {
+  transform: translate3d(calc(var(--dx) * 110%), calc(var(--dy) * 110%), 0);
+  opacity: 0;
+}
+
+[data-title-split].is-in .ch {
+  transform: translate3d(calc(var(--dx) * -110%), calc(var(--dy) * -110%), 0);
+  opacity: 0;
+  transition: none;
+}
+
+html.is-transitioning {
+  cursor: progress;
+}
+
+html.is-transitioning .hero-copy {
+  pointer-events: none;
+}
+
+/* ── 首屏滚动特效（E10）：JS 只灌 --sy / --sp，插值全部交给 CSS ── */
+.hero-copy {
+  opacity: calc(1 - var(--sp, 0) * 0.85);
+  transform: translate3d(0, calc(var(--sp, 0) * -26px), 0);
+}
+
+.hero-hint {
+  opacity: calc(1 - var(--sp, 0) * 3);
+}
+
+/* ── 减少动态效果：全部退化成瞬时 ───────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  #curtain,
+  #curtain span,
+  [data-title-split] .ch {
+    transition-duration: 1ms;
+    transition-delay: 0ms;
+  }
+  #curtain.is-cover i::after {
+    animation-duration: 1ms;
+    animation-delay: 0ms;
+  }
+  .hero-copy,
+  .hero-hint {
+    opacity: 1;
+    transform: none;
+  }
+}

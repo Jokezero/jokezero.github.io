@@ -17,6 +17,26 @@ export const SITE = {
    * 内联脚本为了保持极小体积（约 200 字节）写的是字面量，改这里时两处都要改。
    */
   themeStorageKey: "zeroweb-theme",
+
+  /** 站点开始运行的时间：首页状态行的"运行 T+Nd"用它计算，换成你的上线日期即可。 */
+  startDate: "2026-09-30",
+
+  /**
+   * 首页 Hero 文案。
+   * 注意：这一段目前是**设计原型里的占位文案**（对应 03-open-questions.md 的 B12，
+   * 还没确认）。改这里一处，首页与分享卡片都会跟着变。
+   * `title` 里的 <br> 是换行符，标题会自动按行拆成单字做动效。
+   */
+  hero: {
+    kicker: "BACKEND ENGINEER · SYSTEMS & PERFORMANCE",
+    title: "把复杂的系统<br>做简单。",
+    lede: "这里记录我做过的事、踩过的坑，以及正在折腾的东西。",
+    ctas: [
+      { label: "读文章", href: "/blog/" },
+      { label: "关于我", href: "/about/" },
+    ],
+    note: "背景：实时三体引力模拟（混沌解）",
+  },
   /** 一句话描述：用于 <meta description>、RSS 与 OG。 */
   description: "个人网站 —— 技术长文、项目记录与长期维护日志。",
 
@@ -58,7 +78,12 @@ export const SITE = {
    * P2 已落地搜索 / 评论 / 统计；P3 落地动效。
    */
   features: {
-    heroEffect: "static", // "static" | "canvas"；P3 实现 canvas 后改为 "canvas"
+    /** P3：四套实时背景（三体 / 原子 / 线框球 / 双摆）已实现；改成 "static" 可一键退回纯黑。 */
+    heroEffect: "canvas" as "static" | "canvas",
+    /** 页面切换动效（幕布覆盖 + 标题逐字飞出）。 */
+    pageTransition: true,
+    /** 首次进入的字符绘制遮罩。 */
+    introArt: true,
     commandPalette: false, // P3
     /** 评论：要先填好下面的 comments 配置（仓库开启 Discussions 才有 ID），否则不加载任何脚本。 */
     comments: false,

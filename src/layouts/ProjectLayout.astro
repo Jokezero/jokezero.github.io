@@ -9,7 +9,6 @@ import type { CollectionEntry } from "astro:content";
 import BaseLayout from "./BaseLayout.astro";
 import Container from "../components/ui/Container.astro";
 import Prose from "../components/ui/Prose.astro";
-import ReadingProgress from "../components/effects/ReadingProgress.astro";
 import CodeCopy from "../components/effects/CodeCopy.astro";
 import Lightbox from "../components/effects/Lightbox.astro";
 import Giscus from "../components/comments/Giscus.astro";
@@ -31,8 +30,6 @@ const links = [
 ---
 
 <BaseLayout title={meta.title} description={meta.summary}>
-  <ReadingProgress />
-
   <Container width="content" class="py-16">
     <div class="mx-auto grid max-w-[1120px] gap-12 min-[900px]:grid-cols-[240px_minmax(0,1fr)]">
       <!-- 左栏：一句话简介 → 等宽清单（日期 / 技术栈）→ 外链 -->

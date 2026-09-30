@@ -6,6 +6,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Container from "../../components/ui/Container.astro";
 import BlogIndex from "../../components/blog/BlogIndex.astro";
+import Background from "../../components/effects/Background.astro";
 import { getPosts } from "../../lib/posts";
 
 export async function getStaticPaths() {
@@ -32,7 +33,12 @@ const { tag, items } = Astro.props;
 ---
 
 <BaseLayout title={`标签：${tag}`} description={`所有带 #${tag} 标签的文章。`}>
-  <Container width="content" class="py-14">
+  <Background
+    scene="atom"
+    description="背景：实时原子结构模拟（三条椭圆轨道与电子），纯装饰元素。"
+  />
+
+  <Container width="content" class="relative z-[2] py-14">
     <div class="mx-auto max-w-[1120px]">
       <p class="mb-8 font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">
         标签 · {items.length} 篇

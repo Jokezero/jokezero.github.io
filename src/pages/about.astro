@@ -11,6 +11,7 @@
 import { getEntry } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Container from "../components/ui/Container.astro";
+import Background from "../components/effects/Background.astro";
 import { externalAttrs } from "../lib/url";
 
 const about = await getEntry("pages", "about");
@@ -30,6 +31,12 @@ const sections = [
 ---
 
 <BaseLayout title={data.title} description={data.summary}>
+  <!-- 整页背景：双摆（常亮，铺满视口） -->
+  <Background
+    scene="pendulum"
+    description="背景：实时双摆混沌模拟（末端轨迹），纯装饰元素。"
+  />
+
   <!-- 分节导航：吸在顶栏下方；标题屏隐藏 -->
   <nav
     id="about-nav"
@@ -73,7 +80,8 @@ const sections = [
         About · Profile
       </p>
       <h1
-        class="mt-6 text-step-5 leading-[1.05] font-semibold tracking-[-0.02em] text-fg-0"
+        data-title-split
+        class="mt-5 text-[clamp(30px,3.6vw,50px)] leading-[1.16] font-semibold tracking-[-0.03em] text-fg-0"
       >
         {data.title}
       </h1>
@@ -205,6 +213,8 @@ const sections = [
   }
 
   .asection {
+    position: relative;
+    z-index: 2;
     display: flex;
     min-height: 100dvh;
     flex-direction: column;

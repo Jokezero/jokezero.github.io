@@ -6,6 +6,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Container from "../../components/ui/Container.astro";
 import ProjectShelf from "../../components/projects/ProjectShelf.astro";
+import Background from "../../components/effects/Background.astro";
 import { getProjects } from "../../lib/posts";
 
 const projects = await getProjects();
@@ -24,7 +25,13 @@ const items = projects.map((project) => ({
 ---
 
 <BaseLayout title="项目" description="做过的东西：工具、系统与实验。">
-  <Container width="content" class="pt-14 pb-20">
+  <!-- 整页背景：线框球（常亮，铺满视口） -->
+  <Background
+    scene="sphere"
+    description="背景：实时线框球体模拟（经纬网格与数据点），纯装饰元素。"
+  />
+
+  <Container width="content" class="relative z-[2] pt-14 pb-20">
     <div class="mx-auto max-w-[1120px]">
       <header class="mb-10">
         <p class="font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">
