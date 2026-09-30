@@ -1,0 +1,12 @@
+# 单包仓库也保留 workspace 文件：pnpm 10 起把安装策略放在这里，
+# 不再读取 package.json 的 "pnpm" 字段（见 https://pnpm.io/settings）。
+packages:
+  - "."
+
+# pnpm 默认拦截依赖的构建脚本（防供应链投毒），被拦截时 install 会以非 0 退出。
+# 这里只放行真正需要构建脚本的两个依赖：
+#   esbuild → 校验并链接平台二进制（Vite / Astro 依赖它）
+#   sharp   → 图像处理原生模块（P2 起用于构建期图片优化）
+allowBuilds:
+  esbuild: true
+  sharp: true

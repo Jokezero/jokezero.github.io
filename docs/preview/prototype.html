@@ -1,0 +1,2755 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>个人网站 · 视觉原型 v6</title>
+<style>
+  :root {
+    --fg: #ffffff;
+    --fg-2: #a3a3a3;
+    --fg-3: #6b6b6b;
+    --line: rgba(255, 255, 255, 0.14);
+    --line-2: rgba(255, 255, 255, 0.08);
+    --surface: #050505;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #000000;
+    color: var(--fg);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .wrap { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; padding: 0 26px; }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    height: 60px;
+    border-bottom: 1px solid var(--line-2);
+    font-size: 13px;
+  }
+
+  .brand { display: flex; align-items: center; gap: 9px; }
+  .brand span { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; }
+
+  .nav { display: flex; gap: 22px; color: var(--fg-2); }
+  .nav a:hover, .nav a.on { color: var(--fg); }
+
+  .topbar .right { margin-left: auto; display: flex; gap: 8px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 7px 15px;
+    font-size: 12.5px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--fg);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 160ms ease, background 160ms ease;
+  }
+  .btn:hover { border-color: rgba(255, 255, 255, 0.36); background: rgba(255, 255, 255, 0.05); }
+  .btn-solid { background: #ffffff; color: #000000; border-color: #ffffff; font-weight: 500; }
+  .btn-solid:hover { background: #e6e6e6; border-color: #e6e6e6; }
+
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: clamp(600px, 76vh, 820px);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  #scene {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 0;
+  }
+
+  .hero-grid { position: relative; z-index: 2; width: 100%; }
+  .hero-copy { max-width: 30rem; }
+
+  .kicker {
+    margin: 0 0 20px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--fg-3);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(30px, 3.6vw, 50px);
+    font-weight: 600;
+    line-height: 1.16;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  .lede {
+    margin: 20px 0 0;
+    font-size: 14.5px;
+    line-height: 1.78;
+    color: var(--fg-2);
+    max-width: 26rem;
+  }
+
+  .cta { display: flex; gap: 10px; margin-top: 30px; }
+
+  .note {
+    margin-top: 40px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line-2);
+    margin-bottom: 0;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    color: var(--fg-3);
+  }
+
+  .hero-meta {
+    margin-top: 14px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    color: var(--fg-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- 滚动：进度线、滚动提示、视差 ---------- */
+  .progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    z-index: 40;
+    pointer-events: none;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .progress i {
+    display: block;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.34em;
+    color: var(--fg-3);
+    opacity: max(0, calc(1 - var(--sp, 0) * 3.5));
+  }
+
+  .scroll-hint i {
+    display: block;
+    width: 1px;
+    height: 26px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+  }
+
+  .spacer { height: 70vh; }
+
+  /* 滚动视差：文案向上淡出，首屏画布轻微下移 */
+  .hero-copy {
+    transform: translate3d(0, calc(var(--sy, 0) * -0.34px), 0);
+    opacity: max(0, calc(1 - var(--sp, 0) * 1.7));
+  }
+
+  #scene { transform: translate3d(0, calc(var(--sy, 0) * 0.05px), 0); }
+
+  /* ---------- 文章页：无标题、无边框的竖直列表 ---------- */
+  .archive { display: none; padding: 56px 0 40px; }
+
+  html.is-archive .archive { display: block; }
+  html.is-archive .hero { display: none; }
+
+  /* 文章页自己的画布：固定铺满视口，作为整页背景（仅在本页显示） */
+  #listScene {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* 左侧索引栏 + 右侧列表 */
+  .archive-grid {
+    display: grid;
+    grid-template-columns: 212px minmax(0, 1fr);
+    gap: 60px;
+    align-items: start;
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  .index { position: sticky; top: 34px; }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* 搜索框：只有一个下边框，不用输入框的方框样式 */
+  .search-input {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0;
+    padding: 6px 0 9px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    color: var(--fg);
+    outline: none;
+    transition: border-color 300ms ease;
+  }
+
+  .search-input::placeholder { color: var(--fg-3); }
+  .search-input:focus { border-bottom-color: rgba(255, 255, 255, 0.44); }
+  .search-input::-webkit-search-cancel-button { display: none; }
+
+  /* 标签：纯文字，无边框无底色，选中态只靠颜色 */
+  .tags {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 26px;
+    padding-top: 22px;
+    position: relative;
+  }
+
+  .tags::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0.18) 16%,
+      rgba(255, 255, 255, 0.18) 84%,
+      rgba(255, 255, 255, 0)
+    );
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    background: none;
+    border: 0;
+    padding: 5px 0;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--fg-3);
+    cursor: pointer;
+    transition: color 240ms ease, transform 380ms cubic-bezier(0.86, 0, 0.07, 1);
+  }
+
+  .tag:hover { color: var(--fg-2); transform: translateX(3px); }
+  .tag.is-on { color: var(--fg); }
+  .tag-n { font-size: 9.5px; color: var(--fg-3); }
+
+  .posts {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .post { position: relative; }
+
+  /* 筛选后，第一条可见项不画分隔线 */
+  .post.is-first::before { display: none; }
+
+  /* 分隔线：两头渐隐，不用边框、不用卡片 */
+  .post + .post::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.2) 16%,
+      rgba(255, 255, 255, 0.2) 84%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
+
+  .post-link {
+    display: flex;
+    align-items: baseline;
+    gap: 22px;
+    padding: 19px 2px;
+    text-decoration: none;
+    transition: transform 420ms cubic-bezier(0.86, 0, 0.07, 1);
+  }
+
+  .post-link:hover { transform: translateX(6px); }
+
+  .post-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--fg-2);
+    transition: color 260ms ease;
+  }
+
+  .post-link:hover .post-title { color: var(--fg); }
+
+  .post-date,
+  .post-tags {
+    flex: 0 0 auto;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    color: var(--fg-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .posts-empty {
+    margin: 0;
+    padding: 26px 2px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--fg-3);
+  }
+
+  @media (max-width: 900px) {
+    .archive-grid { grid-template-columns: minmax(0, 1fr); gap: 34px; }
+    .index { position: static; }
+    .tags { flex-direction: row; flex-wrap: wrap; gap: 0 18px; }
+  }
+
+  /* ---------- 项目页：左侧控制栏 + 右侧分页项目网格 ---------- */
+  .projects { display: none; padding: 8px 0 40px; }
+
+  html.is-projects .projects { display: block; }
+  html.is-projects #scene { display: none; }       /* 本页用 #projScene，首屏画布让位 */
+  html.is-projects .hero { min-height: 0; padding: 74px 0 40px; align-items: flex-start; }
+  html.is-projects .cta { display: none; }         /* 按要求删除两个按钮 */
+
+  #projScene {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: 224px minmax(0, 1fr);
+    gap: 60px;
+    align-items: start;
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  .pindex { position: sticky; top: 34px; }
+
+  .p-label {
+    margin: 0 0 12px;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.22em;
+    color: var(--fg-3);
+  }
+
+  .p-block {
+    position: relative;
+    margin-top: 26px;
+    padding-top: 24px;
+  }
+
+  .p-block::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0.18) 16%,
+      rgba(255, 255, 255, 0.18) 84%,
+      rgba(255, 255, 255, 0)
+    );
+  }
+
+  .perpage { display: flex; gap: 16px; }
+
+  .pp,
+  .pnum,
+  .stack {
+    background: none;
+    border: 0;
+    padding: 2px 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--fg-3);
+    cursor: pointer;
+    transition: color 240ms ease, transform 380ms cubic-bezier(0.86, 0, 0.07, 1);
+  }
+
+  .pp:hover,
+  .pnum:hover,
+  .stack:hover { color: var(--fg-2); transform: translateX(3px); }
+  .pp[aria-pressed="true"],
+  .pnum[aria-pressed="true"],
+  .stack[aria-pressed="true"] { color: var(--fg); }
+
+  .pages { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+
+  .stacks { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+
+  .stack { font-size: 11px; }
+
+  .p-hint {
+    margin: 30px 0 0;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    color: var(--fg-3);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 44px 52px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .card {
+    position: relative;
+    padding-left: 20px;
+    transition: transform 520ms cubic-bezier(0.86, 0, 0.07, 1), opacity 380ms ease;
+  }
+
+  /* 左侧一条两头渐隐的竖线，作为项目条目的分隔语言 */
+  .card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.2) 18%,
+      rgba(255, 255, 255, 0.2) 82%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
+
+  .card.is-hidden { display: none; }
+
+  /* 进场：先用 transition:none 停在偏移位置，下一帧移除类目 → 过渡归位（带级联） */
+  .card.is-enter {
+    opacity: 0;
+    transform: translate3d(0, var(--enter, 22px), 0);
+    transition: none;
+  }
+
+  /* 退场：保留过渡，让条目滑走 */
+  .card.is-leave {
+    opacity: 0;
+    transform: translate3d(0, var(--leave, -22px), 0);
+  }
+
+  .card-n {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--fg-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .card-title {
+    margin: 8px 0 0;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+  }
+
+  .card-desc {
+    margin: 9px 0 0;
+    font-size: 13px;
+    line-height: 1.72;
+    color: var(--fg-2);
+  }
+
+  .card-meta {
+    margin: 12px 0 0;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--fg-3);
+  }
+
+  .cards-empty {
+    margin: 0;
+    padding: 26px 2px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--fg-3);
+  }
+
+  @media (max-width: 900px) {
+    .projects-grid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+    .pindex { position: static; }
+    .cards { grid-template-columns: minmax(0, 1fr); gap: 34px; }
+  }
+
+  /* ---------- 关于页：一屏一节的滑动结构 ---------- */
+  .about { display: none; }
+
+  html.is-about .about { display: block; }
+  html.is-about .cta { display: none; }            /* 按要求删除两个按钮 */
+
+  /* 共享页头在本页收起为零高：保留画布（固定在视口），内容搬进第一屏 */
+  html.is-about .hero { min-height: 0; height: 0; padding: 0; overflow: visible; }
+  html.is-about .hero-grid,
+  html.is-about .scroll-hint { display: none; }
+
+  html.is-about #scene {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: none;
+  }
+
+  /* 滑动容器：自身一屏高，内部轨道按屏滑动 */
+  .about-slider { position: relative; height: 100vh; height: 100dvh; overflow: hidden; }
+  .about-track { transition: transform 720ms cubic-bezier(0.86, 0, 0.07, 1); will-change: transform; }
+  /* 每屏一屏高；内边距与字号都随视口流体缩放，任何窗口尺寸下都不会裁到标题 */
+  .slide {
+    height: 100vh;
+    height: 100dvh;
+    box-sizing: border-box;
+    padding: clamp(72px, 11vh, 104px) 0 clamp(48px, 9vh, 80px);
+    display: flex;
+    align-items: center;
+  }
+  .slide > .wrap { width: 100%; }
+  .slide-inner { max-width: 46rem; }
+  .slide h1 { font-size: clamp(20px, min(4.2vw, 5.6vh), 50px); }
+  .slide .lede { font-size: clamp(12.5px, min(1.1vw, 1.9vh), 14.5px); }
+
+  /* 分节轨道：相对视口固定的一条横向导航（不再受滑块高度与滚动位置影响） */
+  .arail {
+    position: fixed;
+    top: 78px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(1188px, calc(100% - 52px));
+    z-index: 3;
+    display: none;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 24px;
+    transition: opacity 320ms ease;
+  }
+
+  html.is-about .arail { display: flex; }
+
+  .arail.is-hidden { opacity: 0; pointer-events: none; }
+
+  .steps { display: flex; flex-wrap: wrap; gap: 8px 26px; }
+
+  .about-count {
+    position: fixed;
+    right: 26px;
+    bottom: 22px;
+    margin: 0;
+    z-index: 3;
+    display: none;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--fg-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  html.is-about .about-count { display: block; }
+  .about-count.is-hidden { opacity: 0; }
+
+  /* 极端矮窗（<560px 高）的兜底：让出两行不占信息量的辅助文字 */
+  @media (max-height: 560px) {
+    .slide .note,
+    .slide-hint { display: none; }
+  }
+
+  /* ================= 关于页 v2（重写，2026-09-29）=================
+     原方案是"折叠共享页头 + 轨道位移 + 固定导航 + 自定义滚轮"，机制过多，
+     曾导致标题不可见与切换动效重复。现在改成最简结构：
+       · 首屏 = 共享页头（与其他页面同一个标题元素，不会消失）
+       · 之后每节各占一屏，切换交给浏览器原生滚动吸附，不再有自定义滚轮
+       · 首页文案不做滚动淡出，避免任何"看不见"的可能 */
+  html.is-about { scroll-snap-type: y mandatory; }
+
+  html.is-about .hero {
+    min-height: 100vh;
+    height: auto;
+    padding: clamp(64px, 10vh, 110px) 0 clamp(56px, 9vh, 92px);
+    align-items: center;
+    scroll-snap-align: start;
+    /* 页头在首屏上方 60px：把它抵消，吸附后正好停在 y=0，顶部导航才不会被推上去 */
+    scroll-margin-top: 60px;
+  }
+
+  html.is-about .hero-grid { display: block; }
+
+  /* 关于页首屏文案固定可见：不参与滚动淡出与视差 */
+  html.is-about .hero-copy {
+    opacity: 1;
+    transform: none;
+  }
+
+  .asection {
+    min-height: 100vh;
+    box-sizing: border-box;
+    padding: clamp(64px, 12vh, 130px) 0 clamp(56px, 10vh, 110px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    scroll-snap-align: start;
+  }
+  .slide-hint {
+    margin: 30px 0 0;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.32em;
+    color: var(--fg-3);
+  }
+
+  .step {
+    position: relative;
+    background: none;
+    border: 0;
+    padding: 6px 0 6px 18px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.1em;
+    color: var(--fg-3);
+    cursor: pointer;
+    transition: color 240ms ease, transform 380ms cubic-bezier(0.86, 0, 0.07, 1);
+  }
+
+  /* 步骤前面的短横线，选中时点亮并加长 */
+  .step::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 8px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.28);
+    transition: width 380ms cubic-bezier(0.86, 0, 0.07, 1), background 240ms ease;
+  }
+
+  .step:hover { color: var(--fg-2); transform: translateX(3px); }
+  .step.is-on { color: var(--fg); }
+  .step.is-on::before { width: 14px; background: rgba(255, 255, 255, 0.7); }
+
+  .slide-n {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--fg-3);
+  }
+
+  .slide-t {
+    margin: 16px 0 0;
+    font-size: clamp(20px, 2.4vw, 28px);
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+  }
+
+  .slide-p {
+    margin: 16px 0 0;
+    max-width: 46ch;
+    font-size: 14px;
+    line-height: 1.85;
+    color: var(--fg-2);
+  }
+
+  .timeline,
+  .links { margin: 18px 0 0; padding: 0; list-style: none; max-width: 46rem; }
+
+  .timeline li {
+    display: flex;
+    align-items: baseline;
+    gap: 22px;
+    padding: 11px 0;
+    position: relative;
+  }
+
+  .timeline li + li::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0.18) 16%,
+      rgba(255, 255, 255, 0.18) 84%,
+      rgba(255, 255, 255, 0)
+    );
+  }
+
+  .tl-y {
+    flex: 0 0 auto;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--fg-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tl-x { flex: 1 1 auto; min-width: 0; font-size: 14px; }
+
+  .grp { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 20px; padding: 10px 0; }
+  .g-k {
+    flex: 0 0 84px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--fg-3);
+  }
+  .g-v { flex: 1 1 auto; min-width: 0; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em; color: var(--fg-2); }
+
+  .links li { display: flex; align-items: baseline; gap: 20px; padding: 12px 0; }
+  .l-k {
+    flex: 0 0 84px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--fg-3);
+  }
+  .l-v { font-size: 14px; color: var(--fg-2); transition: color 240ms ease; }
+  .l-v:hover { color: var(--fg); }
+
+  @media (max-width: 900px) {
+    .arail { top: 70px; gap: 6px 16px; }
+    .steps { gap: 6px 18px; }
+    .step { font-size: 10.5px; }
+  }
+
+  /* ---------- 页面切换 ----------
+     参考三个站的共同做法：一块预先停在画面外的整屏幕布扫过画面，
+     离开页的标题逐字朝不同方向飞出，新页的标题再逐字归位。
+     参考：wodniack.dev 的 s-hero-move-to-* 逐字飞出与 -100% 停靠色块；
+     jiejoe.com 的整屏 .loading 遮罩；cosmicbroth.com 的整屏系统式遮罩。 */
+  #curtain {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    background-color: #000000;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.055) 0px,
+      rgba(255, 255, 255, 0.055) 1px,
+      transparent 1px,
+      transparent 44px
+    );
+    border-bottom: 1px solid rgba(255, 255, 255, 0.42);
+    transform: translate3d(0, -100%, 0);
+    transition: transform 520ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #curtain.is-cover { transform: translate3d(0, 0, 0); }
+  /* 揭开：紧接覆盖结束就开始，缓动从慢到快，整段读起来是一次连续下扫 */
+  #curtain.is-pass {
+    transform: translate3d(0, 100%, 0);
+    transition: transform 560ms cubic-bezier(0.8, 0, 0.85, 0.55);
+  }
+  #curtain.no-anim { transition: none; }
+
+  #curtain span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.34em;
+    color: var(--fg-3);
+    opacity: 0;
+    transition: opacity 240ms ease;
+  }
+
+  #curtain.is-cover span { opacity: 1; transition-delay: 300ms; }
+
+  /* 首次加载：用字符把线稿一笔一笔"画"出来（只播一次，不用幕布） */
+  #boot {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: #000000;
+    display: grid;
+    place-items: center;
+    transition: opacity 640ms ease;
+  }
+
+  #boot.is-gone { opacity: 0; pointer-events: none; }
+
+  #boot pre {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.55;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.82);
+    white-space: pre;
+  }
+
+  #boot .la-ch {
+    opacity: 0;
+    transition: opacity 200ms linear;
+  }
+
+  #boot.is-draw .la-ch {
+    opacity: 1;
+    transition-delay: calc(var(--n) * 13ms);
+  }
+
+  /* 幕布上的加载进度线：进入画面时从左向右画满，作为加载动画 */
+  #curtain i {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, 26px);
+    width: 132px;
+    height: 1px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.16);
+  }
+
+  #curtain i::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.62);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  #curtain.is-cover i::after {
+    animation: curtain-load 760ms cubic-bezier(0.4, 0, 0.2, 1) 120ms forwards;
+  }
+
+  @keyframes curtain-load {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #curtain.is-cover i::after { animation-duration: 1ms; animation-delay: 0ms; }
+  }
+
+  /* 左上角图标可点：回到首页 */
+  .brand { cursor: pointer; }
+
+  /* 标题逐字飞出／归位 */
+  .hero-copy h1 .ch {
+    display: inline-block;
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+    transition: transform 640ms cubic-bezier(0.86, 0, 0.07, 1), opacity 300ms linear;
+    transition-delay: calc(var(--n) * 16ms);
+  }
+
+  .hero-copy h1.is-out .ch {
+    transform: translate3d(calc(var(--dx) * 110%), calc(var(--dy) * 110%), 0);
+    opacity: 0;
+  }
+
+  .hero-copy h1.is-in .ch {
+    transform: translate3d(calc(var(--dx) * -110%), calc(var(--dy) * -110%), 0);
+    opacity: 0;
+    transition: none;
+  }
+
+  html.is-transitioning { cursor: progress; }
+  html.is-transitioning .hero-copy { pointer-events: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #curtain { transition-duration: 1ms; }
+    #curtain span { transition-duration: 1ms; }
+    .hero-copy h1 .ch { transition-duration: 1ms; transition-delay: 0ms; }
+  }
+
+  .footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 40px 0 56px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--fg-3);
+  }
+
+  @media (max-width: 900px) {
+    .hero { min-height: 780px; align-items: flex-start; padding-top: 72px; }
+    .hero-copy { max-width: 100%; }
+    .nav { display: none; }
+    .lede { max-width: 100%; }
+  }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 0 18px; }
+    .hero { min-height: 740px; }
+    .btn { padding: 6px 12px; font-size: 12px; }
+    .scroll-hint { bottom: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="boot" aria-hidden="true"><pre id="loadArt"></pre></div>
+<div id="curtain" aria-hidden="true"><span>LOADING</span><i></i></div>
+
+<div class="wrap">
+  <header class="topbar">
+    <a class="brand" href="#" id="brandHome" aria-label="回到首页">
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M8 1.5 L15 14.5 L1 14.5 Z" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/>
+      </svg>
+      <span>SITE</span>
+    </a>
+    <nav class="nav">
+      <a href="#" class="on">首页</a>
+      <a href="#">文章</a>
+      <a href="#">项目</a>
+      <a href="#">关于</a>
+    </nav>
+  </header>
+</div>
+
+<div class="progress" aria-hidden="true"><i></i></div>
+
+<section class="hero">
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="kicker">BACKEND ENGINEER · SYSTEMS &amp; PERFORMANCE</p>
+      <h1>把复杂的系统<br>做简单。</h1>
+      <p class="lede">这里记录我做过的事、踩过的坑，以及正在折腾的东西。</p>
+      <div class="cta">
+        <a class="btn btn-solid" href="#">读文章</a>
+        <a class="btn" href="#">关于我</a>
+      </div>
+      <p class="note">背景：实时三体引力模拟（混沌解）</p>
+      <p class="hero-meta">最近更新 2026.09.18 · 文章 42 · 项目 7 · 运行 T+214d</p>
+    </div>
+  </div>
+  <div class="scroll-hint" aria-hidden="true"><span>SCROLL</span><i></i></div>
+</section>
+
+<section class="archive">
+  <canvas id="listScene" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="archive-grid">
+      <aside class="index">
+        <label class="sr-only" for="postQuery">搜索文章</label>
+        <input id="postQuery" class="search-input" type="search" placeholder="搜索文章…" autocomplete="off">
+        <div class="tags" id="tagList" role="group" aria-label="按标签筛选"></div>
+      </aside>
+      <div class="list-col">
+        <ol class="posts" id="posts">
+          <li class="post" data-tags="rust performance">
+            <a class="post-link" href="#">
+              <span class="post-title">用 Rust 重写日志管道：吞吐提升 7 倍</span>
+              <span class="post-date">2026-09-18</span>
+              <span class="post-tags">RUST · PERFORMANCE</span>
+            </a>
+          </li>
+          <li class="post" data-tags="algorithm">
+            <a class="post-link" href="#">
+              <span class="post-title">实现一个轻量级模糊匹配索引</span>
+              <span class="post-date">2026-08-30</span>
+              <span class="post-tags">ALGORITHM</span>
+            </a>
+          </li>
+          <li class="post" data-tags="web astro">
+            <a class="post-link" href="#">
+              <span class="post-title">为什么我把个人站重写成了静态站</span>
+              <span class="post-date">2026-08-11</span>
+              <span class="post-tags">WEB · ASTRO</span>
+            </a>
+          </li>
+          <li class="post" data-tags="physics canvas">
+            <a class="post-link" href="#">
+              <span class="post-title">把混沌搬进背景：三体模拟的实现笔记</span>
+              <span class="post-date">2026-07-29</span>
+              <span class="post-tags">PHYSICS · CANVAS</span>
+            </a>
+          </li>
+        </ol>
+        <p class="posts-empty" id="postsEmpty" hidden>暂无文章喵～正在努力学习</p>
+        <p class="posts-empty" id="noResults" hidden>没有匹配的文章…</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="projects">
+  <canvas id="projScene" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="projects-grid">
+      <aside class="pindex">
+        <label class="sr-only" for="projQuery">搜索项目</label>
+        <input id="projQuery" class="search-input" type="search" placeholder="搜索项目…" autocomplete="off">
+
+        <div class="p-block">
+          <p class="p-label">技术栈</p>
+          <div class="stacks" id="stackList" role="group" aria-label="按技术栈筛选"></div>
+        </div>
+
+        <div class="p-block">
+          <p class="p-label">页码</p>
+          <div class="pages" id="pageList" role="group" aria-label="项目分页"></div>
+        </div>
+
+        <div class="p-block">
+          <p class="p-label">每页数量</p>
+          <div class="perpage" id="perPage" role="group" aria-label="每页项目数量">
+            <button type="button" class="pp" data-n="3" aria-pressed="true">3</button>
+            <button type="button" class="pp" data-n="4" aria-pressed="false">4</button>
+            <button type="button" class="pp" data-n="6" aria-pressed="false">6</button>
+          </div>
+        </div>
+
+        <p class="p-hint">在项目页任意位置滚动 ↑↓ 切换页</p>
+      </aside>
+
+      <div class="pcol">
+        <ul class="cards" id="cards">
+          <li class="card" data-stack="rust performance">
+            <span class="card-n">01</span>
+            <h3 class="card-title">分布式日志聚合管道</h3>
+            <p class="card-desc">把 40 台机器的日志收敛进一条管道，端到端延迟 800ms。</p>
+            <p class="card-meta">RUST · KAFKA · 2025</p>
+          </li>
+          <li class="card" data-stack="go algorithm">
+            <span class="card-n">02</span>
+            <h3 class="card-title">轻量级模糊匹配索引</h3>
+            <p class="card-desc">为百万级词条做近似匹配，P99 查询 3ms，索引常驻内存 40MB。</p>
+            <p class="card-meta">GO · 2025</p>
+          </li>
+          <li class="card" data-stack="astro performance">
+            <span class="card-n">03</span>
+            <h3 class="card-title">静态站点构建流水线</h3>
+            <p class="card-desc">内容、构建、部署串成一条 90 秒的流水线，提交即上线。</p>
+            <p class="card-meta">ASTRO · GITHUB ACTIONS · 2026</p>
+          </li>
+          <li class="card" data-stack="rust algorithm">
+            <span class="card-n">04</span>
+            <h3 class="card-title">时序数据压缩库</h3>
+            <p class="card-desc">时间戳差分加游程编码，压缩比 12:1，解码无需分配内存。</p>
+            <p class="card-meta">RUST · 2024</p>
+          </li>
+          <li class="card" data-stack="go performance">
+            <span class="card-n">05</span>
+            <h3 class="card-title">分布式限流器</h3>
+            <p class="card-desc">基于滑动窗口的令牌桶，多节点之间保持一致，误差小于 1%。</p>
+            <p class="card-meta">GO · REDIS · 2024</p>
+          </li>
+          <li class="card" data-stack="canvas">
+            <span class="card-n">06</span>
+            <h3 class="card-title">混沌系统可视化工具箱</h3>
+            <p class="card-desc">三体、双摆、洛伦兹与噪声地形，都跑在 Canvas 2D 上。</p>
+            <p class="card-meta">CANVAS · PHYSICS · 2026</p>
+          </li>
+          <li class="card" data-stack="rust">
+            <span class="card-n">07</span>
+            <h3 class="card-title">终端文件管理器</h3>
+            <p class="card-desc">键盘驱动、两栏视图，冷启动 8ms，支持远程目录。</p>
+            <p class="card-meta">RUST · TUI · 2023</p>
+          </li>
+          <li class="card" data-stack="go performance">
+            <span class="card-n">08</span>
+            <h3 class="card-title">高并发压测框架</h3>
+            <p class="card-desc">声明式场景描述，单机 50 万 QPS，自带火焰图采集。</p>
+            <p class="card-meta">GO · 2023</p>
+          </li>
+          <li class="card" data-stack="rust algorithm">
+            <span class="card-n">09</span>
+            <h3 class="card-title">个人知识库检索</h3>
+            <p class="card-desc">本地优先的全文检索，索引仅 12MB，支持中文分词。</p>
+            <p class="card-meta">RUST · 2023</p>
+          </li>
+        </ul>
+        <p class="cards-empty" id="cardsEmpty" hidden>暂无项目喵～正在努力学习</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about">
+  <div class="wrap">
+    <section class="asection">
+      <p class="slide-n">01 / PROFILE</p>
+      <h2 class="slide-t">后端出身，关心系统与性能。</h2>
+      <p class="slide-p">写了八年服务端：日志管道、限流器、检索索引都做过，也做过把老系统一点点拆掉这种事。喜欢把复杂的部分藏起来，只留下好用的接口。</p>
+    </section>
+
+    <section class="asection">
+      <p class="slide-n">02 / EXPERIENCE</p>
+      <ul class="timeline">
+        <li><span class="tl-y">2023 — 现在</span><span class="tl-x">某公司 · 后端工程师</span></li>
+        <li><span class="tl-y">2021 — 2023</span><span class="tl-x">某公司 · 服务端开发</span></li>
+        <li><span class="tl-y">2018 — 2021</span><span class="tl-x">某公司 · 初级后端</span></li>
+        <li><span class="tl-y">2016 — 2018</span><span class="tl-x">计算机相关专业</span></li>
+      </ul>
+    </section>
+
+    <section class="asection">
+      <p class="slide-n">03 / STACK</p>
+      <div class="groups">
+        <div class="grp"><span class="g-k">语言</span><span class="g-v">RUST · GO · PYTHON · TYPESCRIPT</span></div>
+        <div class="grp"><span class="g-k">基础设施</span><span class="g-v">POSTGRESQL · REDIS · KAFKA · KUBERNETES</span></div>
+        <div class="grp"><span class="g-k">方向</span><span class="g-v">性能优化 · 分布式系统 · 静态站点</span></div>
+      </div>
+    </section>
+
+    <section class="asection">
+      <p class="slide-n">04 / CONTACT</p>
+      <ul class="links">
+        <li><span class="l-k">EMAIL</span><a class="l-v" href="#">hi@example.com</a></li>
+        <li><span class="l-k">GITHUB</span><a class="l-v" href="#">github.com/yourname</a></li>
+        <li><span class="l-k">RSS</span><a class="l-v" href="#">/rss.xml</a></li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- 分节导航：只在内容屏出现，标题屏隐藏；切屏由浏览器原生吸附完成 -->
+  <aside class="arail is-hidden" id="stepList">
+    <div class="steps" role="group" aria-label="关于页分节">
+      <button type="button" class="step" data-target="0">01 简介</button>
+      <button type="button" class="step" data-target="1">02 经历</button>
+      <button type="button" class="step" data-target="2">03 技能</button>
+      <button type="button" class="step" data-target="3">04 联系</button>
+    </div>
+  </aside>
+
+  <p class="about-count is-hidden" id="aboutCount">
+    <span id="slideNow">01</span> / <span id="slideTotal">04</span>
+  </p>
+</section>
+
+<div class="spacer"></div>
+
+<div class="wrap">
+  <footer class="footer">
+    <span>© 2026 SITE</span>
+    <span>BUILT WITH ASTRO · GITHUB PAGES</span>
+    <span id="revStamp">REV —</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var heroCanvas = document.getElementById("scene");
+  var listCanvas = document.getElementById("listScene");
+  var projCanvas = document.getElementById("projScene");
+  if (!heroCanvas || !heroCanvas.getContext || !listCanvas || !listCanvas.getContext ||
+      !projCanvas || !projCanvas.getContext) return;
+  var heroCtx = heroCanvas.getContext("2d");
+  var listCtx = listCanvas.getContext("2d");
+  var projCtx = projCanvas.getContext("2d");
+  if (!heroCtx || !listCtx || !projCtx) return;
+
+  // 版本戳：用来确认浏览器里跑的是不是磁盘上这一版（file:// 页面不会自动重载）
+  var REV = "REV 27 · 2026-09-29";
+  var revEl = document.getElementById("revStamp");
+  if (revEl) revEl.textContent = REV;
+
+  // 刷新 / 重新打开发布页时，浏览器会恢复上次的滚动位置；而首屏文案是按滚动进度淡出的，
+  // 这里不重置就会让标题直接停在"淡出"状态，看起来像文字消失。所以关闭滚动恢复并回到顶部。
+  if (window.history && "scrollRestoration" in window.history) {
+    window.history.scrollRestoration = "manual";
+  }
+
+  // 三块画布：hero = 首屏背景（三体 / 双摆），list = 文章页整页背景（原子），
+  // proj = 项目页整页背景（线框球）
+  var VIEWS = {
+    hero: { canvas: heroCanvas, ctx: heroCtx, w: 1, h: 1, r: 1 },
+    list: { canvas: listCanvas, ctx: listCtx, w: 1, h: 1, r: 1 },
+    proj: { canvas: projCanvas, ctx: projCtx, w: 1, h: 1, r: 1 }
+  };
+  var view = VIEWS.hero;
+  var ctx = heroCtx;
+  var width = 1, height = 1, ratio = 1;
+  var isArchive = false;
+  var isProjects = false;
+  var isAbout = false;
+
+  function useView(v) {
+    view = v;
+    ctx = v.ctx;
+    width = v.w;
+    height = v.h;
+    ratio = v.r;
+    ctx.setTransform(v.r, 0, 0, v.r, 0, 0);
+  }
+  var rafId = 0;
+  var started = 0;
+  var introBase = 0;
+  var lastT = 0;
+  var scrollY = 0;
+  var scrollProg = 0;
+  var simIndex = 0;
+  var reduce = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+
+  // 指针交互：tx/ty 是事件给出的目标值，x/y 每帧缓动逼近，influence 控制交互强度淡入淡出
+  var pointer = { tx: 0, ty: 0, x: 0, y: 0, active: false, influence: 0 };
+
+  function drift() {
+    var k = pointer.influence;
+    return [
+      (pointer.x - width * 0.5) * 0.042 * k,
+      (pointer.y - height * 0.5) * 0.032 * k
+    ];
+  }
+
+  function stepPointer() {
+    pointer.x += (pointer.tx - pointer.x) * 0.11;
+    pointer.y += (pointer.ty - pointer.y) * 0.11;
+    var target = pointer.active ? 1 : 0;
+    pointer.influence += (target - pointer.influence) * 0.05;
+    if (Math.abs(pointer.influence - target) < 0.002) pointer.influence = target;
+  }
+
+  function reduced() { return !!(reduce && reduce.matches); }
+
+  function sizeView(v) {
+    var rect = v.canvas.getBoundingClientRect();
+    var w = Math.max(1, Math.round(rect.width));
+    var h = Math.max(1, Math.round(rect.height));
+    var r = Math.min(window.devicePixelRatio || 1, 2);
+    var changed = (w !== v.w || h !== v.h || r !== v.r);
+    v.w = w;
+    v.h = h;
+    v.r = r;
+    if (changed) {
+      // 改画布尺寸会清空内容，调用方必须紧接着重绘一次
+      v.canvas.width = Math.round(w * r);
+      v.canvas.height = Math.round(h * r);
+    }
+    return changed;
+  }
+
+  function resize() {
+    var changed = false;
+    if (sizeView(VIEWS.hero)) changed = true;
+    if (sizeView(VIEWS.list)) changed = true;
+    if (sizeView(VIEWS.proj)) changed = true;
+    return changed;
+  }
+
+  function clear() {
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, width, height);
+  }
+
+  // 文字一侧压一层渐变黑，保证左侧文案始终干净可读，右侧装置不受影响
+  function edgeScrim() {
+    var narrow = width < 900;
+    if (narrow) {
+      var gv = ctx.createLinearGradient(0, 0, 0, height * 0.54);
+      gv.addColorStop(0, "rgba(0, 0, 0, 0.94)");
+      gv.addColorStop(0.7, "rgba(0, 0, 0, 0.58)");
+      gv.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = gv;
+      ctx.fillRect(0, 0, width, height * 0.54);
+    } else {
+      var gh = ctx.createLinearGradient(0, 0, width * 0.52, 0);
+      gh.addColorStop(0, "rgba(0, 0, 0, 0.95)");
+      gh.addColorStop(0.62, "rgba(0, 0, 0, 0.6)");
+      gh.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = gh;
+      ctx.fillRect(0, 0, width * 0.52, height);
+    }
+  }
+
+  function dot(x, y, r, alpha) {
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255, 255, 255, " + alpha.toFixed(3) + ")";
+    ctx.fill();
+  }
+
+  /* ---------------- 三体运动：真实的牛顿引力模拟 ---------------- */
+  // 采用经典「8 字舞」初始条件（Chenciner–Montgomery 解）：三个等质量天体在自身引力下
+  // 沿同一条 8 字轨道互相追逐。积分器为速度 Verlet，G = 1，归一化单位。
+  var TB = {
+    m: [3, 4, 5],
+    x: [], y: [], vx: [], vy: [],
+    acc: { x: [0, 0, 0], y: [0, 0, 0] },
+    trail: [[], [], []],
+    soft2: 0.08 * 0.08,
+    last: 0, accum: 0, energy: 0, inited: false,
+    vis: 0, phase: "birth", resets: 0, tsim: 0, escaped: false
+  };
+
+  var TB_STEP = 1 / 1000;
+  var TB_RATE = 1;
+  var TB_ESCAPE = 9;
+  var TB_TRAIL_MAX = 200;
+  var TB_TRAIL_MOVE = 0.006;
+  var TB_FADE = 1.1;
+  var TB_BASE = [[1, 3], [-2, -1], [1, -1]];
+
+  function tbInit(first) {
+    var jitter = first ? 0 : 0.03;
+    TB.x = [];
+    TB.y = [];
+    TB.vx = [0, 0, 0];
+    TB.vy = [0, 0, 0];
+    for (var i = 0; i < 3; i++) {
+      TB.x.push(TB_BASE[i][0] * (1 + (Math.random() - 0.5) * jitter * 2));
+      TB.y.push(TB_BASE[i][1] * (1 + (Math.random() - 0.5) * jitter * 2));
+    }
+    TB.trail = [[], [], []];
+    TB.accum = 0;
+    TB.last = 0;
+    TB.tsim = 0;
+    TB.escaped = false;
+    TB.vis = 0;
+    TB.phase = "birth";
+    TB.inited = true;
+    TB.energy = tbEnergy();
+  }
+
+  function tbAccel(x, y, outX, outY) {
+    var i, j;
+    for (i = 0; i < 3; i++) {
+      outX[i] = 0;
+      outY[i] = 0;
+    }
+    for (i = 0; i < 3; i++) {
+      for (j = i + 1; j < 3; j++) {
+        var dx = x[j] - x[i];
+        var dy = y[j] - y[i];
+        var d2 = dx * dx + dy * dy + TB.soft2;
+        var inv = 1 / (d2 * Math.sqrt(d2));
+        outX[i] += TB.m[j] * dx * inv;
+        outY[i] += TB.m[j] * dy * inv;
+        outX[j] -= TB.m[i] * dx * inv;
+        outY[j] -= TB.m[i] * dy * inv;
+      }
+    }
+  }
+
+  function tbEnergy() {
+    var ke = 0;
+    var pe = 0;
+    var i, j;
+    for (i = 0; i < 3; i++) {
+      ke += 0.5 * TB.m[i] * (TB.vx[i] * TB.vx[i] + TB.vy[i] * TB.vy[i]);
+      for (j = i + 1; j < 3; j++) {
+        var dx = TB.x[j] - TB.x[i];
+        var dy = TB.y[j] - TB.y[i];
+        pe -= (TB.m[i] * TB.m[j]) / Math.sqrt(dx * dx + dy * dy + TB.soft2);
+      }
+    }
+    return ke + pe;
+  }
+
+  function tbStep(dt) {
+    var ax = TB.acc.x;
+    var ay = TB.acc.y;
+    var i;
+    tbAccel(TB.x, TB.y, ax, ay);
+    for (i = 0; i < 3; i++) {
+      TB.x[i] += TB.vx[i] * dt + 0.5 * ax[i] * dt * dt;
+      TB.y[i] += TB.vy[i] * dt + 0.5 * ay[i] * dt * dt;
+      TB.vx[i] += 0.5 * ax[i] * dt;
+      TB.vy[i] += 0.5 * ay[i] * dt;
+    }
+    tbAccel(TB.x, TB.y, ax, ay);
+    for (i = 0; i < 3; i++) {
+      TB.vx[i] += 0.5 * ax[i] * dt;
+      TB.vy[i] += 0.5 * ay[i] * dt;
+    }
+  }
+
+  // 推进模拟：按真实流逝的时间做固定步长积分；系统崩解后淡出、重新播种，进入下一轮混沌
+  function tbAdvance(t, rate) {
+    if (!TB.inited) tbInit(true);
+    if (!TB.last || t < TB.last) {
+      TB.last = t;
+      return;
+    }
+    var real = Math.min(0.1, t - TB.last);
+    TB.last = t;
+    var speed = rate || TB_RATE;
+    TB.tsim += real * speed;
+
+    if (TB.phase === "birth") {
+      TB.vis = Math.min(1, TB.vis + real / TB_FADE);
+      if (TB.vis >= 1) TB.phase = "run";
+    } else if (TB.phase === "collapse") {
+      TB.vis = Math.max(0, TB.vis - real / TB_FADE);
+      if (TB.vis <= 0) {
+        TB.resets += 1;
+        tbInit(false);
+      }
+    }
+
+    TB.accum += real * speed;
+    var guard = 0;
+    while (TB.accum >= TB_STEP && guard < 400) {
+      tbStep(TB_STEP);
+      TB.accum -= TB_STEP;
+      guard++;
+    }
+    if (guard >= 400) TB.accum = 0;
+
+    if (TB.phase === "run") {
+      var maxR = 0;
+      for (var i = 0; i < 3; i++) {
+        var r = Math.hypot(TB.x[i], TB.y[i]);
+        if (r > maxR) maxR = r;
+      }
+      // 有星体被彻底甩出 = 系统崩解；超时也强制进入下一轮
+      if ((maxR > TB_ESCAPE && !TB.escaped) || TB.tsim > 150) {
+        TB.escaped = true;
+        TB.phase = "collapse";
+      }
+    }
+
+    // 轨迹按位移采样，近距离高速掠过时才密、远处飞行时也不至于稀疏
+    for (var k = 0; k < 3; k++) {
+      var tr = TB.trail[k];
+      var last = tr.length ? tr[tr.length - 1] : null;
+      if (!last || Math.hypot(TB.x[k] - last[0], TB.y[k] - last[1]) > TB_TRAIL_MOVE) {
+        tr.push([TB.x[k], TB.y[k]]);
+        if (tr.length > TB_TRAIL_MAX) tr.splice(0, 300);
+      }
+    }
+
+    TB.energy = tbEnergy();
+  }
+
+  // 短拖尾：按分段绘制，越靠近当前时刻越亮
+  function tbTrails(scale, cx, cy, alpha, chunks) {
+    var i, k, seg, from, to, tr, n;
+    for (i = 0; i < 3; i++) {
+      tr = TB.trail[i];
+      n = tr.length;
+      if (n < 3) continue;
+      for (seg = 0; seg < chunks; seg++) {
+        from = Math.floor((n - 1) * (seg / chunks));
+        to = Math.floor((n - 1) * ((seg + 1) / chunks));
+        if (to - from < 1) continue;
+        ctx.beginPath();
+        for (k = from; k <= to; k++) {
+          var sx = cx + tr[k][0] * scale;
+          var sy = cy + tr[k][1] * scale;
+          if (k === from) ctx.moveTo(sx, sy);
+          else ctx.lineTo(sx, sy);
+        }
+        var fade = (seg + 1) / chunks;
+        ctx.strokeStyle = "rgba(255, 255, 255, " + (alpha * fade * fade).toFixed(3) + ")";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // 三颗恒星：径向渐变做柔和光晕 + 叠加混合，让它们像真正的光源点
+  function tbSuns(scale, cx, cy, alpha) {
+    var cores = [];
+    var i;
+    for (i = 0; i < 3; i++) {
+      cores.push([
+        cx + TB.x[i] * scale,
+        cy + TB.y[i] * scale,
+        1.4 + 1.1 * (TB.m[i] / 5)
+      ]);
+    }
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    for (i = 0; i < cores.length; i++) {
+      var c = cores[i];
+      var g = ctx.createRadialGradient(c[0], c[1], 0, c[0], c[1], c[2] * 11);
+      g.addColorStop(0, "rgba(255, 255, 255, " + (0.55 * alpha).toFixed(3) + ")");
+      g.addColorStop(0.18, "rgba(255, 255, 255, " + (0.2 * alpha).toFixed(3) + ")");
+      g.addColorStop(0.5, "rgba(255, 255, 255, " + (0.05 * alpha).toFixed(3) + ")");
+      g.addColorStop(1, "rgba(255, 255, 255, 0)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(c[0], c[1], c[2] * 11, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    for (i = 0; i < cores.length; i++) {
+      dot(cores[i][0], cores[i][1], cores[i][2], Math.min(1, alpha * 1.15));
+    }
+  }
+
+  // 背景三体的落位：铺满整个首屏
+  function tbPlacement() {
+    var narrow = width < 900;
+    var d = drift();
+    return {
+      cx: width * 0.5 + d[0],
+      cy: height * 0.5 + d[1],
+      scale: Math.min(width * (narrow ? 0.1 : 0.075), height * (narrow ? 0.16 : 0.13))
+    };
+  }
+
+  // 首屏背景：三体运动，低亮度 + 短拖尾 + 三颗发光恒星
+  function drawThreeBody(t, dim) {
+    tbAdvance(t, 1);
+    // 减少动态效果时直接以完整亮度呈现静态一帧
+    var vis = reduced() ? 1 : TB.vis;
+    if (vis <= 0.01) return;
+    var P = tbPlacement();
+    var k = vis * (dim == null ? 1 : dim);
+    tbTrails(P.scale, P.cx, P.cy, 0.17 * k, 10);
+    tbSuns(P.scale, P.cx, P.cy, 0.8 * k);
+  }
+
+  /* ================= 另外两套混沌系统 ================= */
+
+  /* 线框球：经纬网格绕倾斜轴自转，按深度分段着色；
+     球面上有若干缓慢呼吸的数据点。作为项目页的整页背景。 */
+  function drawGlobe(t, dim) {
+    var off = drift();
+    var cx = width * 0.5 + off[0];
+    var cy = height * 0.5 + off[1];
+    var R = Math.min(width * 0.24, height * 0.4);
+    var k = (dim == null ? 1 : dim) * 0.95;
+    var spin = t * 0.2;
+    var tiltA = 0.45;
+    var cosS = Math.cos(spin), sinS = Math.sin(spin);
+    var cosT = Math.cos(tiltA), sinT = Math.sin(tiltA);
+    var i, j, c;
+
+    // 中心柔光（先画，避免冲淡线条）
+    var glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.7);
+    glow.addColorStop(0, "rgba(255, 255, 255, " + (0.05 * k).toFixed(3) + ")");
+    glow.addColorStop(1, "rgba(255, 255, 255, 0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(cx - R * 1.7, cy - R * 1.7, R * 3.4, R * 3.4);
+
+    function project(px, py, pz) {
+      var x1 = px * cosS - pz * sinS;
+      var z1 = px * sinS + pz * cosS;
+      var y1 = py * cosT - z1 * sinT;
+      var z2 = py * sinT + z1 * cosT;
+      var s = 1.9 / (1.9 + z2);
+      return [cx + x1 * R * s, cy + y1 * R * s, z2];
+    }
+
+    // 把一条闭合折线按深度切成 8 段分别着色，形成球体积感
+    function drawRing(pts, base) {
+      var segs = 8;
+      for (c = 0; c < segs; c++) {
+        var from = Math.floor((pts.length - 1) * (c / segs));
+        var to = Math.floor((pts.length - 1) * ((c + 1) / segs));
+        if (to - from < 1) continue;
+        var zSum = 0;
+        ctx.beginPath();
+        for (j = from; j <= to; j++) {
+          if (j === from) ctx.moveTo(pts[j][0], pts[j][1]);
+          else ctx.lineTo(pts[j][0], pts[j][1]);
+          zSum += pts[j][2];
+        }
+        var zAvg = (zSum / (to - from + 1) + 1) / 2;
+        ctx.strokeStyle = "rgba(255, 255, 255, " + (base * (0.3 + 0.9 * zAvg) * k).toFixed(3) + ")";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+
+    var pts;
+
+    // 纬线
+    for (i = 1; i < 9; i++) {
+      var phi = (i / 9) * Math.PI;
+      var py = Math.cos(phi);
+      var pr = Math.sin(phi);
+      pts = [];
+      for (j = 0; j <= 64; j++) {
+        var a = (j / 64) * Math.PI * 2;
+        pts.push(project(Math.cos(a) * pr, py, Math.sin(a) * pr));
+      }
+      drawRing(pts, 0.15);
+    }
+
+    // 经线
+    for (i = 0; i < 12; i++) {
+      var lon = (i / 12) * Math.PI * 2;
+      var cl = Math.cos(lon);
+      var sl = Math.sin(lon);
+      pts = [];
+      for (j = 0; j <= 48; j++) {
+        var th = (j / 48) * Math.PI;
+        pts.push(project(Math.sin(th) * cl, Math.cos(th), Math.sin(th) * sl));
+      }
+      drawRing(pts, 0.12);
+    }
+
+    // 赤道略亮
+    pts = [];
+    for (j = 0; j <= 72; j++) {
+      var e = (j / 72) * Math.PI * 2;
+      pts.push(project(Math.cos(e), 0, Math.sin(e)));
+    }
+    drawRing(pts, 0.26);
+
+    // 球面上的数据点
+    for (i = 0; i < 7; i++) {
+      var la = i * 2.399 + t * 0.05;
+      var ph = Math.acos(1 - 2 * ((i + 0.5) / 7));
+      var sp = project(Math.sin(ph) * Math.cos(la), Math.cos(ph), Math.sin(ph) * Math.sin(la));
+      var pulse = 0.55 + 0.45 * Math.sin(t * 1.4 + i);
+      dot(sp[0], sp[1], 2.2, (0.3 + 0.5 * pulse) * k);
+    }
+  }
+
+  // 双摆：两个质点由刚性杆相连，末端轨迹是经典的混沌花瓣图案
+  var DP = { a1: 1.7, a2: -0.5, w1: 0, w2: 0, trail: [], accum: 0, last: 0, inited: false };
+  var DP_DT = 1 / 600;
+  var DP_G = 9.81;
+
+  // 四阶龙格-库塔：双摆对积分器很敏感，RK4 才能让能量长期不漂
+  function dpDeriv(s) {
+    var a1 = s[0], a2 = s[1], w1 = s[2], w2 = s[3];
+    var d = a1 - a2;
+    var den = 3 - Math.cos(2 * d);
+    return [w1, w2,
+      (-DP_G * 3 * Math.sin(a1) - DP_G * Math.sin(a1 - 2 * a2)
+        - 2 * Math.sin(d) * (w2 * w2 + w1 * w1 * Math.cos(d))) / den,
+      (2 * Math.sin(d) * (2 * w1 * w1 + 2 * DP_G * Math.cos(a1)
+        + w2 * w2 * Math.cos(d))) / den
+    ];
+  }
+
+  function dpStep(dt) {
+    var s = [DP.a1, DP.a2, DP.w1, DP.w2];
+    var k1 = dpDeriv(s);
+    var k2 = dpDeriv(s.map(function (v, i) { return v + k1[i] * dt / 2; }));
+    var k3 = dpDeriv(s.map(function (v, i) { return v + k2[i] * dt / 2; }));
+    var k4 = dpDeriv(s.map(function (v, i) { return v + k3[i] * dt; }));
+    for (var i = 0; i < 4; i++) {
+      s[i] += dt / 6 * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]);
+    }
+    DP.a1 = s[0];
+    DP.a2 = s[1];
+    DP.w1 = s[2];
+    DP.w2 = s[3];
+  }
+
+  function dpAdvance(t) {
+    if (!DP.inited) {
+      DP.inited = true;
+      DP.last = t;
+      DP.trail = [];
+      return;
+    }
+    if (t < DP.last) DP.last = t;
+    var real = Math.min(0.1, t - DP.last);
+    DP.last = t;
+    DP.accum += real * 1.1;
+    var guard = 0;
+    while (DP.accum >= DP_DT && guard < 260) {
+      dpStep(DP_DT);
+      DP.accum -= DP_DT;
+      guard++;
+    }
+    if (guard >= 260) DP.accum = 0;
+    var tr = DP.trail;
+    tr.push([Math.sin(DP.a1) + Math.sin(DP.a2), Math.cos(DP.a1) + Math.cos(DP.a2)]);
+    if (tr.length > 700) tr.splice(0, 100);
+  }
+
+  function drawPendulum(t, dim) {
+    dpAdvance(t);
+    var d = drift();
+    var cx = width * 0.5 + d[0];
+    var cy = height * 0.34 + d[1];
+    var scale = Math.min(height * 0.26, width * 0.14);
+    var k = (dim == null ? 1 : dim) * 0.9;
+    var tr = DP.trail;
+    var n = tr.length;
+    var chunks = 12;
+    var i, j, from, to;
+
+    for (i = 0; i < chunks; i++) {
+      from = Math.floor((n - 1) * (i / chunks));
+      to = Math.floor((n - 1) * ((i + 1) / chunks));
+      if (to - from < 1) continue;
+      ctx.beginPath();
+      for (j = from; j <= to; j++) {
+        var x = cx + tr[j][0] * scale;
+        var y = cy + tr[j][1] * scale;
+        if (j === from) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      var fade = (i + 1) / chunks;
+      ctx.strokeStyle = "rgba(255, 255, 255, " + (0.26 * k * fade * fade).toFixed(3) + ")";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    var p1x = cx + Math.sin(DP.a1) * scale;
+    var p1y = cy + Math.cos(DP.a1) * scale;
+    var p2x = cx + (Math.sin(DP.a1) + Math.sin(DP.a2)) * scale;
+    var p2y = cy + (Math.cos(DP.a1) + Math.cos(DP.a2)) * scale;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(p1x, p1y);
+    ctx.lineTo(p2x, p2y);
+    ctx.strokeStyle = "rgba(255, 255, 255, " + (0.5 * k).toFixed(3) + ")";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    dot(cx, cy, 2, 0.5 * k);
+    dot(p1x, p1y, 3, 0.78 * k);
+    dot(p2x, p2y, 3.6, 0.95 * k);
+  }
+
+  // 简化原子：三条互成 60° 的椭圆轨道（经典原子图标）
+  function drawAtom(t, dim) {
+    var d = drift();
+    var cx = width * 0.5 + d[0];
+    var cy = height * 0.5 + d[1];
+    var R = Math.min(width * 0.19, height * 0.3);
+    var k = (dim == null ? 1 : dim) * 0.85;
+    var spin = t * 0.16;
+    var rx = R * 1.5;
+    var ry = R * 0.58;
+    var i, j;
+
+    for (i = 0; i < 3; i++) {
+      var rot = spin + i * Math.PI / 3;
+      var co = Math.cos(rot);
+      var si = Math.sin(rot);
+
+      ctx.beginPath();
+      for (j = 0; j <= 96; j++) {
+        var a = (j / 96) * Math.PI * 2;
+        var px = Math.cos(a) * rx;
+        var py = Math.sin(a) * ry;
+        var x = cx + px * co - py * si;
+        var y = cy + px * si + py * co;
+        if (j === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = "rgba(255, 255, 255, " + (0.17 * k).toFixed(3) + ")";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      var ea = t * 0.85 + i * (Math.PI * 2 / 3);
+      for (j = 0; j < 8; j++) {
+        var q1 = ea - j * 0.05;
+        var q2 = ea - (j + 1) * 0.05;
+        var q1x = Math.cos(q1) * rx;
+        var q1y = Math.sin(q1) * ry;
+        var q2x = Math.cos(q2) * rx;
+        var q2y = Math.sin(q2) * ry;
+        ctx.beginPath();
+        ctx.moveTo(cx + q1x * co - q1y * si, cy + q1x * si + q1y * co);
+        ctx.lineTo(cx + q2x * co - q2y * si, cy + q2x * si + q2y * co);
+        ctx.strokeStyle = "rgba(255, 255, 255, " + ((1 - j / 8) * 0.3 * k).toFixed(3) + ")";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      var hx = cx + Math.cos(ea) * rx * co - Math.sin(ea) * ry * si;
+      var hy = cy + Math.cos(ea) * rx * si + Math.sin(ea) * ry * co;
+      dot(hx, hy, 2.4, 0.85 * k);
+    }
+
+    dot(cx, cy, 3.6, 0.9 * k);
+    ctx.beginPath();
+    ctx.arc(cx, cy, 11, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(255, 255, 255, " + (0.14 * k).toFixed(3) + ")";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  /* ================= 渲染主循环 ================= */
+
+  function draw(t) {
+    lastT = t;
+    stepPointer();
+
+    // 文章页：原子结构铺满整页，保持常亮
+    if (isArchive) {
+      useView(VIEWS.list);
+      clear();
+      drawAtom(t, 1);
+      return;
+    }
+
+    // 项目页：线框球铺满整页，保持常亮
+    if (isProjects) {
+      useView(VIEWS.proj);
+      clear();
+      drawGlobe(t, 1);
+      return;
+    }
+
+    useView(VIEWS.hero);
+    clear();
+    // 首屏背景随滚动压暗，滚出首屏后基本隐去
+    var dim = reduced() ? 1 : Math.max(0.22, 1 - scrollProg * 0.8);
+    if (simIndex === 2) drawPendulum(t, dim);
+    else drawThreeBody(t, dim);
+    edgeScrim();        // 左侧压暗，保证文案可读
+  }
+
+  function loop(now) {
+    draw((now - started) / 1000);
+    rafId = window.requestAnimationFrame(loop);
+  }
+
+  function startLoop() {
+    if (rafId || reduced()) return;
+    started = (window.performance && performance.now) ? performance.now() : Date.now();
+    rafId = window.requestAnimationFrame(loop);
+  }
+
+  function stopLoop() {
+    if (rafId) {
+      window.cancelAnimationFrame(rafId);
+      rafId = 0;
+    }
+  }
+
+  // 指针交互：整套模拟做轻微视差，不影响模拟本身
+  function setPointer(clientX, clientY) {
+    var rect = view.canvas.getBoundingClientRect();
+    var wasActive = pointer.active;
+    pointer.tx = clientX - rect.left;
+    pointer.ty = clientY - rect.top;
+    if (!wasActive) {
+      pointer.x = pointer.tx;
+      pointer.y = pointer.ty;
+    }
+    pointer.active = true;
+  }
+
+  window.addEventListener("pointermove", function (e) {
+    setPointer(e.clientX, e.clientY);
+  });
+  window.addEventListener("pointerdown", function (e) {
+    setPointer(e.clientX, e.clientY);
+  });
+  document.addEventListener("pointerleave", function () {
+    pointer.active = false;
+  });
+  window.addEventListener("blur", function () {
+    pointer.active = false;
+  });
+
+  /* ---------------- 滚动特效：进度线 + 视差 + 背景随滚动压暗 ---------------- */
+  var progressBar = document.querySelector(".progress i");
+  var heroSection = document.querySelector(".hero");
+  var rootEl = document.documentElement;
+  var scrollQueued = false;
+
+  function readScroll() {
+    scrollQueued = false;
+    scrollY = window.pageYOffset || rootEl.scrollTop || 0;
+    var heroH = heroSection ? heroSection.offsetHeight : window.innerHeight;
+    scrollProg = Math.max(0, Math.min(1.4, scrollY / Math.max(1, heroH * 0.55)));
+    rootEl.style.setProperty("--sy", scrollY.toFixed(1));
+    rootEl.style.setProperty("--sp", scrollProg.toFixed(3));
+    if (progressBar) {
+      var span = Math.max(1, rootEl.scrollHeight - window.innerHeight);
+      progressBar.style.transform = "scaleX(" + Math.min(1, scrollY / span).toFixed(4) + ")";
+    }
+  }
+
+  function onScroll() {
+    if (scrollQueued) return;
+    scrollQueued = true;
+    window.requestAnimationFrame(readScroll);
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  readScroll();
+
+  /* ---------------- 文章页索引：标签筛选 + 标题搜索 ---------------- */
+  var postsEmpty = document.getElementById("postsEmpty");
+  var noResults = document.getElementById("noResults");
+  var tagList = document.getElementById("tagList");
+  var searchInput = document.getElementById("postQuery");
+  var activeTags = [];
+  var postsOl = document.getElementById("posts");
+
+  // 标题 / 日期 / 标签 直接从构建期渲染好的 HTML 读取
+  var POSTS = Array.prototype.slice.call(document.querySelectorAll(".post")).map(function (li) {
+    var t = li.querySelector(".post-title");
+    var d = li.querySelector(".list-date");
+    return {
+      el: li,
+      title: t ? t.textContent.trim() : "",
+      date: d ? d.textContent.trim() : "",
+      tags: (li.getAttribute("data-tags") || "").split(/\s+/).filter(Boolean)
+    };
+  });
+
+  function postQuery() {
+    return searchInput && searchInput.value ? searchInput.value.trim().toLowerCase() : "";
+  }
+
+  // OR 筛选：命中任一已选标签即通过；未选标签时全部通过
+  function postMatches(p, sel, q) {
+    if (q && p.title.toLowerCase().indexOf(q) < 0) return false;
+    if (!sel.length) return true;
+    for (var i = 0; i < sel.length; i++) if (p.tags.indexOf(sel[i]) >= 0) return true;
+    return false;
+  }
+
+  // 命中标签的个数，用于排序
+  function hitCount(p, sel) {
+    var n = 0;
+    for (var i = 0; i < sel.length; i++) if (p.tags.indexOf(sel[i]) >= 0) n++;
+    return n;
+  }
+
+  // 结果集：先按 OR 过滤，再按「命中数降序 → 日期降序 → 标题」排序
+  function postResult(sel) {
+    var q = postQuery();
+    var list = POSTS.filter(function (p) { return postMatches(p, sel, q); });
+    list.sort(function (a, b) {
+      return hitCount(b, sel) - hitCount(a, sel) ||
+        (a.date < b.date ? 1 : (a.date > b.date ? -1 : 0)) ||
+        (a.title < b.title ? -1 : (a.title > b.title ? 1 : 0));
+    });
+    return list;
+  }
+
+  function tagButton(tag, label, n, on) {
+    return '<button type="button" class="tag' + (on ? " is-on" : "") + '" data-tag="' + tag +
+      '" aria-pressed="' + on + '">' + label + '<span class="tag-n">' + n + "</span></button>";
+  }
+
+  // 计数按当前选择动态重算：显示的是「点这一下会得到几条」
+  function buildTags() {
+    if (!tagList) return;
+    var all = [];
+    POSTS.forEach(function (p) {
+      p.tags.forEach(function (t) { if (all.indexOf(t) < 0) all.push(t); });
+    });
+    all.sort();
+    var html = tagButton("*", "全部", postResult([]).length, activeTags.length === 0);
+    all.forEach(function (t) {
+      html += tagButton(t, t.toUpperCase(), postResult(activeTags.concat([t])).length, activeTags.indexOf(t) >= 0);
+    });
+    tagList.innerHTML = html;
+  }
+
+  function applyFilter() {
+    var list = postResult(activeTags);
+    var shown = 0;
+    POSTS.forEach(function (p) {
+      var ok = list.indexOf(p) >= 0;
+      p.el.hidden = !ok;
+      p.el.classList.toggle("is-first", ok && shown === 0);
+      if (ok) shown++;
+    });
+    // 按排序结果重排 DOM（appendChild 会移动已存在的节点）
+    if (postsOl) list.forEach(function (p) { postsOl.appendChild(p.el); });
+    if (postsEmpty) postsEmpty.hidden = POSTS.length > 0;
+    if (noResults) noResults.hidden = !(POSTS.length > 0 && shown === 0);
+    buildTags();
+  }
+
+  if (tagList) {
+    tagList.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest(".tag") : null;
+      if (!btn) return;
+      var t = btn.getAttribute("data-tag") || "*";
+      if (t === "*") {
+        activeTags = [];
+      } else {
+        var i = activeTags.indexOf(t);
+        if (i >= 0) activeTags.splice(i, 1);
+        else activeTags.push(t);
+      }
+      applyFilter();
+    });
+  }
+
+  if (searchInput) searchInput.addEventListener("input", applyFilter);
+
+  applyFilter();
+
+  /* ---------------- 项目页：每页数量 + 分页 + 技术栈筛选 + 滚轮翻页 ----------------
+     这里的"翻页"只发生在本页内部：项目被分成若干页，滚轮上下滚动切换上一页/下一页，
+     不跳转到别的页面。到首页/末页时不再拦截滚轮，交还给页面本身滚动。 */
+  var cardEls = Array.prototype.slice.call(document.querySelectorAll(".card"));
+  var cardsEmpty = document.getElementById("cardsEmpty");
+  var perPageBox = document.getElementById("perPage");
+  var pageList = document.getElementById("pageList");
+  var stackList = document.getElementById("stackList");
+  var projQuery = document.getElementById("projQuery");
+
+  var PROJ = { perPage: 3, page: 0, stacks: [], lock: false };
+
+  var CARDS = cardEls.map(function (li) {
+    var t = li.querySelector(".card-title");
+    var d = li.querySelector(".card-desc");
+    var m = li.querySelector(".card-meta");
+    return {
+      el: li,
+      stack: (li.getAttribute("data-stack") || "").split(/\s+/).filter(Boolean),
+      text: ((t ? t.textContent : "") + " " + (d ? d.textContent : "")).toLowerCase(),
+      date: m ? m.textContent.trim() : ""
+    };
+  });
+
+  function projQueryText() {
+    return projQuery && projQuery.value ? projQuery.value.trim().toLowerCase() : "";
+  }
+
+  // 命中标签个数，用于排序
+  function cardHits(c, sel) {
+    var n = 0;
+    for (var i = 0; i < sel.length; i++) if (c.stack.indexOf(sel[i]) >= 0) n++;
+    return n;
+  }
+
+  // OR 筛选 + 按命中数降序、并列按日期倒序
+  function projResult(sel) {
+    var q = projQueryText();
+    var list = CARDS.filter(function (c) {
+      if (q && c.text.indexOf(q) < 0) return false;
+      if (!sel.length) return true;
+      for (var i = 0; i < sel.length; i++) if (c.stack.indexOf(sel[i]) >= 0) return true;
+      return false;
+    });
+    list.sort(function (a, b) {
+      return cardHits(b, sel) - cardHits(a, sel) ||
+        (a.date < b.date ? 1 : (a.date > b.date ? -1 : 0));
+    });
+    return list;
+  }
+
+  function projVisible() { return projResult(PROJ.stacks); }
+
+  function projPageCount() {
+    return Math.max(1, Math.ceil(projVisible().length / PROJ.perPage));
+  }
+
+  function buildProjIndex() {
+    var i;
+    if (perPageBox) {
+      var pp = perPageBox.querySelectorAll(".pp");
+      for (i = 0; i < pp.length; i++) {
+        pp[i].setAttribute("aria-pressed", parseInt(pp[i].getAttribute("data-n"), 10) === PROJ.perPage ? "true" : "false");
+      }
+    }
+    if (pageList) {
+      var total = projPageCount();
+      var html = "";
+      for (i = 0; i < total; i++) {
+        var n = i + 1;
+        html += '<button type="button" class="pnum" data-page="' + i + '" aria-pressed="' +
+          (i === PROJ.page) + '">' + (n < 10 ? "0" + n : n) + "</button>";
+      }
+      pageList.innerHTML = html;
+    }
+    // 技术栈多选；括号内数字是「点这一下会得到几条」
+    if (stackList) {
+      var all = [];
+      CARDS.forEach(function (c) {
+        c.stack.forEach(function (st) { if (all.indexOf(st) < 0) all.push(st); });
+      });
+      all.sort();
+      var out = '<button type="button" class="stack' + (PROJ.stacks.length === 0 ? " is-on" : "") +
+        '" data-stack="*" aria-pressed="' + (PROJ.stacks.length === 0) + '">全部 ' + projResult([]).length + "</button>";
+      all.forEach(function (st) {
+        var on = PROJ.stacks.indexOf(st) >= 0;
+        out += '<button type="button" class="stack' + (on ? " is-on" : "") + '" data-stack="' + st +
+          '" aria-pressed="' + on + '">' + st.toUpperCase() + " " + projResult(PROJ.stacks.concat([st])).length + "</button>";
+      });
+      stackList.innerHTML = out;
+    }
+  }
+
+  // dir > 0：向后翻（旧条目向上走），dir < 0：向前翻
+  function renderProjects(dir) {
+    var list = projVisible();
+    var total = Math.max(1, Math.ceil(list.length / PROJ.perPage));
+    if (PROJ.page > total - 1) PROJ.page = total - 1;
+    if (PROJ.page < 0) PROJ.page = 0;
+    var from = PROJ.page * PROJ.perPage;
+    var to = from + PROJ.perPage;
+    var i;
+
+    var leaving = [];
+    for (i = 0; i < CARDS.length; i++) {
+      if (!CARDS[i].el.classList.contains("is-hidden")) leaving.push(CARDS[i].el);
+    }
+    if (dir) {
+      for (i = 0; i < leaving.length; i++) {
+        leaving[i].style.setProperty("--leave", (dir > 0 ? -22 : 22) + "px");
+        leaving[i].classList.remove("is-enter");
+        leaving[i].classList.add("is-leave");
+      }
+    }
+
+    function commit() {
+      var show = list.slice(from, to);
+      for (var k = 0; k < CARDS.length; k++) {
+        var el = CARDS[k].el;
+        var inPage = show.indexOf(CARDS[k]) >= 0;
+        el.classList.remove("is-leave");
+        el.classList.toggle("is-hidden", !inPage);
+        if (inPage) {
+          el.style.setProperty("--enter", (dir > 0 ? 22 : -22) + "px");
+          el.classList.add("is-enter");
+        }
+      }
+      if (cardsEmpty) cardsEmpty.hidden = CARDS.length > 0;
+      buildProjIndex();
+
+      // 两级 rAF 后再摘掉 is-enter，确保浏览器先算出停靠位置
+      window.requestAnimationFrame(function () {
+        window.requestAnimationFrame(function () {
+          show.forEach(function (c, n) {
+            window.setTimeout(function () {
+              c.el.classList.remove("is-enter");
+            }, n * 55);
+          });
+        });
+      });
+    }
+
+    if (dir && !reduced()) window.setTimeout(commit, 360);
+    else commit();
+  }
+
+  function goProjPage(next, dir) {
+    var total = projPageCount();
+    if (next < 0 || next >= total || next === PROJ.page) return;
+    PROJ.page = next;
+    renderProjects(dir);
+  }
+
+  function resetProjects() {
+    PROJ.page = 0;
+    renderProjects(0);
+  }
+
+  if (perPageBox) {
+    perPageBox.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest(".pp") : null;
+      if (!btn) return;
+      var n = parseInt(btn.getAttribute("data-n"), 10) || 3;
+      if (n === PROJ.perPage) return;
+      PROJ.perPage = n;
+      PROJ.page = 0;
+      renderProjects(0);
+    });
+  }
+
+  if (pageList) {
+    pageList.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest(".pnum") : null;
+      if (!btn) return;
+      var p = parseInt(btn.getAttribute("data-page"), 10) || 0;
+      goProjPage(p, p > PROJ.page ? 1 : -1);
+    });
+  }
+
+  if (stackList) {
+    stackList.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest(".stack") : null;
+      if (!btn) return;
+      var st = btn.getAttribute("data-stack") || "*";
+      if (st === "*") {
+        PROJ.stacks = [];
+      } else {
+        var k = PROJ.stacks.indexOf(st);
+        if (k >= 0) PROJ.stacks.splice(k, 1);
+        else PROJ.stacks.push(st);
+      }
+      // 重排后页码必须归零，否则会停在一个不存在的页上
+      PROJ.page = 0;
+      renderProjects(0);
+    });
+  }
+
+  if (projQuery) {
+    projQuery.addEventListener("input", function () {
+      PROJ.page = 0;
+      renderProjects(0);
+    });
+  }
+
+  function onProjectsWheel(e) {
+    // 正在做页面切换时不响应滚轮：触控板的惯性滚动很容易在切换途中再触发一次
+    if (!isProjects || pageSwitching || e.ctrlKey) return;
+    var dir = e.deltaY > 0 ? 1 : (e.deltaY < 0 ? -1 : 0);
+    if (!dir) return;
+    var next = PROJ.page + dir;
+    var total = projPageCount();
+    if (next < 0 || next >= total) return;   // 首末页不拦截，交还给页面滚动
+    e.preventDefault();
+    if (PROJ.lock) return;
+    PROJ.lock = true;
+    window.setTimeout(function () {
+      PROJ.lock = false;
+    }, 780);
+    goProjPage(next, dir);
+  }
+
+  window.addEventListener("wheel", onProjectsWheel, { passive: false });
+
+  buildProjIndex();
+  renderProjects(0);
+
+  /* ---------------- 关于页：一屏一节 + 滚轮换节 ----------------
+     滑动容器本身一屏高，内部轨道整体上下位移：第一屏是标题，之后每块内容各占一屏。
+     整页任意位置滚轮都生效；到首屏 / 末屏时不再拦截，交还给页面滚动。 */
+  var stepList = document.getElementById("stepList");
+  var aboutTrack = document.getElementById("aboutTrack");
+  var slideNow = document.getElementById("slideNow");
+  var slideTotal = document.getElementById("slideTotal");
+  var countEl = document.querySelector(".about-count");
+  var SLIDES = Array.prototype.slice.call(document.querySelectorAll(".about-track .slide"));
+
+  var STEP = { index: 0, count: SLIDES.length, lock: false };
+
+  function pad2(n) {
+    return n < 10 ? "0" + n : String(n);
+  }
+
+  function buildSteps() {
+    if (stepList) {
+      var btns = stepList.querySelectorAll(".step");
+      for (var i = 0; i < btns.length; i++) {
+        var on = parseInt(btns[i].getAttribute("data-step"), 10) === STEP.index;
+        btns[i].classList.toggle("is-on", on);
+        btns[i].setAttribute("aria-pressed", on ? "true" : "false");
+      }
+      // 标题那一屏不显示分节导航
+      stepList.classList.toggle("is-hidden", STEP.index === 0);
+    }
+    // 计数器同样只在内容屏显示，标题屏不出现
+    if (countEl) countEl.classList.toggle("is-hidden", STEP.index === 0);
+    if (slideNow) slideNow.textContent = pad2(STEP.index + 1);
+    if (slideTotal) slideTotal.textContent = pad2(STEP.count);
+  }
+
+  function renderStep() {
+    if (!STEP.count) return;
+    if (STEP.index > STEP.count - 1) STEP.index = STEP.count - 1;
+    if (STEP.index < 0) STEP.index = 0;
+    if (aboutTrack) {
+      aboutTrack.style.transform = "translate3d(0, " + (-STEP.index * 100) + "vh, 0)";
+    }
+    buildSteps();
+  }
+
+  function goStep(next) {
+    if (next < 0 || next >= STEP.count || next === STEP.index) return;
+    STEP.index = next;
+    renderStep();
+  }
+
+  function resetSteps() {
+    STEP.index = 0;
+    renderStep();
+  }
+
+  if (stepList) {
+    stepList.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest(".step") : null;
+      if (!btn) return;
+      goStep(parseInt(btn.getAttribute("data-step"), 10) || 1);
+    });
+  }
+
+  function onAboutWheel(e) {
+    if (!isAbout || pageSwitching || e.ctrlKey) return;
+    var dir = e.deltaY > 0 ? 1 : (e.deltaY < 0 ? -1 : 0);
+    if (!dir) return;
+    var next = STEP.index + dir;
+    if (next < 0 || next >= STEP.count) return;   // 首末屏放行
+    e.preventDefault();
+    if (STEP.lock) return;
+    STEP.lock = true;
+    window.setTimeout(function () {
+      STEP.lock = false;
+    }, 760);
+    goStep(next);
+  }
+
+  window.addEventListener("wheel", onAboutWheel, { passive: false });
+
+  buildSteps();
+  renderStep();
+
+  // 兜底：任何脚本异常都不应该把页面留在"幕布盖着 + 标题飞出"的中间状态
+  /* ---------------- 关于页分节导航（叠加在原生滚动吸附之上） ----------------
+     用 IntersectionObserver 判断当前停在哪一屏，比自己算滚动位置稳；
+     切屏交给浏览器的 scroll-snap，导航只负责高亮与跳转。 */
+  var aboutSections = Array.prototype.slice.call(document.querySelectorAll(".asection"));
+  var aboutHero = document.querySelector(".hero");
+  var aboutRail = document.getElementById("stepList");
+  var aboutCount = document.getElementById("aboutCount");
+  var stepNowEl = document.getElementById("slideNow");
+  var stepTotalEl = document.getElementById("slideTotal");
+  var stepBtns = aboutRail ? Array.prototype.slice.call(aboutRail.querySelectorAll(".step")) : [];
+  var activeSection = -1;
+
+  if (stepTotalEl) stepTotalEl.textContent = pad2(aboutSections.length);
+
+  function setActiveSection(idx) {
+    if (idx === activeSection) return;
+    activeSection = idx;
+    var onContent = idx >= 0;
+    for (var i = 0; i < stepBtns.length; i++) {
+      var on = i === idx;
+      stepBtns[i].classList.toggle("is-on", on);
+      stepBtns[i].setAttribute("aria-pressed", on ? "true" : "false");
+    }
+    if (aboutRail) aboutRail.classList.toggle("is-hidden", !onContent);
+    if (aboutCount) aboutCount.classList.toggle("is-hidden", !onContent);
+    if (stepNowEl) stepNowEl.textContent = onContent ? pad2(idx + 1) : "01";
+  }
+
+  if (window.IntersectionObserver) {
+    var aboutIO = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        if (!entries[i].isIntersecting) continue;
+        setActiveSection(entries[i].target === aboutHero ? -1 : aboutSections.indexOf(entries[i].target));
+        break;
+      }
+    }, { threshold: 0.55 });
+    if (aboutHero) aboutIO.observe(aboutHero);
+    for (var ai = 0; ai < aboutSections.length; ai++) aboutIO.observe(aboutSections[ai]);
+  }
+
+  stepBtns.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var target = aboutSections[parseInt(btn.getAttribute("data-target"), 10) || 0];
+      if (target && target.scrollIntoView) {
+        target.scrollIntoView({ behavior: reduced() ? "auto" : "smooth", block: "start" });
+      }
+    });
+  });
+
+  window.addEventListener("error", function () {
+    if (elTitle) elTitle.classList.remove("is-out", "is-in");
+    rootEl.classList.remove("is-transitioning");
+    if (curtain) {
+      curtain.classList.add("no-anim");
+      curtain.classList.remove("is-cover", "is-pass");
+      window.requestAnimationFrame(function () {
+        curtain.classList.remove("no-anim");
+      });
+    }
+    pageSwitching = false;
+  });
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) stopLoop();
+    else startLoop();
+  });
+
+  if (window.ResizeObserver) {
+    var onResize = function () {
+      if (resize()) draw(lastT);      // 尺寸变了必须立刻重绘，否则会闪一帧空白
+    };
+    var ro = new ResizeObserver(onResize);
+    ro.observe(heroCanvas);
+    ro.observe(listCanvas);
+    ro.observe(projCanvas);
+  } else {
+    window.addEventListener("resize", function () {
+      if (resize()) draw(lastT);
+    });
+  }
+
+  if (reduce && reduce.addEventListener) {
+    reduce.addEventListener("change", function () {
+      stopLoop();
+      draw(6);
+    });
+  }
+
+  /* ---------------- 页面切换：幕布扫过 + 标题逐字飞出／归位 ----------------
+     借鉴点（来自三个参考站的实测）：
+     · wodniack.dev：整屏色块预先停在画面外（translateX(-100%)），切换时滑过；
+       标题的每个字符各自朝上/下/左/右飞出一屏，缓动统一用 cubic-bezier(.86,0,.07,1)。
+     · jiejoe.com：整屏 .loading 遮罩（黑块 + 色块）在每次路由切换时复用。
+     · cosmicbroth.com：整屏系统式遮罩 + 等宽文案，配一行扫过的波形。
+     这里用单块自上而下扫过的幕布（transform + 1px 发丝边）替代原来的 18 条带动画，
+     并在覆盖期间完成逐字飞出与逐字归位。 */
+  var curtain = document.getElementById("curtain");
+  var curtainLabel = curtain ? curtain.querySelector("span") : null;
+  var boot = document.getElementById("boot");
+  var DIRS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+
+  // 字符线稿：把三角标记按逐字顺序铺进 <pre>，靠 --n 做级联显影
+  var loadArt = document.getElementById("loadArt");
+  if (loadArt) {
+    var ART = [
+      "      /\\",
+      "     /  \\",
+      "    /    \\",
+      "   /      \\",
+      "  /________\\"
+    ];
+    var artHTML = "";
+    var artN = 0;
+    for (var ar = 0; ar < ART.length; ar++) {
+      var artLine = ART[ar];
+      for (var ac = 0; ac < artLine.length; ac++) {
+        var ach = artLine.charAt(ac);
+        artHTML += '<span class="la-ch" style="--n:' + artN + '">' +
+          (ach === " " ? "&nbsp;" : ach) + "</span>";
+        artN++;
+      }
+      artHTML += "\n";
+    }
+    loadArt.innerHTML = artHTML;
+  }
+
+  var PAGES = {
+    home: {
+      kicker: "BACKEND ENGINEER · SYSTEMS & PERFORMANCE",
+      title: "把复杂的系统<br>做简单。",
+      lede: "这里记录我做过的事、踩过的坑，以及正在折腾的东西。",
+      ctaA: "读文章",
+      ctaB: "关于我",
+      nav: 0,
+      sim: 0,
+      label: "LOADING · HOME",
+      note: "背景：三体运动 · 实时牛顿引力积分（混沌解）"
+    },
+    list: {
+      kicker: "ARCHIVE · 42 POSTS · SINCE 2024",
+      title: "一直写，<br>一直改。",
+      lede: "以技术长文为主，夹一些踩坑记录与读书笔记。",
+      ctaA: "返回首页",
+      ctaB: "订阅 RSS",
+      nav: 1,
+      sim: 3,
+      label: "LOADING · ARCHIVE",
+      note: "背景：原子结构 · 3 条轨道"
+    },
+    work: {
+      kicker: "SELECTED WORK · 7 PROJECTS",
+      title: "做过的东西<br>都在这儿。",
+      lede: "每一个都附了背景、架构与踩过的坑。",
+      ctaA: "看项目",
+      ctaB: "关于我",
+      nav: 2,
+      sim: 1,
+      label: "LOADING · WORK",
+      note: "背景：线框球 · 经纬网格实时投影",
+      noCta: true
+    },
+    about: {
+      kicker: "ABOUT · BEIJING · SINCE 2016",
+      title: "写代码，<br>也写代码之外。",
+      lede: "后端出身，关心系统、性能，以及人和工具的关系。",
+      ctaA: "读文章",
+      ctaB: "联系我",
+      nav: 3,
+      sim: 2,
+      label: "LOADING · ABOUT",
+      note: "背景：双摆 · 末端轨迹为混沌解"
+    }
+  };
+
+  var elKicker = document.querySelector(".kicker");
+  var elTitle = document.querySelector(".hero-copy h1");
+  var elLede = document.querySelector(".lede");
+  var elCtas = document.querySelectorAll(".cta .btn");
+  var ctaRow = document.querySelector(".cta");
+  var elNote = document.querySelector(".note");
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll(".nav a"));
+  var pageSwitching = false;
+  var titleHTML = PAGES.home.title;
+
+  // 把标题拆成单字，并给每个字一个飞出方向（四向循环）
+  function splitTitle(el, html) {
+    var lines = html.split(/<br\s*\/?>/i);
+    var n = 0;
+    el.innerHTML = lines.map(function (line) {
+      var buf = "";
+      for (var i = 0; i < line.length; i++) {
+        var ch = line.charAt(i);
+        var d = DIRS[n % 4];
+        buf += '<span class="ch" style="--n:' + (n % 12) +
+          ";--dx:" + d[0] + ";--dy:" + d[1] + '">' +
+          (ch === " " ? "&nbsp;" : ch) + "</span>";
+        n++;
+      }
+      return buf;
+    }).join("<br>");
+  }
+
+  function applyPage(name) {
+    var p = PAGES[name] || PAGES.home;
+    titleHTML = p.title;
+    simIndex = p.sim || 0;
+
+    // 先把页面状态切干净，并解除标题的飞出状态；后面任何一步出错都不会让标题停在不可见
+    isArchive = name === "list";
+    isProjects = name === "work";
+    isAbout = name === "about";
+    rootEl.classList.toggle("is-archive", isArchive);
+    rootEl.classList.toggle("is-projects", isProjects);
+    rootEl.classList.toggle("is-about", isAbout);
+    if (elTitle) elTitle.classList.remove("is-out", "is-in");
+
+    // 各页的局部状态各自兜底，互不影响
+    try { resetProjects(); } catch (e) {}
+    try { resetSteps(); } catch (e) {}
+
+    // 画布可见状态刚变化：同步量尺寸并立刻重绘，避免"先黑一下再突然出现"
+    resize();
+    draw(lastT);
+    readScroll();
+    if (elKicker) elKicker.textContent = p.kicker;
+    if (elLede) elLede.textContent = p.lede;
+    if (elCtas[0]) elCtas[0].textContent = p.ctaA;
+    if (elCtas[1]) elCtas[1].textContent = p.ctaB;
+    if (ctaRow) ctaRow.hidden = !!p.noCta;
+    if (elNote) elNote.textContent = p.note;
+    navLinks.forEach(function (a, i) {
+      a.classList.toggle("on", i === p.nav);
+    });
+    if (elTitle) {
+      splitTitle(elTitle, titleHTML);
+      elTitle.classList.remove("is-out");
+      elTitle.classList.add("is-in");
+      void elTitle.offsetWidth;
+      window.requestAnimationFrame(function () {
+        elTitle.classList.remove("is-in");
+      });
+    }
+    introBase = lastT;
+  }
+
+  // 逐字飞出 → 幕布自上而下扫过 → 换页 → 幕布继续向下离开 → 逐字归位
+  var goTimers = [];
+  var introTimers = [];
+  var transitionSeq = 0;
+
+  function goTo(name) {
+    if (pageSwitching || !curtain) return;
+    pageSwitching = true;
+    // 每次切换领一个序号：过期的回调一律不再执行，杜绝"动效播两次"
+    var mySeq = ++transitionSeq;
+
+    // 进场遮罩的定时器如果还没跑完，先取消，避免与本次切换叠加
+    introTimers.forEach(window.clearTimeout);
+    introTimers.length = 0;
+    goTimers.forEach(window.clearTimeout);
+    goTimers.length = 0;
+
+    rootEl.classList.add("is-transitioning");
+    if (curtainLabel) curtainLabel.textContent = (PAGES[name] || PAGES.home).label;
+
+    if (reduced()) {
+      applyPage(name);
+      rootEl.classList.remove("is-transitioning");
+      pageSwitching = false;
+      return;
+    }
+
+    // 只有当前页看得见标题时才做"逐字飞出"，否则纯属白演
+    if (elTitle && !isArchive && !isAbout) {
+      splitTitle(elTitle, titleHTML);
+      void elTitle.offsetWidth;
+      elTitle.classList.add("is-out");
+    }
+
+    // 无论幕布此前停在什么位置，先无动画地复位到画面上方，保证每次都是同一方向下扫
+    curtain.classList.add("no-anim");
+    curtain.classList.remove("is-pass", "is-cover");
+    void curtain.offsetWidth;
+    curtain.classList.remove("no-anim");
+
+    curtain.classList.add("is-cover");
+
+    // 覆盖 520ms → 紧接揭开 560ms，两段首尾相接、缓动互补，读起来是一次连续下扫
+    goTimers.push(window.setTimeout(function () {
+      if (mySeq !== transitionSeq) return;
+      applyPage(name);
+      // 换页必须回到顶部：否则上一页的滚动位置会让首屏文案停在淡出状态（标题看起来"消失"）
+      if (window.scrollTo) window.scrollTo(0, 0);
+      readScroll();
+    }, 540));
+
+    goTimers.push(window.setTimeout(function () {
+      if (mySeq !== transitionSeq) return;
+      curtain.classList.remove("is-cover");
+      curtain.classList.add("is-pass");
+    }, 570));
+
+    goTimers.push(window.setTimeout(function () {
+      if (mySeq !== transitionSeq) return;
+      // 幕布就停在视口下方（不可见），**不在收尾时复位**：
+      // 复位是瞬时跳变，只要此刻幕布还没完全离开画面，就会被看成"又闪了一下"。
+      // 下次切换开始时 goTo 会用 no-anim 悄悄复位，那一步始终发生在画面外。
+      rootEl.classList.remove("is-transitioning");
+      pageSwitching = false;
+      goTimers.length = 0;
+    }, 1180));
+  }
+
+  var NAV_PAGES = ["home", "list", "work", "about"];
+
+  // 左上角图标 = 回到首页
+  var brandHome = document.getElementById("brandHome");
+  if (brandHome) {
+    brandHome.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (!isArchive && !isProjects && !isAbout) {
+        if (window.scrollTo) window.scrollTo(0, 0);
+        return;
+      }
+      goTo("home");
+    });
+  }
+
+  navLinks.forEach(function (link, index) {
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      goTo(NAV_PAGES[index] || "home");
+    });
+  });
+
+  if (elCtas[0]) {
+    elCtas[0].addEventListener("click", function (e) {
+      e.preventDefault();
+      goTo("list");
+    });
+  }
+  if (elCtas[1]) {
+    elCtas[1].addEventListener("click", function (e) {
+      e.preventDefault();
+      goTo("about");
+    });
+  }
+
+  // 首次加载：字符绘制 → 字符随遮罩渐隐 → 网站出现。这一遍不动幕布（幕布只服务页面切换）
+  if (boot) {
+    if (reduced()) {
+      boot.style.display = "none";
+    } else {
+      if (window.scrollTo) window.scrollTo(0, 0);   // 遮罩还全黑，此时复位滚动不会被看见
+      window.requestAnimationFrame(function () {
+        boot.classList.add("is-draw");
+      });
+      introTimers.push(window.setTimeout(function () {
+        boot.classList.add("is-gone");
+        if (elTitle) {
+          elTitle.classList.add("is-in");
+          void elTitle.offsetWidth;
+          window.requestAnimationFrame(function () {
+            elTitle.classList.remove("is-in");
+          });
+        }
+      }, 980));
+      introTimers.push(window.setTimeout(function () {
+        boot.style.display = "none";
+        introTimers.length = 0;
+      }, 1760));
+    }
+  }
+  if (elTitle) splitTitle(elTitle, titleHTML);
+
+  resize();
+  if (reduced()) draw(6);
+  else startLoop();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "name": "zeroweb",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "zeroweb —— 个人网站（Astro 5 全静态，部署于 GitHub Pages）",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^7.3.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@astrojs/mdx": "^8.0.2",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "@lhci/cli": "^0.15.1",
+    "@size-limit/file": "^14.1.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro-og-canvas": "^0.13.2",
+    "pagefind": "^1.5.2",
+    "sharp": "^0.35.5",
+    "size-limit": "^14.1.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3"
+  }
+}

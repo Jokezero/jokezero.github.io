@@ -1,0 +1,37 @@
+/*
+ * 全局样式入口。
+ *
+ * P0 只放最小基础层（纯黑底 + 近白正文），保证首页能立住。
+ * P1 会把 docs/01-design-spec.md §4.2 的全部设计令牌写进 src/styles/tokens.css，
+ * 并通过 Tailwind v4 的 @theme 映射成工具类；届时本文件只负责汇总导入。
+ */
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    background-color: #000000;
+    /* 站点滚动保持原生行为，不做任何劫持（见 §4.7 可访问性红线）。 */
+  }
+
+  body {
+    background-color: #000000;
+    color: rgba(255, 255, 255, 0.92);
+    font-family:
+      system-ui,
+      "PingFang SC",
+      "Microsoft YaHei",
+      "Noto Sans CJK SC",
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 焦点环必须始终可见（见 §4.7）。 */
+  :focus-visible {
+    outline: 1px solid rgba(255, 255, 255, 0.72);
+    outline-offset: 3px;
+  }
+}

@@ -1,0 +1,61 @@
+---
+/**
+ * 站点基础骨架。
+ *
+ * P0 的职责很窄：把 <head> 的元信息、站点语言、favicon 与全局样式接好，
+ * 保证每个页面共用同一套外壳、且控制台不出现 404 请求。
+ * P1 会在此基础上补：设计令牌、字体 preload、防闪烁主题脚本、顶栏与页脚。
+ */
+import "../styles/global.css";
+import { SITE } from "../config/site";
+
+interface Props {
+  /** 页面标题；站点名会自动追加在后。 */
+  title?: string;
+  /** 页面摘要，缺省时用站点描述。 */
+  description?: string;
+}
+
+const { title, description = SITE.description } = Astro.props;
+
+// 首页标题直接就是站点名，其他页面为 "页面名 · 站点名"。
+const pageTitle = title ? `${title} · ${SITE.name}` : SITE.name;
+
+// canonical / OG 用的绝对地址。
+const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
+---
+
+<!doctype html>
+<html lang={SITE.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- favicon：内联 SVG，避免浏览器自动请求 /favicon.ico 造成 404 -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- 社交分享（P2 会补每篇文章的 OG 图） -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- RSS 自动发现：界面不放订阅入口，但让阅读器/浏览器能自动找到 -->
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={SITE.name}
+      href="/rss.xml"
+    />
+  </head>
+
+  <body>
+    <slot />
+  </body>
+</html>
