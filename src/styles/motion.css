@@ -129,9 +129,12 @@ html[data-theme="light"] canvas[data-scene] {
 #boot pre {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.55;
-  letter-spacing: 0.06em;
+  /* 字样比原来的三角长得多，字号随视口缩放：小屏不溢出，大屏看得清笔画 */
+  font-size: clamp(9px, 2.2vw, 15px);
+  /* ASCII 字形靠"相邻行贴合、同排笔画连成线"才成字：
+     行高要收紧，字距必须为 0（加字距会把连续的下划线拆成虚线） */
+  line-height: 1.15;
+  letter-spacing: 0;
   color: var(--color-fg-0);
   white-space: pre;
 }
@@ -143,7 +146,8 @@ html[data-theme="light"] canvas[data-scene] {
 
 #boot.is-draw .la-ch {
   opacity: 1;
-  transition-delay: calc(var(--n) * 13ms);
+  /* 每字延迟由脚本按字符总数算好后写进 --intro-step（默认 13ms） */
+  transition-delay: calc(var(--n) * var(--intro-step, 13ms));
 }
 
 /* 到达页 / 已播过 / 减少动态效果：遮罩直接不显示（首帧就生效，不会闪） */
