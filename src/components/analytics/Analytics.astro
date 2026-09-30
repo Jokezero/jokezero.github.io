@@ -15,24 +15,15 @@ const enabled =
     (provider === "umami" && Boolean(umami.scriptUrl && umami.websiteId)));
 ---
 
-{
-  enabled && provider === "cloudflare" && (
-    <script
-      is:inline
-      defer
-      src="https://static.cloudflareinsights.com/beacon.min.js"
-      data-cf-beacon={JSON.stringify({ token })}
-    />
-  )
-}
+{enabled && provider === "cloudflare" && (
+  <script
+    is:inline
+    defer
+    src="https://static.cloudflareinsights.com/beacon.min.js"
+    data-cf-beacon={JSON.stringify({ token })}
+  />
+)}
 
-{
-  enabled && provider === "umami" && (
-    <script
-      is:inline
-      defer
-      src={umami.scriptUrl}
-      data-website-id={umami.websiteId}
-    />
-  )
-}
+{enabled && provider === "umami" && (
+  <script is:inline defer src={umami.scriptUrl} data-website-id={umami.websiteId} />
+)}

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "首屏 HTML（首页）",
+    "path": "dist/index.html",
+    "limit": "25 KB",
+    "gzip": true
+  },
+  {
+    "name": "全站 CSS 合计",
+    "path": "dist/_astro/*.css",
+    "limit": "30 KB",
+    "gzip": true
+  },
+  {
+    "name": "全站 JS 合计（比单页实际加载更严格）",
+    "path": "dist/_astro/*.js",
+    "limit": "40 KB",
+    "gzip": true
+  },
+  {
+    "name": "自托管字体",
+    "path": "dist/fonts/*.woff2",
+    "limit": "120 KB",
+    "gzip": true
+  }
+]

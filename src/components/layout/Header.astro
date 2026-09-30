@@ -43,22 +43,18 @@ function isCurrent(href: string) {
 
     <div class="ml-auto flex items-center gap-4">
       <nav class="hidden items-center gap-6 md:flex" aria-label="主导航">
-        {
-          SITE.nav.map((item) => (
-            <a
-              href={item.href}
-              class:list={[
-                "tap font-mono text-micro tracking-[0.14em] uppercase no-underline transition-colors duration-[var(--dur-base)]",
-                isCurrent(item.href)
-                  ? "text-fg-0"
-                  : "text-fg-3 hover:text-fg-1",
-              ]}
-              aria-current={isCurrent(item.href) ? "page" : undefined}
-            >
-              {item.label}
-            </a>
-          ))
-        }
+        {SITE.nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              "tap font-mono text-micro tracking-[0.14em] uppercase no-underline transition-colors duration-[var(--dur-base)]",
+              isCurrent(item.href) ? "text-fg-0" : "text-fg-3 hover:text-fg-1",
+            ]}
+            aria-current={isCurrent(item.href) ? "page" : undefined}
+          >
+            {item.label}
+          </a>
+        ))}
       </nav>
 
       <ThemeToggle />
@@ -78,17 +74,15 @@ function isCurrent(href: string) {
   <!-- 窄屏菜单面板：默认隐藏，点 MENU 展开 -->
   <div id="mobile-nav" hidden class="border-t border-line-0 md:hidden">
     <nav class="mx-auto flex max-w-[1200px] flex-col px-6 py-2" aria-label="移动端导航">
-      {
-        SITE.nav.map((item) => (
-          <a
-            href={item.href}
-            class="tap border-b border-line-0 py-3 font-mono text-micro tracking-[0.14em] uppercase text-fg-2 no-underline last:border-b-0"
-            aria-current={isCurrent(item.href) ? "page" : undefined}
-          >
-            {item.label}
-          </a>
-        ))
-      }
+      {SITE.nav.map((item) => (
+        <a
+          href={item.href}
+          class="tap border-b border-line-0 py-3 font-mono text-micro tracking-[0.14em] uppercase text-fg-2 no-underline last:border-b-0"
+          aria-current={isCurrent(item.href) ? "page" : undefined}
+        >
+          {item.label}
+        </a>
+      ))}
     </nav>
   </div>
 </header>

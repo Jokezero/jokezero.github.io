@@ -46,31 +46,31 @@ const links = [
           <div class="flex gap-3">
             <dt class="w-14 shrink-0">STACK</dt>
             <dd class="m-0 flex flex-wrap gap-x-3 gap-y-1">
-              {meta.tags.map((tag) => <span>{tag}</span>)}
+              {meta.tags.map((tag) => (
+                <span>{tag}</span>
+              ))}
             </dd>
           </div>
         </dl>
 
-        {
-          links.length > 0 && (
-            <>
-              <div class="divider-fade my-6" />
-              <ul class="m-0 flex list-none flex-col gap-3 p-0">
-                {links.map((link) => (
-                  <li>
-                    <a
-                      href={link.url}
-                      class="font-mono text-micro tracking-[0.1em] text-fg-3 uppercase no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
-                      {...externalAttrs(link.url)}
-                    >
-                      {link.label} ↗
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )
-        }
+        {links.length > 0 && (
+          <>
+            <div class="divider-fade my-6" />
+            <ul class="m-0 flex list-none flex-col gap-3 p-0">
+              {links.map((link) => (
+                <li>
+                  <a
+                    href={link.url}
+                    class="font-mono text-micro tracking-[0.1em] text-fg-3 uppercase no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
+                    {...externalAttrs(link.url)}
+                  >
+                    {link.label} ↗
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
 
         <div class="divider-fade my-6"></div>
 
@@ -84,9 +84,7 @@ const links = [
 
       <!-- 右栏：正文（封面与图集都在 Markdown 里，图片统一走灯箱） -->
       <article class="min-w-0">
-        <h1
-          class="text-[clamp(1.5rem,3.4vw,2.25rem)] leading-[1.25] font-semibold tracking-[-0.02em] text-fg-0"
-        >
+        <h1 class="text-[clamp(1.5rem,3.4vw,2.25rem)] leading-[1.25] font-semibold tracking-[-0.02em] text-fg-0">
           {meta.title}
         </h1>
 

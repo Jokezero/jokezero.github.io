@@ -31,14 +31,12 @@ const classes = [base, variants[variant], className].filter(Boolean).join(" ");
 const attrs = href ? externalAttrs(href) : {};
 ---
 
-{
-  href ? (
-    <a href={href} class={classes} {...attrs}>
-      <slot />
-    </a>
-  ) : (
-    <button type="button" class={classes}>
-      <slot />
-    </button>
-  )
-}
+{href ? (
+  <a href={href} class={classes} {...attrs}>
+    <slot />
+  </a>
+) : (
+  <button type="button" class={classes}>
+    <slot />
+  </button>
+)}

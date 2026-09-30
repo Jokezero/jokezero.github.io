@@ -19,7 +19,9 @@ export function initIntro(): void {
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const skip =
-    reduced || html.classList.contains("is-arriving") || html.classList.contains("no-intro");
+    reduced ||
+    html.classList.contains("is-arriving") ||
+    html.classList.contains("no-intro");
 
   if (skip) {
     boot.style.display = "none";

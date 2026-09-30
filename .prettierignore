@@ -1,0 +1,13 @@
+# 构建产物与依赖
+dist/
+node_modules/
+.astro/
+pnpm-lock.yaml
+
+# 设计文档与内容：都是人写的散文，重排只会让 diff 变得没法看
+docs/
+src/content/
+
+# 二进制与静态资源
+public/fonts/
+public/favicon.svg

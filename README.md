@@ -28,17 +28,18 @@ pnpm dev          # 本地开发服务器 http://localhost:4321
 pnpm build        # 产出静态站点到 dist/
 pnpm preview      # 预览 dist/ 的构建结果
 pnpm check        # TypeScript / Astro 类型检查
+pnpm verify       # 一次跑完全部质量门禁（类型 + 格式 + Lint + 构建 + 体积 + 死链）
 ```
 
 ## 目录说明
 
-| 路径 | 作用 |
-| --- | --- |
-| `docs/` | 设计与施工文档（唯一事实来源），`docs/adr/` 是技术决策记录 |
-| `src/config/site.ts` | 站点级单一配置源：站点名、地址、导航、功能开关 |
-| `src/content/` | 全部内容（posts / projects / pages），新增内容只加文件 |
-| `src/layouts/` | 页面骨架 |
-| `src/pages/` | 文件即路由 |
-| `src/styles/` | 全局样式与设计令牌 |
-| `public/` | 原样拷贝到站点根目录的静态资源 |
-| `.github/workflows/` | 部署与质量门禁 |
+| 路径                 | 作用                                                       |
+| -------------------- | ---------------------------------------------------------- |
+| `docs/`              | 设计与施工文档（唯一事实来源），`docs/adr/` 是技术决策记录 |
+| `src/config/site.ts` | 站点级单一配置源：站点名、地址、导航、功能开关             |
+| `src/content/`       | 全部内容（posts / projects / pages），新增内容只加文件     |
+| `src/layouts/`       | 页面骨架                                                   |
+| `src/pages/`         | 文件即路由                                                 |
+| `src/styles/`        | 全局样式与设计令牌                                         |
+| `public/`            | 原样拷贝到站点根目录的静态资源                             |
+| `.github/workflows/` | 部署与质量门禁                                             |

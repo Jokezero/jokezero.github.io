@@ -24,31 +24,29 @@ const ready =
   Boolean(config.repo && config.repoId && config.categoryId);
 ---
 
-{
-  ready && (
-    <section class="mt-20" aria-labelledby="comments-title">
-      <div class="divider-fade" />
-      <h2
-        id="comments-title"
-        class="mt-8 font-mono text-micro tracking-[0.16em] text-fg-3 uppercase"
-      >
-        Comments
-      </h2>
-      <div
-        id="giscus-container"
-        class="mt-6"
-        data-repo={config.repo}
-        data-repo-id={config.repoId}
-        data-category={config.category}
-        data-category-id={config.categoryId}
-        data-mapping={config.mapping}
-        data-reactions={config.reactionsEnabled}
-        data-input-position={config.inputPosition}
-        data-lang="zh-CN"
-      />
-    </section>
-  )
-}
+{ready && (
+  <section class="mt-20" aria-labelledby="comments-title">
+    <div class="divider-fade" />
+    <h2
+      id="comments-title"
+      class="mt-8 font-mono text-micro tracking-[0.16em] text-fg-3 uppercase"
+    >
+      Comments
+    </h2>
+    <div
+      id="giscus-container"
+      class="mt-6"
+      data-repo={config.repo}
+      data-repo-id={config.repoId}
+      data-category={config.category}
+      data-category-id={config.categoryId}
+      data-mapping={config.mapping}
+      data-reactions={config.reactionsEnabled}
+      data-input-position={config.inputPosition}
+      data-lang="zh-CN"
+    />
+  </section>
+)}
 
 <script>
   const container = document.getElementById("giscus-container");

@@ -11,8 +11,6 @@ export function formatDate(date: Date): string {
  */
 export function readingMinutes(body: string): number {
   const cjk = (body.match(/[\u4e00-\u9fff]/g) ?? []).length;
-  const latin = (
-    body.replace(/[\u4e00-\u9fff]/g, " ").match(/[A-Za-z0-9]+/g) ?? []
-  ).length;
+  const latin = (body.replace(/[\u4e00-\u9fff]/g, " ").match(/[A-Za-z0-9]+/g) ?? []).length;
   return Math.max(1, Math.round(cjk / 350 + latin / 220));
 }

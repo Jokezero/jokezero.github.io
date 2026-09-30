@@ -31,9 +31,7 @@ export function createPendulum(): Scene {
         G * Math.sin(t1 - 2 * t2) -
         2 * Math.sin(d) * (o2 * o2 + o1 * o1 * Math.cos(d))) /
         den,
-      (2 *
-        Math.sin(d) *
-        (2 * o1 * o1 + 2 * G * Math.cos(t1) + o2 * o2 * Math.cos(d))) /
+      (2 * Math.sin(d) * (2 * o1 * o1 + 2 * G * Math.cos(t1) + o2 * o2 * Math.cos(d))) /
         den,
     ];
   }

@@ -191,11 +191,7 @@ export function createThreeBody(): Scene {
     const { ctx } = api;
     const cores: [number, number, number][] = [];
     for (let i = 0; i < 3; i += 1) {
-      cores.push([
-        cx + x[i] * scale,
-        cy + y[i] * scale,
-        1.4 + 1.1 * (mass[i] / 5),
-      ]);
+      cores.push([cx + x[i] * scale, cy + y[i] * scale, 1.4 + 1.1 * (mass[i] / 5)]);
     }
 
     ctx.save();

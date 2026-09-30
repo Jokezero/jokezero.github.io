@@ -43,24 +43,20 @@ const sections = [
     class="sticky top-14 z-40 border-b border-line-0 bg-bg-0 transition-opacity duration-[var(--dur-base)]"
     aria-label="关于页分节"
   >
-    <div
-      class="mx-auto flex max-w-[1200px] flex-wrap items-center gap-x-7 gap-y-2 px-6 py-3"
-    >
-      {
-        sections.map((section) => (
-          <a
-            href={`#${section.id}`}
-            class="about-nav-link flex items-center gap-2 font-mono text-micro tracking-[0.1em] text-fg-3 uppercase no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
-            data-section={section.id}
-          >
-            <span
-              class="block h-px w-2 bg-current transition-[width] duration-[var(--dur-base)]"
-              aria-hidden="true"
-            />
-            {section.index} {section.name}
-          </a>
-        ))
-      }
+    <div class="mx-auto flex max-w-[1200px] flex-wrap items-center gap-x-7 gap-y-2 px-6 py-3">
+      {sections.map((section) => (
+        <a
+          href={`#${section.id}`}
+          class="about-nav-link flex items-center gap-2 font-mono text-micro tracking-[0.1em] text-fg-3 uppercase no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
+          data-section={section.id}
+        >
+          <span
+            class="block h-px w-2 bg-current transition-[width] duration-[var(--dur-base)]"
+            aria-hidden="true"
+          />
+          {section.index} {section.name}
+        </a>
+      ))}
     </div>
   </nav>
 
@@ -85,13 +81,13 @@ const sections = [
       >
         {data.title}
       </h1>
-      <p class="mt-8 max-w-[52ch] text-step-0 leading-[1.9] text-fg-2">
-        {data.summary}
-      </p>
+      <p class="mt-8 max-w-[52ch] text-step-0 leading-[1.9] text-fg-2">{data.summary}</p>
 
       <div class="mt-16 flex items-center gap-3" aria-hidden="true">
         <span class="block h-10 w-px bg-line-1"></span>
-        <span class="font-mono text-micro tracking-[0.2em] text-fg-3 uppercase">Scroll</span>
+        <span class="font-mono text-micro tracking-[0.2em] text-fg-3 uppercase">
+          Scroll
+        </span>
       </div>
     </Container>
   </section>
@@ -99,17 +95,13 @@ const sections = [
   <!-- 01 简介 -->
   <section id="profile" class="asection">
     <Container width="layout">
-      <p class="font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">
-        01 / Profile
-      </p>
+      <p class="font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">01 / Profile</p>
       <h2 class="mt-5 text-step-3 font-semibold tracking-[-0.02em] text-fg-0">简介</h2>
 
       <div class="mt-10 max-w-[62ch] space-y-5">
-        {
-          data.intro.map((paragraph) => (
-            <p class="text-step-0 leading-[2] text-fg-1">{paragraph}</p>
-          ))
-        }
+        {data.intro.map((paragraph) => (
+          <p class="text-step-0 leading-[2] text-fg-1">{paragraph}</p>
+        ))}
       </div>
     </Container>
   </section>
@@ -123,16 +115,19 @@ const sections = [
       <h2 class="mt-5 text-step-3 font-semibold tracking-[-0.02em] text-fg-0">经历</h2>
 
       <ul class="mt-10 max-w-[62ch] list-none p-0">
-        {
-          data.experience.map((item, index) => (
-            <li class:list={["flex flex-col gap-2 py-4 sm:flex-row sm:gap-8", index > 0 && "border-t border-line-0"]}>
-              <span class="w-[10ch] shrink-0 font-mono text-micro tracking-[0.1em] text-fg-3 tabular-nums">
-                {item.year}
-              </span>
-              <span class="text-step-0 leading-[1.9] text-fg-1">{item.text}</span>
-            </li>
-          ))
-        }
+        {data.experience.map((item, index) => (
+          <li
+            class:list={[
+              "flex flex-col gap-2 py-4 sm:flex-row sm:gap-8",
+              index > 0 && "border-t border-line-0",
+            ]}
+          >
+            <span class="w-[10ch] shrink-0 font-mono text-micro tracking-[0.1em] text-fg-3 tabular-nums">
+              {item.year}
+            </span>
+            <span class="text-step-0 leading-[1.9] text-fg-1">{item.text}</span>
+          </li>
+        ))}
       </ul>
     </Container>
   </section>
@@ -140,28 +135,24 @@ const sections = [
   <!-- 03 技能 -->
   <section id="stack" class="asection">
     <Container width="layout">
-      <p class="font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">
-        03 / Stack
-      </p>
+      <p class="font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">03 / Stack</p>
       <h2 class="mt-5 text-step-3 font-semibold tracking-[-0.02em] text-fg-0">技能</h2>
 
       <dl class="mt-10 grid max-w-[62ch] gap-8 sm:grid-cols-2">
-        {
-          data.skills.map((group) => (
-            <div>
-              <dt class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase">
-                {group.group}
-              </dt>
-              <dd class="mt-4 m-0 flex flex-wrap gap-x-5 gap-y-2">
-                {group.items.map((item) => (
-                  <span class="font-mono text-[12.5px] tracking-[0.06em] text-fg-1">
-                    {item}
-                  </span>
-                ))}
-              </dd>
-            </div>
-          ))
-        }
+        {data.skills.map((group) => (
+          <div>
+            <dt class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase">
+              {group.group}
+            </dt>
+            <dd class="mt-4 m-0 flex flex-wrap gap-x-5 gap-y-2">
+              {group.items.map((item) => (
+                <span class="font-mono text-[12.5px] tracking-[0.06em] text-fg-1">
+                  {item}
+                </span>
+              ))}
+            </dd>
+          </div>
+        ))}
       </dl>
     </Container>
   </section>
@@ -169,32 +160,33 @@ const sections = [
   <!-- 04 联系 -->
   <section id="contact" class="asection">
     <Container width="layout">
-      <p class="font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">
-        04 / Contact
-      </p>
+      <p class="font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">04 / Contact</p>
       <h2 class="mt-5 text-step-3 font-semibold tracking-[-0.02em] text-fg-0">联系</h2>
 
       <ul class="mt-10 max-w-[62ch] list-none p-0">
-        {
-          data.contacts.map((contact, index) => (
-            <li class:list={["flex flex-col gap-2 py-4 sm:flex-row sm:gap-8", index > 0 && "border-t border-line-0"]}>
-              <span class="w-[10ch] shrink-0 font-mono text-micro tracking-[0.1em] text-fg-3 uppercase">
-                {contact.label}
-              </span>
-              {contact.url ? (
-                <a
-                  href={contact.url}
-                  class="text-step-0 text-fg-1 no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
-                  {...externalAttrs(contact.url)}
-                >
-                  {contact.value}
-                </a>
-              ) : (
-                <span class="text-step-0 text-fg-1">{contact.value}</span>
-              )}
-            </li>
-          ))
-        }
+        {data.contacts.map((contact, index) => (
+          <li
+            class:list={[
+              "flex flex-col gap-2 py-4 sm:flex-row sm:gap-8",
+              index > 0 && "border-t border-line-0",
+            ]}
+          >
+            <span class="w-[10ch] shrink-0 font-mono text-micro tracking-[0.1em] text-fg-3 uppercase">
+              {contact.label}
+            </span>
+            {contact.url ? (
+              <a
+                href={contact.url}
+                class="text-step-0 text-fg-1 no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
+                {...externalAttrs(contact.url)}
+              >
+                {contact.value}
+              </a>
+            ) : (
+              <span class="text-step-0 text-fg-1">{contact.value}</span>
+            )}
+          </li>
+        ))}
       </ul>
     </Container>
   </section>

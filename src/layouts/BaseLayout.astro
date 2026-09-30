@@ -67,7 +67,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
         }
       })();
     </script>
-
     <!--
       动效门闸（防闪烁 + 防误播）：必须在样式表之前同步执行。
       · 从站内转场进来 → 给 <html> 挂 is-arriving，幕布首帧就盖满画面
@@ -94,11 +93,14 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
         }
       })();
     </script>
-
     <!-- 关键 CSS 内联：样式表到达之前，底色已经是正确的 -->
     <style is:inline>
-      html { background: #000; }
-      html[data-theme="light"] { background: #fff; }
+      html {
+        background: #000;
+      }
+      html[data-theme="light"] {
+        background: #fff;
+      }
     </style>
 
     <!-- 只预加载首屏必需的 400 字重；600 用到时才下载 -->
@@ -118,12 +120,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
     <meta name="twitter:card" content="summary_large_image" />
 
     <!-- RSS 自动发现：界面不放订阅入口，但让阅读器/浏览器能自动找到 -->
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title={SITE.name}
-      href="/rss.xml"
-    />
+    <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
   </head>
 
   <body class="flex min-h-dvh flex-col bg-bg-0 text-fg-1">

@@ -8,17 +8,15 @@ import { SITE } from "../../config/site";
 const enabled = SITE.features.pageTransition;
 ---
 
-{
-  enabled && (
-    <>
-      <div id="curtain" aria-hidden="true">
-        <span>LOADING</span>
-        <i />
-      </div>
-      <script>
-        import { initPageTransition } from "../../scripts/page-transition";
-        initPageTransition();
-      </script>
-    </>
-  )
-}
+{enabled && (
+  <>
+    <div id="curtain" aria-hidden="true">
+      <span>LOADING</span>
+      <i />
+    </div>
+    <script>
+      import { initPageTransition } from "../../scripts/page-transition";
+      initPageTransition();
+    </script>
+  </>
+)}

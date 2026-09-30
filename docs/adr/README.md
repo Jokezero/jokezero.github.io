@@ -21,5 +21,6 @@
 | [0013](./0013-per-page-canvas.md) | 四套背景模拟的画布形态（每页一个主体） | 已采纳 |
 | [0014](./0014-transition-on-static-site.md) | 多页静态站上的页面切换动效 | 已采纳 |
 | [0015](./0015-motion-degradation-and-budget.md) | 动效的降级策略与首屏预算 | 已采纳 |
+| [0016](./0016-quality-gates-and-baseline.md) | 质量门禁的实现方式与性能基线 | 已采纳 |
 
 新增记录时直接续号，**不要修改历史记录**——改主意就新写一条并标注"取代 00XX"。

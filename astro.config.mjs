@@ -25,6 +25,15 @@ export default defineConfig({
   // Tailwind v4 通过 Vite 插件接入（不再需要 tailwind.config.js）。
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      // 0 = 所有脚本/样式都输出成带 hash 的独立文件，不往 HTML 里塞。
+      // 理由（见 docs/adr/0016）：
+      //   1. 共享的交互脚本只下载一次，站内跳转直接命中缓存；
+      //   2. 体积预算（§6.1）能对 JS/CSS 逐项度量，而不是混在 HTML 里；
+      //   3. 顺带绕开"内联脚本 + 动态 import"会触发 __VITE_PRELOAD__ 报错的坑。
+      // 首屏关键 CSS 仍然由 BaseLayout 里的 <style is:inline> 提供，不受影响。
+      assetsInlineLimit: 0,
+    },
   },
 
   // 代码高亮：Shiki + VS Code 默认主题（暗 dark-plus / 亮 light-plus，见 06-content-model.md）。

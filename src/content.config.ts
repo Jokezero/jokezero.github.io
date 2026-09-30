@@ -50,9 +50,7 @@ const projects = defineCollection({
       /** 视频链接（B 站等）：卡片上只标 VIDEO，不嵌播放器，点出去看。 */
       video: z.url().optional(),
       /** 其他任意链接，例如在线演示、文档。 */
-      links: z
-        .array(z.object({ label: z.string(), url: z.url() }))
-        .default([]),
+      links: z.array(z.object({ label: z.string(), url: z.url() })).default([]),
       featured: z.boolean().default(false),
       draft: z.boolean().default(false),
     }),
@@ -73,9 +71,7 @@ const pages = defineCollection({
     /** 01 简介：每段一条 */
     intro: z.array(z.string()).default([]),
     /** 02 经历：年份 + 事由 */
-    experience: z
-      .array(z.object({ year: z.string(), text: z.string() }))
-      .default([]),
+    experience: z.array(z.object({ year: z.string(), text: z.string() })).default([]),
     /** 03 技能：分组名 + 该项清单 */
     skills: z
       .array(z.object({ group: z.string(), items: z.array(z.string()) }))
