@@ -1,0 +1,22 @@
+---
+/**
+ * 首次进入的字符绘制遮罩。静态 DOM，从首帧就盖住画面，所以不会闪。
+ */
+import { SITE } from "../../config/site";
+
+const enabled = SITE.features.introArt;
+---
+
+{
+  enabled && (
+    <>
+      <div id="boot" aria-hidden="true">
+        <pre id="boot-art" />
+      </div>
+      <script>
+        import { initIntro } from "../../scripts/intro";
+        initIntro();
+      </script>
+    </>
+  )
+}

@@ -12,7 +12,6 @@ import type { CollectionEntry } from "astro:content";
 import BaseLayout from "./BaseLayout.astro";
 import Container from "../components/ui/Container.astro";
 import Prose from "../components/ui/Prose.astro";
-import ReadingProgress from "../components/effects/ReadingProgress.astro";
 import CodeCopy from "../components/effects/CodeCopy.astro";
 import Lightbox from "../components/effects/Lightbox.astro";
 import Giscus from "../components/comments/Giscus.astro";
@@ -35,8 +34,6 @@ const tags = meta.tags;
 ---
 
 <BaseLayout title={meta.title} description={meta.summary}>
-  <ReadingProgress />
-
   <Container width="content" class="py-16">
     <!-- 正文 68ch 居中；>=1100px 时右侧留出 200px 放 TOC -->
     <div class="mx-auto grid max-w-[1120px] gap-12 min-[1100px]:grid-cols-[minmax(0,68ch)_200px]">

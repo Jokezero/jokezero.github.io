@@ -12,6 +12,9 @@ import { SITE } from "../config/site";
 import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
 import Analytics from "../components/analytics/Analytics.astro";
+import PageTransition from "../components/effects/PageTransition.astro";
+import Intro from "../components/effects/Intro.astro";
+import ScrollEffects from "../components/effects/ScrollEffects.astro";
 
 interface Props {
   /** 页面标题；站点名会自动追加在后。 */
@@ -65,6 +68,33 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
       })();
     </script>
 
+    <!--
+      动效门闸（防闪烁 + 防误播）：必须在样式表之前同步执行。
+      · 从站内转场进来 → 给 <html> 挂 is-arriving，幕布首帧就盖满画面
+      · 直接打开 / 刷新 → 首次进入才播字符绘制（同一会话只播一次）
+      · 开启"减少动态效果" → 两者都不播
+    -->
+    <script is:inline>
+      (() => {
+        const html = document.documentElement;
+        try {
+          const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+          const arriving = sessionStorage.getItem("zw-arriving");
+          if (arriving) sessionStorage.removeItem("zw-arriving");
+          if (reduced) {
+            html.classList.add("no-intro");
+          } else if (arriving) {
+            html.classList.add("is-arriving");
+            if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+          } else if (sessionStorage.getItem("zw-intro")) {
+            html.classList.add("no-intro");
+          }
+        } catch {
+          html.classList.add("no-intro");
+        }
+      })();
+    </script>
+
     <!-- 关键 CSS 内联：样式表到达之前，底色已经是正确的 -->
     <style is:inline>
       html { background: #000; }
@@ -107,7 +137,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
 
     <Header />
 
-    <main id="main" class="flex-1">
+    <!-- 内容层压 z-index：整页背景是 fixed + z-0，静态内容必须抬到它上面（§10 第 2 条坑） -->
+    <main id="main" class="relative z-[2] flex-1">
       <slot />
     </main>
 
@@ -115,5 +146,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
 
     <!-- 统计脚本：开关关闭或没填 token 时什么都不渲染 -->
     <Analytics />
+
+    <!-- 动效层：滚动特效常驻；幕布与进场遮罩由 features 开关控制 -->
+    <ScrollEffects />
+    <PageTransition />
+    <Intro />
   </body>
 </html>

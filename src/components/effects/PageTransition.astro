@@ -1,0 +1,24 @@
+---
+/**
+ * 页面切换幕布（E9）。静态 DOM 常驻，JS 只切类名。
+ * 关闭 features.pageTransition 时整个组件不渲染，页面上不会留下任何东西。
+ */
+import { SITE } from "../../config/site";
+
+const enabled = SITE.features.pageTransition;
+---
+
+{
+  enabled && (
+    <>
+      <div id="curtain" aria-hidden="true">
+        <span>LOADING</span>
+        <i />
+      </div>
+      <script>
+        import { initPageTransition } from "../../scripts/page-transition";
+        initPageTransition();
+      </script>
+    </>
+  )
+}

@@ -1,0 +1,46 @@
+---
+/**
+ * 背景模拟画布。
+ *
+ * 规范：docs/01-design-spec.md §4.4（可降级）/ §4.5（四套模拟）
+ *   · 一页只放一个主体，低亮度，不抢正文
+ *   · 画布对辅助技术隐藏，另给一段 sr-only 的等价描述
+ *   · 无 JS 时这里就是一块透明区域，正文照常阅读
+ *
+ * mode:
+ *   hero = 放在首屏内部（随首屏滚动、随滚动压暗、做 5% 视差）
+ *   page = 铺满视口并固定在内容之下（常亮）
+ */
+import { SITE } from "../../config/site";
+
+interface Props {
+  scene: "three-body" | "atom" | "sphere" | "pendulum";
+  mode?: "hero" | "page";
+  description: string;
+}
+
+const { scene, mode = "page", description } = Astro.props;
+const enabled = SITE.features.heroEffect === "canvas";
+---
+
+{
+  enabled && (
+    <>
+      <div
+        class:list={[
+          "pointer-events-none z-0",
+          mode === "page" ? "fixed inset-0" : "absolute inset-0 overflow-hidden",
+        ]}
+        aria-hidden="true"
+      >
+        <canvas data-scene={scene} data-mode={mode} class="block h-full w-full" />
+      </div>
+      <p class="sr-only">{description}</p>
+    </>
+  )
+}
+
+<script>
+  import { mountBackgrounds } from "../../scripts/background";
+  mountBackgrounds();
+</script>

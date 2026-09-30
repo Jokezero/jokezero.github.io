@@ -1,43 +1,94 @@
 ---
 /**
- * 首页。
+ * 首页：Hero + 实时三体背景。
  *
- * 现在这里只有 Hero 的**文字部分**，用的是 P1 的设计令牌：
- *   kicker（等宽微标签）→ 大标题 → 说明 → 阶段标注
- * 招牌视觉（三体运动背景、滚动特效、页面切换）属于 P3，
- * 届时会在这段结构外面套上画布与动效，文字内容本身不用重写。
+ * 结构（§4.5.1 第 3 条）：
+ *   等宽全大写 kicker → 两行大标题 → 一段说明 → 两个胶囊按钮 →
+ *   一行等宽背景说明 → 一行等宽状态数据；底部中央是 SCROLL 提示。
  *
- * 想改这里的文字：直接改下面的 HTML，或改 src/config/site.ts 里的站点名与描述。
+ * 文字全部来自 src/config/site.ts 的 hero 字段（改一处即可），
+ * 状态行是**构建期算出来的真实数据**（最近更新 / 文章数 / 项目数 / 运行天数），
+ * 不是写死的装饰文案。
  */
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Container from "../components/ui/Container.astro";
+import Button from "../components/ui/Button.astro";
+import Background from "../components/effects/Background.astro";
 import { SITE } from "../config/site";
+import { getPosts, getProjects } from "../lib/posts";
+import { formatDate } from "../lib/format";
+
+const posts = await getPosts();
+const projects = await getProjects();
+
+const latest = posts[0]?.data.pubDate;
+const days = Math.max(
+  0,
+  Math.floor((Date.now() - new Date(SITE.startDate).valueOf()) / 86_400_000),
+);
+
+const status = [
+  latest ? `最近更新 ${formatDate(latest).replace(/-/g, ".")}` : "还没有更新",
+  `文章 ${posts.length}`,
+  `项目 ${projects.length}`,
+  `运行 T+${days}d`,
+].join(" · ");
 ---
 
 <BaseLayout>
-  <Container
-    width="layout"
-    class="flex min-h-[70dvh] flex-col justify-center py-24"
-  >
-    <!-- 等宽全大写微标签：全站统一的"工程感"细节 -->
-    <p class="font-mono text-micro tracking-[0.2em] text-fg-3 uppercase">
-      Personal Site · Static Build
-    </p>
+  <section data-hero class="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden">
+    <Background
+      scene="three-body"
+      mode="hero"
+      description="背景：实时三体引力模拟（混沌解），纯装饰元素。"
+    />
 
-    <!-- 站点大标题：内容来自配置，改站点名只需改一处 -->
-    <h1
-      class="mt-6 text-step-5 leading-[1.05] font-semibold tracking-[-0.02em] text-fg-0"
+    <Container width="layout" class="relative z-[2] py-[16vh]">
+      <div class="hero-copy max-w-[62ch]">
+        <p class="font-mono text-micro tracking-[0.2em] text-fg-3 uppercase">
+          {SITE.hero.kicker}
+        </p>
+
+        <!-- 标题会被拆成单字做切换动效；<br> 由配置里的换行符决定 -->
+        <h1
+          data-title-split
+          class="mt-5 text-[clamp(30px,3.6vw,50px)] leading-[1.16] font-semibold tracking-[-0.03em] text-balance text-fg-0"
+          set:html={SITE.hero.title}
+        />
+
+        <p class="mt-5 max-w-[26rem] text-[14.5px] leading-[1.78] text-fg-2">
+          {SITE.hero.lede}
+        </p>
+
+        <div class="mt-[30px] flex flex-wrap gap-[10px]">
+          {
+            SITE.hero.ctas.map((cta, index) => (
+              <Button href={cta.href} variant={index === 0 ? "solid" : "ghost"}>
+                {cta.label}
+              </Button>
+            ))
+          }
+        </div>
+
+        <!-- 背景说明与状态数据：上压一条发丝线，与原型一致 -->
+        <p
+          class="mt-10 border-t border-line-2 pt-[18px] font-mono text-micro tracking-[0.14em] text-fg-3"
+        >
+          {SITE.hero.note}
+        </p>
+        <p class="mt-3.5 font-mono text-micro tracking-[0.1em] text-fg-3 tabular-nums">
+          {status}
+        </p>
+      </div>
+    </Container>
+
+    <!-- SCROLL 提示：滚动后淡出（--sp 由 ScrollEffects 写入） -->
+    <div
+      class="hero-hint pointer-events-none absolute inset-x-0 bottom-8 flex flex-col items-center gap-3"
+      aria-hidden="true"
     >
-      {SITE.name}
-    </h1>
-
-    <p class="mt-8 max-w-[52ch] text-step-0 leading-[1.9] text-fg-2">
-      {SITE.description}
-    </p>
-
-    <!-- 阶段标注：P3 落地招牌视觉后删掉这一行 -->
-    <p class="mt-14 font-mono text-micro tracking-[0.12em] text-fg-3">
-      P1 · 设计系统与骨架 · 招牌视觉在 P3 落地
-    </p>
-  </Container>
+      <span class="block h-8 w-px bg-line-1"></span>
+      <span class="font-mono text-micro tracking-[0.24em] text-fg-3 uppercase">Scroll</span>
+    </div>
+  </section>
 </BaseLayout>
