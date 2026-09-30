@@ -19,12 +19,8 @@ export async function getStaticPaths() {
       params: { slug: post.id },
       props: {
         post,
-        next: newer
-          ? { title: newer.data.title, href: `/blog/${newer.id}/` }
-          : undefined,
-        prev: older
-          ? { title: older.data.title, href: `/blog/${older.id}/` }
-          : undefined,
+        next: newer ? { title: newer.data.title, href: `/blog/${newer.id}/` } : undefined,
+        prev: older ? { title: older.data.title, href: `/blog/${older.id}/` } : undefined,
       },
     };
   });
@@ -34,12 +30,6 @@ const { post, prev, next } = Astro.props;
 const { Content, headings } = await render(post);
 ---
 
-<PostLayout
-  post={post}
-  headings={headings}
-  body={post.body ?? ""}
-  prev={prev}
-  next={next}
->
+<PostLayout post={post} headings={headings} body={post.body ?? ""} prev={prev} next={next}>
   <Content />
 </PostLayout>

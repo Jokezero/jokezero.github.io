@@ -1,0 +1,105 @@
+/*
+ * 打印样式（P4 验收项：文章页打印可用）。
+ *
+ * 打印的目标很朴素：白纸黑字、去掉所有装饰与交互、段落不跨页断开、
+ * 站外链接把地址印出来。画布、幕布、进场遮罩、顶栏页脚、评论区、
+ * 代码复制按钮这些在纸上没有意义的东西一律不输出。
+ */
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* 装饰层与交互层不上纸 */
+  #curtain,
+  #boot,
+  #scroll-progress,
+  canvas[data-scene],
+  header,
+  footer,
+  #about-nav,
+  #about-count,
+  .code-bar,
+  #giscus-container,
+  .lightbox,
+  .hero-hint,
+  .skip-link {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  a {
+    color: #000000 !important;
+    text-decoration: underline;
+  }
+
+  /* 正文：印刷友好的字号与断页规则 */
+  .prose {
+    max-width: none;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #000000;
+  }
+
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4 {
+    color: #000000;
+    break-after: avoid-page;
+  }
+
+  .prose p,
+  .prose li {
+    orphans: 3;
+    widows: 3;
+  }
+
+  .prose img,
+  .prose table,
+  .prose pre,
+  .prose blockquote {
+    break-inside: avoid;
+  }
+
+  .prose pre,
+  .prose pre.astro-code,
+  .prose pre.astro-code span {
+    background: #f4f4f4 !important;
+    color: #111111 !important;
+    border-color: #bbbbbb;
+  }
+
+  .prose :not(pre) > code {
+    border-color: #cccccc;
+    color: #000000;
+  }
+
+  .prose blockquote {
+    border-left-color: #999999;
+    color: #333333;
+  }
+
+  /* 站外链接把地址印出来，纸面上才找得到 */
+  .prose a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #555555;
+  }
+
+  /* 关于页是一屏一节的结构，打印时还原成正常文档流 */
+  html.is-about {
+    scroll-snap-type: none;
+  }
+
+  .asection {
+    min-height: auto;
+    padding-block: 1rem;
+    break-inside: avoid;
+  }
+}

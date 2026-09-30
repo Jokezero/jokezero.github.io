@@ -11,7 +11,5 @@ export function isExternal(href: string): boolean {
 
 /** 站外链接需要的属性；站内链接返回空对象。 */
 export function externalAttrs(href: string) {
-  return isExternal(href)
-    ? { target: "_blank", rel: "noopener noreferrer" }
-    : {};
+  return isExternal(href) ? { target: "_blank", rel: "noopener noreferrer" } : {};
 }

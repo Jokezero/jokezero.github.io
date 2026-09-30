@@ -315,9 +315,8 @@ export function mountScene(
     });
 
   // 等首屏内容渲染完再开始，避免和首屏抢主线程
-  const idle = (
-    window as Window & { requestIdleCallback?: (cb: () => void) => number }
-  ).requestIdleCallback;
+  const idle = (window as Window & { requestIdleCallback?: (cb: () => void) => number })
+    .requestIdleCallback;
   if (typeof idle === "function") idle(() => start());
   else window.setTimeout(() => start(), 120);
 }

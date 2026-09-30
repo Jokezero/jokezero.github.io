@@ -1,0 +1,58 @@
+name: Quality
+
+# 质量门禁：推送 main、任何 PR、以及手动触发。
+# 与 deploy.yml 分开：部署只关心"能不能上线"，这里关心"有没有腐化"。
+on:
+  push: { branches: [main] }
+  pull_request:
+  workflow_dispatch:
+
+permissions: { contents: read }
+
+concurrency: { group: "quality-${{ github.ref }}", cancel-in-progress: true }
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+
+      # 1. 类型与内容校验：TypeScript + 内容集合 schema
+      - name: astro check
+        run: pnpm check
+
+      # 2. 代码格式与静态检查
+      - name: Prettier
+        run: pnpm format:check
+      - name: ESLint
+        run: pnpm lint
+
+      # 3. 构建（astro build + Pagefind 索引）
+      - name: Build
+        run: pnpm build
+
+      # 4. 体积预算：超出 §6.1 的任一项即失败
+      - name: size-limit
+        run: pnpm size
+
+      # 5. 内部死链必须为 0
+      - name: Internal links
+        run: pnpm links
+
+      # 6. Lighthouse CI：性能 / 可访问性（内部就是 axe-core）/ 最佳实践 / SEO
+      #    阈值见 lighthouserc.json，取自 docs/01-design-spec.md §6.1
+      - name: Lighthouse CI
+        run: pnpm lhci
+
+      # 失败时把报告留成制品，方便点开看是哪一条挂了
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci
+          if-no-files-found: ignore

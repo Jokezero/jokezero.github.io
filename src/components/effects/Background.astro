@@ -23,22 +23,20 @@ const { scene, mode = "page", description } = Astro.props;
 const enabled = SITE.features.heroEffect === "canvas";
 ---
 
-{
-  enabled && (
-    <>
-      <div
-        class:list={[
-          "pointer-events-none z-0",
-          mode === "page" ? "fixed inset-0" : "absolute inset-0 overflow-hidden",
-        ]}
-        aria-hidden="true"
-      >
-        <canvas data-scene={scene} data-mode={mode} class="block h-full w-full" />
-      </div>
-      <p class="sr-only">{description}</p>
-    </>
-  )
-}
+{enabled && (
+  <>
+    <div
+      class:list={[
+        "pointer-events-none z-0",
+        mode === "page" ? "fixed inset-0" : "absolute inset-0 overflow-hidden",
+      ]}
+      aria-hidden="true"
+    >
+      <canvas data-scene={scene} data-mode={mode} class="block h-full w-full" />
+    </div>
+    <p class="sr-only">{description}</p>
+  </>
+)}
 
 <script>
   import { mountBackgrounds } from "../../scripts/background";

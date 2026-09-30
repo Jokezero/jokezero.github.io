@@ -18,37 +18,35 @@ import { SITE } from "../config/site";
     </p>
     <h1 class="mt-4 text-step-3 font-semibold tracking-[-0.02em] text-fg-0">搜索</h1>
 
-    {
-      SITE.features.search ? (
-        <>
-          <input
-            id="search-input"
-            class="search-input mt-10 max-w-[520px]"
-            type="search"
-            placeholder="输入关键词…"
-            aria-label="全站搜索"
-            autocomplete="off"
-          />
+    {SITE.features.search ? (
+      <>
+        <input
+          id="search-input"
+          class="search-input mt-10 max-w-[520px]"
+          type="search"
+          placeholder="输入关键词…"
+          aria-label="全站搜索"
+          autocomplete="off"
+        />
 
-          <div
-            id="search-results"
-            class="mt-10 flex max-w-[720px] flex-col"
-            aria-live="polite"
-          />
+        <div
+          id="search-results"
+          class="mt-10 flex max-w-[720px] flex-col"
+          aria-live="polite"
+        />
 
-          <p
-            id="search-message"
-            class="mt-6 max-w-[60ch] font-mono text-micro leading-[1.9] text-fg-3"
-          >
-            索引在构建期生成；本地 pnpm dev 环境下不可用，运行 pnpm build 后再预览即可。
-          </p>
-        </>
-      ) : (
-        <p class="mt-10 font-mono text-micro text-fg-3">
-          搜索当前处于关闭状态（src/config/site.ts 的 features.search）。
+        <p
+          id="search-message"
+          class="mt-6 max-w-[60ch] font-mono text-micro leading-[1.9] text-fg-3"
+        >
+          索引在构建期生成；本地 pnpm dev 环境下不可用，运行 pnpm build 后再预览即可。
         </p>
-      )
-    }
+      </>
+    ) : (
+      <p class="mt-10 font-mono text-micro text-fg-3">
+        搜索当前处于关闭状态（src/config/site.ts 的 features.search）。
+      </p>
+    )}
   </Container>
 </BaseLayout>
 

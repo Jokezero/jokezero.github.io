@@ -55,9 +55,7 @@ export const SITE = {
   ],
 
   /** 页脚 / 关于页的社交链接。 */
-  social: [
-    { label: "GitHub", href: "https://github.com/Jokezero" },
-  ],
+  social: [{ label: "GitHub", href: "https://github.com/Jokezero" }],
 
   /**
    * 页脚导航：站内入口放在这里，顶栏只保留主信息架构（§4.5.1 明确"右上角不放按钮"）。

@@ -44,9 +44,7 @@ const tags = meta.tags;
             {formatDate(meta.pubDate)} · {minutes} MIN · {tags.join(" · ")}
           </p>
 
-          <h1
-            class="mt-5 text-[clamp(1.75rem,4vw,2.5rem)] leading-[1.2] font-semibold tracking-[-0.02em] text-fg-0"
-          >
+          <h1 class="mt-5 text-[clamp(1.75rem,4vw,2.5rem)] leading-[1.2] font-semibold tracking-[-0.02em] text-fg-0">
             {meta.title}
           </h1>
 
@@ -69,51 +67,43 @@ const tags = meta.tags;
           <div class="divider-fade"></div>
 
           <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2">
-            {
-              tags.map((tag) => (
-                <a
-                  href={`/tags/${encodeURIComponent(tag)}/`}
-                  class="font-mono text-micro tracking-[0.1em] text-fg-3 no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
-                >
-                  #{tag}
-                </a>
-              ))
-            }
+            {tags.map((tag) => (
+              <a
+                href={`/tags/${encodeURIComponent(tag)}/`}
+                class="font-mono text-micro tracking-[0.1em] text-fg-3 no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
+              >
+                #{tag}
+              </a>
+            ))}
           </div>
 
-          {
-            meta.updatedDate && (
-              <p class="mt-4 font-mono text-micro tracking-[0.1em] text-fg-3">
-                更新于 {formatDate(meta.updatedDate)}
-              </p>
-            )
-          }
+          {meta.updatedDate && (
+            <p class="mt-4 font-mono text-micro tracking-[0.1em] text-fg-3">
+              更新于 {formatDate(meta.updatedDate)}
+            </p>
+          )}
 
           <nav class="mt-10 grid gap-4 sm:grid-cols-2" aria-label="上下篇">
-            {
-              prev && (
-                <a href={prev.href} class="group no-underline">
-                  <span class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase">
-                    上一篇
-                  </span>
-                  <span class="mt-2 block text-[15px] text-fg-2 transition-colors group-hover:text-fg-0">
-                    {prev.title}
-                  </span>
-                </a>
-              )
-            }
-            {
-              next && (
-                <a href={next.href} class="group no-underline sm:text-right">
-                  <span class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase">
-                    下一篇
-                  </span>
-                  <span class="mt-2 block text-[15px] text-fg-2 transition-colors group-hover:text-fg-0">
-                    {next.title}
-                  </span>
-                </a>
-              )
-            }
+            {prev && (
+              <a href={prev.href} class="group no-underline">
+                <span class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase">
+                  上一篇
+                </span>
+                <span class="mt-2 block text-[15px] text-fg-2 transition-colors group-hover:text-fg-0">
+                  {prev.title}
+                </span>
+              </a>
+            )}
+            {next && (
+              <a href={next.href} class="group no-underline sm:text-right">
+                <span class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase">
+                  下一篇
+                </span>
+                <span class="mt-2 block text-[15px] text-fg-2 transition-colors group-hover:text-fg-0">
+                  {next.title}
+                </span>
+              </a>
+            )}
           </nav>
         </footer>
 
@@ -121,32 +111,30 @@ const tags = meta.tags;
       </article>
 
       <!-- 目录：桌面端粘在右侧；窄屏收成一个可展开的列表（不隐藏功能） -->
-      {
-        toc.length > 0 && (
-          <aside class="min-[1100px]:sticky min-[1100px]:top-24 min-[1100px]:self-start">
-            <details class="min-[1100px]:open" open>
-              <summary class="cursor-pointer font-mono text-micro tracking-[0.14em] text-fg-3 uppercase">
-                目录
-              </summary>
-              <nav class="mt-4 flex flex-col gap-2.5" aria-label="文章目录">
-                {toc.map((heading) => (
-                  <a
-                    href={`#${heading.slug}`}
-                    class:list={[
-                      "text-[12.5px] no-underline transition-colors duration-[var(--dur-base)]",
-                      heading.depth === 3
-                        ? "pl-3 text-fg-3 hover:text-fg-1"
-                        : "text-fg-2 hover:text-fg-0",
-                    ]}
-                  >
-                    {heading.text}
-                  </a>
-                ))}
-              </nav>
-            </details>
-          </aside>
-        )
-      }
+      {toc.length > 0 && (
+        <aside class="min-[1100px]:sticky min-[1100px]:top-24 min-[1100px]:self-start">
+          <details class="min-[1100px]:open" open>
+            <summary class="cursor-pointer font-mono text-micro tracking-[0.14em] text-fg-3 uppercase">
+              目录
+            </summary>
+            <nav class="mt-4 flex flex-col gap-2.5" aria-label="文章目录">
+              {toc.map((heading) => (
+                <a
+                  href={`#${heading.slug}`}
+                  class:list={[
+                    "text-[12.5px] no-underline transition-colors duration-[var(--dur-base)]",
+                    heading.depth === 3
+                      ? "pl-3 text-fg-3 hover:text-fg-1"
+                      : "text-fg-2 hover:text-fg-0",
+                  ]}
+                >
+                  {heading.text}
+                </a>
+              ))}
+            </nav>
+          </details>
+        </aside>
+      )}
     </div>
   </Container>
 

@@ -26,14 +26,12 @@ const classes = [
 const attrs = href ? externalAttrs(href) : {};
 ---
 
-{
-  href ? (
-    <a href={href} class={classes} {...attrs}>
-      <slot />
-    </a>
-  ) : (
-    <div class={classes}>
-      <slot />
-    </div>
-  )
-}
+{href ? (
+  <a href={href} class={classes} {...attrs}>
+    <slot />
+  </a>
+) : (
+  <div class={classes}>
+    <slot />
+  </div>
+)}

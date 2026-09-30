@@ -57,7 +57,7 @@ export function createAtom(): Scene {
           ctx.beginPath();
           ctx.moveTo(cx + q1x * co - q1y * si, cy + q1x * si + q1y * co);
           ctx.lineTo(cx + q2x * co - q2y * si, cy + q2x * si + q2y * co);
-          ctx.strokeStyle = `rgba(255,255,255,${(((1 - j / 8) * 0.3 * k)).toFixed(3)})`;
+          ctx.strokeStyle = `rgba(255,255,255,${((1 - j / 8) * 0.3 * k).toFixed(3)})`;
           ctx.lineWidth = 1;
           ctx.stroke();
         }

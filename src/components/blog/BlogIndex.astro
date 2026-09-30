@@ -60,52 +60,48 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10);
       <button type="button" class="text-btn" data-tag="" aria-pressed="true">
         全部
       </button>
-      {
-        tags.map((tag) => (
-          <button
-            type="button"
-            class="text-btn flex items-baseline gap-1.5"
-            data-tag={tag}
-            aria-pressed={initialTags.includes(tag) ? "true" : "false"}
-          >
-            {tag}
-            <span class="text-[9.5px] text-fg-3" data-count>
-              {items.filter((item) => item.tags.includes(tag)).length}
-            </span>
-          </button>
-        ))
-      }
+      {tags.map((tag) => (
+        <button
+          type="button"
+          class="text-btn flex items-baseline gap-1.5"
+          data-tag={tag}
+          aria-pressed={initialTags.includes(tag) ? "true" : "false"}
+        >
+          {tag}
+          <span class="text-[9.5px] text-fg-3" data-count>
+            {items.filter((item) => item.tags.includes(tag)).length}
+          </span>
+        </button>
+      ))}
     </div>
   </aside>
 
   <!-- 列表：每行 = 标题（可伸缩）→ 日期 → 标签；分隔线在行顶部、两头渐隐 -->
   <section>
     <ul id="post-list" class="m-0 list-none p-0">
-      {
-        items.map((item, index) => (
-          <li
-            class:list={["post-row", index === 0 && "is-first"]}
-            data-title={item.title.toLowerCase()}
-            data-tags={item.tags.join(",")}
-            data-date={formatDate(item.pubDate)}
+      {items.map((item, index) => (
+        <li
+          class:list={["post-row", index === 0 && "is-first"]}
+          data-title={item.title.toLowerCase()}
+          data-tags={item.tags.join(",")}
+          data-date={formatDate(item.pubDate)}
+        >
+          <a
+            href={item.href}
+            class="post-row-link flex flex-wrap items-baseline gap-x-6 gap-y-2 py-[19px] no-underline"
           >
-            <a
-              href={item.href}
-              class="post-row-link flex flex-wrap items-baseline gap-x-6 gap-y-2 py-[19px] no-underline"
-            >
-              <span class="min-w-[16ch] flex-1 text-[15px] leading-[1.6] text-fg-2 transition-colors duration-[var(--dur-slow)] group-hover:text-fg-0 hover:text-fg-0">
-                {item.title}
-              </span>
-              <time class="font-mono text-micro tracking-[0.1em] text-fg-3 tabular-nums">
-                {formatDate(item.pubDate)}
-              </time>
-              <span class="font-mono text-micro tracking-[0.1em] text-fg-3">
-                {item.tags.join(", ")}
-              </span>
-            </a>
-          </li>
-        ))
-      }
+            <span class="min-w-[16ch] flex-1 text-[15px] leading-[1.6] text-fg-2 transition-colors duration-[var(--dur-slow)] group-hover:text-fg-0 hover:text-fg-0">
+              {item.title}
+            </span>
+            <time class="font-mono text-micro tracking-[0.1em] text-fg-3 tabular-nums">
+              {formatDate(item.pubDate)}
+            </time>
+            <span class="font-mono text-micro tracking-[0.1em] text-fg-3">
+              {item.tags.join(", ")}
+            </span>
+          </a>
+        </li>
+      ))}
     </ul>
 
     <!-- 空状态（§4.5.2）：完全没有文章 vs 筛选后为空，文案不同 -->
@@ -116,11 +112,7 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10);
     >
       暂无文章喵～正在努力学习
     </p>
-    <p
-      id="empty-match"
-      class="font-mono text-micro tracking-[0.1em] text-fg-3"
-      hidden
-    >
+    <p id="empty-match" class="font-mono text-micro tracking-[0.1em] text-fg-3" hidden>
       没有匹配的文章…
     </p>
   </section>
@@ -193,11 +185,8 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10);
       // 标签计数按当前选择重算："点一下会得到几条"
       for (const button of tagButtons) {
         const tag = button.dataset.tag ?? "";
-        const hypothetical =
-          tag === "" ? new Set<string>() : new Set([...active, tag]);
-        const count = rows.filter((row) =>
-          isMatch(row, hypothetical, query),
-        ).length;
+        const hypothetical = tag === "" ? new Set<string>() : new Set([...active, tag]);
+        const count = rows.filter((row) => isMatch(row, hypothetical, query)).length;
         const countEl = button.querySelector("[data-count]");
         if (countEl) countEl.textContent = String(count);
         button.setAttribute(
