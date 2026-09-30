@@ -18,6 +18,8 @@ export function initIntro(): void {
   if (!boot || !art) return;
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // 到达页（转场进来的）与本会话已播过的都不播；这个判断在 <head> 里就已定好，
+  // 这里只照着执行，避免与转场脚本产生状态竞态（曾经因此闪一帧黑屏）。
   const skip =
     reduced ||
     html.classList.contains("is-arriving") ||
