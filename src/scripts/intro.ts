@@ -52,9 +52,9 @@ export function initIntro(): void {
   art.innerHTML = markup;
 
   // 给每个字符一个随机点亮时刻：笔画因此是"零散地冒出来"、逐渐拼成字样的。
-  // 窗口取 0-620ms，配合每个字符 280ms 的点亮动画，整幅字约 0.9 秒拼齐。
+  // 窗口取 0-900ms，配合每个字符 380ms 的点亮动画，整幅字约 1.3 秒拼齐。
   for (const ch of art.querySelectorAll<HTMLElement>(".la-ch")) {
-    ch.style.setProperty("--d", `${Math.round(Math.random() * 620)}ms`);
+    ch.style.setProperty("--d", `${Math.round(Math.random() * 900)}ms`);
   }
 
   try {
@@ -75,7 +75,7 @@ export function initIntro(): void {
   // 字样拼齐 → 整屏闪一下 → 淡出，露出网站
   window.setTimeout(() => {
     boot.classList.add("is-settle");
-  }, 900);
+  }, 1300);
 
   window.setTimeout(() => {
     boot.classList.add("is-gone");
@@ -84,9 +84,9 @@ export function initIntro(): void {
       void titleEl.offsetWidth;
       window.requestAnimationFrame(() => titleEl.classList.remove("is-in"));
     }
-  }, 1340);
+  }, 1880);
 
   window.setTimeout(() => {
     boot.style.display = "none";
-  }, 2050);
+  }, 2600);
 }

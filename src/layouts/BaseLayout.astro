@@ -96,6 +96,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
             // 而字符绘制脚本这时可能还没执行完，于是黑遮罩会闪一帧。
             html.classList.add("no-intro");
             if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+            // 兜底：万一转场脚本没跑起来，2 秒后也要把幕布放掉，不能一直盖着
+            setTimeout(() => html.classList.remove("is-arriving"), 2000);
           } else if (sessionStorage.getItem("zw-intro")) {
             html.classList.add("no-intro");
           }
