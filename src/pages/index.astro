@@ -1,31 +1,43 @@
 ---
 /**
- * P0 首页：只证明"提交 → 构建 → 上线"这条链路是通的。
+ * 首页。
  *
- * 这里是刻意的最小骨架 —— 招牌视觉（三体运动背景、页面切换、滚动特效）
- * 属于 P3，排版与设计令牌属于 P1；本页届时会被 Hero 组件替换。
+ * 现在这里只有 Hero 的**文字部分**，用的是 P1 的设计令牌：
+ *   kicker（等宽微标签）→ 大标题 → 说明 → 阶段标注
+ * 招牌视觉（三体运动背景、滚动特效、页面切换）属于 P3，
+ * 届时会在这段结构外面套上画布与动效，文字内容本身不用重写。
+ *
+ * 想改这里的文字：直接改下面的 HTML，或改 src/config/site.ts 里的站点名与描述。
  */
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/ui/Container.astro";
 import { SITE } from "../config/site";
 ---
 
 <BaseLayout>
-  <main class="mx-auto flex min-h-dvh max-w-[1120px] flex-col justify-center px-6 py-24">
-    <p class="font-mono text-[11px] tracking-[0.2em] text-white/40 uppercase">
+  <Container
+    width="layout"
+    class="flex min-h-[70dvh] flex-col justify-center py-24"
+  >
+    <!-- 等宽全大写微标签：全站统一的"工程感"细节 -->
+    <p class="font-mono text-micro tracking-[0.2em] text-fg-3 uppercase">
       Personal Site · Static Build
     </p>
 
-    <h1 class="mt-6 text-[clamp(2.25rem,8vw,4rem)] leading-[1.05] font-semibold tracking-tight">
+    <!-- 站点大标题：内容来自配置，改站点名只需改一处 -->
+    <h1
+      class="mt-6 text-step-5 leading-[1.05] font-semibold tracking-[-0.02em] text-fg-0"
+    >
       {SITE.name}
     </h1>
 
-    <p class="mt-8 max-w-[52ch] text-[15px] leading-[1.9] text-white/60">
+    <p class="mt-8 max-w-[52ch] text-step-0 leading-[1.9] text-fg-2">
       {SITE.description}
     </p>
 
-    <!-- 质量说明：这一行只在 P0 出现，P1 起由真正的 Hero 文案取代。 -->
-    <p class="mt-14 font-mono text-[11px] tracking-[0.12em] text-white/30">
-      P0 · 部署链路就绪 · 视觉系统在 P1–P3 逐层落地
+    <!-- 阶段标注：P3 落地招牌视觉后删掉这一行 -->
+    <p class="mt-14 font-mono text-micro tracking-[0.12em] text-fg-3">
+      P1 · 设计系统与骨架 · 招牌视觉在 P3 落地
     </p>
-  </main>
+  </Container>
 </BaseLayout>

@@ -1,0 +1,26 @@
+---
+/**
+ * 版式容器：统一页面的最大宽度与左右留白。
+ *
+ * widths:
+ *   prose   → 68ch，长文阅读舒适区
+ *   layout  → 1120px，列表页 / 项目页的主容器（§4.5.2）
+ *   content → 1200px，通栏区块
+ */
+interface Props {
+  width?: "prose" | "layout" | "content";
+  class?: string;
+}
+
+const { width = "layout", class: className } = Astro.props;
+
+const widths = {
+  prose: "max-w-[var(--measure)]",
+  layout: "max-w-[1120px]",
+  content: "max-w-[1200px]",
+} as const;
+---
+
+<div class:list={["mx-auto w-full px-6", widths[width], className]}>
+  <slot />
+</div>

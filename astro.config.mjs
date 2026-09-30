@@ -15,6 +15,11 @@ export default defineConfig({
   // 全静态预渲染：产物是纯 HTML/CSS/JS，直接交给 GitHub Pages。
   output: "static",
 
+  // 体积小的样式表直接内联进 HTML，减少首屏的往返请求（P1 的"关键 CSS 内联"）。
+  build: {
+    inlineStylesheets: "auto",
+  },
+
   integrations: [mdx(), sitemap()],
 
   // Tailwind v4 通过 Vite 插件接入（不再需要 tailwind.config.js）。
