@@ -51,9 +51,10 @@ export const SITE = {
   /** 顶栏导航（P1 实现顶栏时读取）。 */
   nav: [
     { label: "首页", href: "/" },
-    { label: "文章", href: "/blog" },
-    { label: "项目", href: "/projects" },
-    { label: "关于", href: "/about" },
+    // 带结尾斜杠：与构建产物的目录式 URL 一致，避免每次点击都吃一次 301 跳转
+    { label: "文章", href: "/blog/" },
+    { label: "项目", href: "/projects/" },
+    { label: "关于", href: "/about/" },
   ],
 
   /** 页脚 / 关于页的社交链接。 */
@@ -67,7 +68,7 @@ export const SITE = {
    * 说明：RSS **刻意不放**在界面上（06-content-model.md §6 已确认）——
    * 只在 <head> 保留自动发现标记，读者把 /rss.xml 直接丢进阅读器即可。
    */
-  footerLinks: [{ label: "全文搜索", href: "/search" }],
+  footerLinks: [{ label: "全文搜索", href: "/search/" }],
 
   /**
    * 功能开关（docs/01-design-spec.md §3.3 的"保险丝"）。

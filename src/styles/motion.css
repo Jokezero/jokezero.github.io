@@ -14,6 +14,7 @@
 html.is-arriving #curtain {
   transform: translate3d(0, 0, 0);
   transition: none;
+  animation: none;
 }
 
 /* 亮色主题：画布上的白线整体反转成黑线，底色透明不受影响
@@ -41,20 +42,44 @@ html[data-theme="light"] canvas[data-scene] {
   );
   border-bottom: 1px solid var(--color-line-2);
   transform: translate3d(0, -100%, 0);
-  transition: transform 520ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/*
+ * 幕布的两个阶段都用 **CSS 动画**，不用 transition —— 这是踩过两次坑之后定下来的：
+ * transition 只有在"起始状态已经被提交过"时才会播放，而本项目里"加类"与
+ * "元素首次出现"常常落在同一帧，于是过渡被跳过、画面直接跳变
+ * （表现就是偶发没有动效、或者闪一下）。动画则永远从 keyframes 的第一帧开始播。
+ */
 #curtain.is-cover {
-  transform: translate3d(0, 0, 0);
+  animation: curtain-cover 520ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 #curtain.is-pass {
-  transform: translate3d(0, 100%, 0);
-  transition: transform 560ms cubic-bezier(0.8, 0, 0.85, 0.55);
+  animation: curtain-pass 560ms cubic-bezier(0.8, 0, 0.85, 0.55) forwards;
 }
 
+@keyframes curtain-cover {
+  from {
+    transform: translate3d(0, -100%, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes curtain-pass {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 100%, 0);
+  }
+}
+
+/* 复位：立即停在画面上方，且不带任何动画或过渡 */
 #curtain.no-anim {
   transition: none;
+  animation: none;
 }
 
 #curtain span {
@@ -166,7 +191,7 @@ html[data-theme="light"] canvas[data-scene] {
  * 而插入节点与加类常常落在同一帧里，结果是整个字样一次性出现（就是之前的那个 bug）。
  */
 #boot.is-draw .la-ch {
-  animation: boot-char-in 280ms linear var(--d, 0ms) both;
+  animation: boot-char-in 380ms linear var(--d, 0ms) both;
 }
 
 @keyframes boot-char-in {
@@ -192,7 +217,7 @@ html[data-theme="light"] canvas[data-scene] {
 
 /* 字样拼齐之后，整屏闪一下（老屏幕刷新时的那种亮度跳动） */
 #boot.is-settle pre {
-  animation: boot-settle 380ms linear both;
+  animation: boot-settle 520ms linear both;
 }
 
 @keyframes boot-settle {

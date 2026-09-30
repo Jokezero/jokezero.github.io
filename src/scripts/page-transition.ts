@@ -153,8 +153,12 @@ export function initPageTransition(): void {
     }
     if (url.origin !== location.origin) return;
     if (url.pathname === location.pathname && url.hash) return;
-    if (url.href === location.href) {
-      // 点的是当前页面自己的链接（例如在首页点"首页"）：不播动效，但回到顶部
+
+    // 忽略结尾斜杠的差异（导航写的是 /blog，落地地址是 /blog/）：
+    // 否则点"当前栏目"会被当成跳转到新地址，白白整页重载一次。
+    const normalize = (path: string) => path.replace(/\/+$/, "") || "/";
+    if (normalize(url.pathname) === normalize(location.pathname)) {
+      // 点的是当前页面自己的链接（例如在文章页点"文章"）：不播动效，但回到顶部
       window.scrollTo({ top: 0, behavior: reduced.matches ? "auto" : "smooth" });
       return;
     }

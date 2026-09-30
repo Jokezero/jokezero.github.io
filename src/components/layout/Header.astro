@@ -11,9 +11,12 @@ import ThemeToggle from "./ThemeToggle.astro";
 const currentPath = Astro.url.pathname;
 
 // 判断当前项：首页要精确匹配，其余按前缀匹配（/blog/xxx 也算文章页）。
+// 链接写成 /blog/ 这种带斜杠的形式，这里统一去掉结尾斜杠再比，避免多一个斜杠就匹配不上。
 function isCurrent(href: string) {
-  if (href === "/") return currentPath === "/";
-  return currentPath === href || currentPath.startsWith(`${href}/`);
+  const base = href.replace(/\/+$/, "");
+  const path = currentPath.replace(/\/+$/, "");
+  if (base === "") return path === "";
+  return path === base || path.startsWith(`${base}/`);
 }
 ---
 
