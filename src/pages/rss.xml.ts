@@ -1,35 +1,51 @@
 /**
- * RSS 订阅源。
+ * RSS 订阅源：**输出全文**（docs/06-content-model.md §6 的结论）。
  *
- * 约定见 docs/02-build-and-deploy.md §0：输出全文、界面不放入口，
- * 但保留 <head> 里的自动发现链接（BaseLayout 已接）。
- * P0 阶段内容集合为空，这里先保证端点存在且可订阅；
- * 全文渲染与 OG 图在 P2 与内容系统一起补齐。
+ * 界面不放置任何订阅入口，但 <head> 里保留自动发现标记（BaseLayout 已接），
+ * 读者把 https://jokezero.github.io/rss.xml 丢进阅读器即可订阅。
+ *
+ * 全文渲染用 Astro 的 Container API：把 Markdown 渲染成完整 HTML，
+ * 再把站内相对链接改写为绝对地址，否则阅读器里点不开。
  */
 import rss from "@astrojs/rss";
-import { getCollection } from "astro:content";
+import { render } from "astro:content";
+import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import type { APIContext } from "astro";
 import { SITE } from "../config/site";
+import { getPosts } from "../lib/posts";
 
 export async function GET(context: APIContext) {
-  const now = new Date();
+  const site = (context.site ?? new URL(SITE.url)).href.replace(/\/$/, "");
+  const posts = await getPosts();
+  const container = await AstroContainer.create();
 
-  // 草稿与"计划发布"（pubDate 在未来）都不出现在订阅源里。
-  const posts = (await getCollection("posts"))
-    .filter((post) => !post.data.draft && post.data.pubDate <= now)
-    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  const items = await Promise.all(
+    posts.map(async (post) => {
+      const { Content } = await render(post);
+      const html = await container.renderToString(Content);
+
+      // 站内相对链接 → 绝对链接（只改以单个 / 开头的，不动 // 开头的协议相对地址）
+      const absolute = html.replace(
+        /(src|href)="\/(?!\/)/g,
+        (_match, attr: string) => `${attr}="${site}/`,
+      );
+
+      return {
+        title: post.data.title,
+        description: post.data.summary,
+        pubDate: post.data.pubDate,
+        link: `/blog/${post.id}/`,
+        categories: post.data.tags,
+        content: absolute,
+      };
+    }),
+  );
 
   return rss({
     title: SITE.name,
     description: SITE.description,
     site: context.site ?? SITE.url,
-    items: posts.map((post) => ({
-      title: post.data.title,
-      description: post.data.description,
-      pubDate: post.data.pubDate,
-      link: `/blog/${post.id}/`,
-      categories: post.data.tags,
-    })),
+    items,
     customData: `<language>${SITE.lang}</language>`,
   });
 }

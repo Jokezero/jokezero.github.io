@@ -1,0 +1,115 @@
+---
+/**
+ * 项目详情页排版（docs/07-layout-post-project.md §2）。
+ *
+ * 与正文页的区别：项目页是"展示"，用两栏 —— 左侧 240px 信息栏（sticky），
+ * 右侧内容区（封面 → 正文 → 图集）；同样纯黑、无画布。
+ */
+import type { CollectionEntry } from "astro:content";
+import BaseLayout from "./BaseLayout.astro";
+import Container from "../components/ui/Container.astro";
+import Prose from "../components/ui/Prose.astro";
+import ReadingProgress from "../components/effects/ReadingProgress.astro";
+import CodeCopy from "../components/effects/CodeCopy.astro";
+import Lightbox from "../components/effects/Lightbox.astro";
+import Giscus from "../components/comments/Giscus.astro";
+import { externalAttrs } from "../lib/url";
+
+interface Props {
+  project: CollectionEntry<"projects">;
+}
+
+const { project } = Astro.props;
+const meta = project.data;
+
+// 左栏外链清单：仓库 / 视频 / 其他链接，全部新标签打开
+const links = [
+  ...(meta.repo ? [{ label: "REPO", url: meta.repo }] : []),
+  ...(meta.video ? [{ label: "VIDEO", url: meta.video }] : []),
+  ...meta.links.map((link) => ({ label: link.label, url: link.url })),
+];
+---
+
+<BaseLayout title={meta.title} description={meta.summary}>
+  <ReadingProgress />
+
+  <Container width="content" class="py-16">
+    <div class="mx-auto grid max-w-[1120px] gap-12 min-[900px]:grid-cols-[240px_minmax(0,1fr)]">
+      <!-- 左栏：一句话简介 → 等宽清单（日期 / 技术栈）→ 外链 -->
+      <aside class="min-[900px]:sticky min-[900px]:top-24 min-[900px]:self-start">
+        <p class="text-step-0 leading-[1.9] text-fg-2">{meta.summary}</p>
+
+        <div class="divider-fade my-6"></div>
+
+        <dl class="flex flex-col gap-3 font-mono text-micro tracking-[0.1em] text-fg-3 uppercase">
+          <div class="flex gap-3">
+            <dt class="w-14 shrink-0 text-fg-3">DATE</dt>
+            <dd class="m-0">{meta.date}</dd>
+          </div>
+          <div class="flex gap-3">
+            <dt class="w-14 shrink-0">STACK</dt>
+            <dd class="m-0 flex flex-wrap gap-x-3 gap-y-1">
+              {meta.tags.map((tag) => <span>{tag}</span>)}
+            </dd>
+          </div>
+        </dl>
+
+        {
+          links.length > 0 && (
+            <>
+              <div class="divider-fade my-6" />
+              <ul class="m-0 flex list-none flex-col gap-3 p-0">
+                {links.map((link) => (
+                  <li>
+                    <a
+                      href={link.url}
+                      class="font-mono text-micro tracking-[0.1em] text-fg-3 uppercase no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
+                      {...externalAttrs(link.url)}
+                    >
+                      {link.label} ↗
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )
+        }
+
+        <div class="divider-fade my-6"></div>
+
+        <a
+          href="/projects/"
+          class="font-mono text-micro tracking-[0.1em] text-fg-3 uppercase no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
+        >
+          ← 返回项目列表
+        </a>
+      </aside>
+
+      <!-- 右栏：正文（封面与图集都在 Markdown 里，图片统一走灯箱） -->
+      <article class="min-w-0">
+        <h1
+          class="text-[clamp(1.5rem,3.4vw,2.25rem)] leading-[1.25] font-semibold tracking-[-0.02em] text-fg-0"
+        >
+          {meta.title}
+        </h1>
+
+        <div class="divider-fade mt-8"></div>
+
+        <div class="mt-8" data-lightbox>
+          <Prose>
+            <slot />
+          </Prose>
+        </div>
+
+        <p class="mt-10 font-mono text-micro tracking-[0.1em] text-fg-3 uppercase">
+          {meta.tags.join(" · ")}
+        </p>
+
+        <Giscus />
+      </article>
+    </div>
+  </Container>
+
+  <CodeCopy />
+  <Lightbox />
+</BaseLayout>

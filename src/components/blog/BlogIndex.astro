@@ -1,0 +1,254 @@
+---
+/**
+ * 文章列表：左侧索引栏（搜索 + 标签）+ 右侧无框竖直列表。
+ *
+ * 规范：docs/01-design-spec.md §4.5.2（版式）；
+ *       docs/06-content-model.md §4（多选 OR + 命中数排序的语义）。
+ *
+ * 实现要点：列表和标签在**构建期**就渲染成真实 HTML（无 JS 也能读、也能被
+ * Pagefind 索引），JS 只负责筛选、重排与空状态切换。
+ */
+interface PostItem {
+  id: string;
+  title: string;
+  summary: string;
+  pubDate: Date;
+  tags: string[];
+  href: string;
+}
+
+interface Props {
+  items: PostItem[];
+  /** 预选中的标签（来自 /tags/[tag] 这类入口） */
+  initialTags?: string[];
+}
+
+const { items, initialTags = [] } = Astro.props;
+
+// 标签栏由文章数据聚合而来（不做手写维护）。
+const tags = [...new Set(items.flatMap((item) => item.tags))].sort((a, b) =>
+  a.localeCompare(b, "zh-Hans-CN"),
+);
+
+const formatDate = (date: Date) => date.toISOString().slice(0, 10);
+---
+
+<div
+  id="blog-index"
+  class="grid gap-12 min-[900px]:grid-cols-[212px_1fr] min-[900px]:gap-[60px]"
+  data-initial-tags={JSON.stringify(initialTags)}
+>
+  <!-- 索引栏：搜索 → 渐隐分隔线 → 标签（带命中数） -->
+  <aside class="min-[900px]:sticky min-[900px]:top-24 min-[900px]:self-start">
+    <input
+      id="post-search"
+      class="search-input"
+      type="search"
+      placeholder="搜索文章…"
+      aria-label="按标题搜索文章"
+      autocomplete="off"
+    />
+
+    <div class="divider-fade my-6"></div>
+
+    <div
+      id="tag-filter"
+      class="flex flex-wrap gap-x-5 gap-y-3 min-[900px]:flex-col min-[900px]:gap-y-3"
+      role="group"
+      aria-label="按标签筛选（可多选）"
+    >
+      <button type="button" class="text-btn" data-tag="" aria-pressed="true">
+        全部
+      </button>
+      {
+        tags.map((tag) => (
+          <button
+            type="button"
+            class="text-btn flex items-baseline gap-1.5"
+            data-tag={tag}
+            aria-pressed={initialTags.includes(tag) ? "true" : "false"}
+          >
+            {tag}
+            <span class="text-[9.5px] text-fg-3" data-count>
+              {items.filter((item) => item.tags.includes(tag)).length}
+            </span>
+          </button>
+        ))
+      }
+    </div>
+  </aside>
+
+  <!-- 列表：每行 = 标题（可伸缩）→ 日期 → 标签；分隔线在行顶部、两头渐隐 -->
+  <section>
+    <ul id="post-list" class="m-0 list-none p-0">
+      {
+        items.map((item, index) => (
+          <li
+            class:list={["post-row", index === 0 && "is-first"]}
+            data-title={item.title.toLowerCase()}
+            data-tags={item.tags.join(",")}
+            data-date={formatDate(item.pubDate)}
+          >
+            <a
+              href={item.href}
+              class="post-row-link flex flex-wrap items-baseline gap-x-6 gap-y-2 py-[19px] no-underline"
+            >
+              <span class="min-w-[16ch] flex-1 text-[15px] leading-[1.6] text-fg-2 transition-colors duration-[var(--dur-slow)] group-hover:text-fg-0 hover:text-fg-0">
+                {item.title}
+              </span>
+              <time class="font-mono text-micro tracking-[0.1em] text-fg-3 tabular-nums">
+                {formatDate(item.pubDate)}
+              </time>
+              <span class="font-mono text-micro tracking-[0.1em] text-fg-3">
+                {item.tags.join(", ")}
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <!-- 空状态（§4.5.2）：完全没有文章 vs 筛选后为空，文案不同 -->
+    <p
+      id="empty-posts"
+      class="font-mono text-micro tracking-[0.1em] text-fg-3"
+      hidden={items.length > 0}
+    >
+      暂无文章喵～正在努力学习
+    </p>
+    <p
+      id="empty-match"
+      class="font-mono text-micro tracking-[0.1em] text-fg-3"
+      hidden
+    >
+      没有匹配的文章…
+    </p>
+  </section>
+</div>
+
+<script>
+  const root = document.getElementById("blog-index");
+
+  if (root) {
+    const list = root.querySelector<HTMLUListElement>("#post-list")!;
+    const rows = Array.from(root.querySelectorAll<HTMLLIElement>(".post-row"));
+    const search = root.querySelector<HTMLInputElement>("#post-search");
+    const tagButtons = Array.from(
+      root.querySelectorAll<HTMLButtonElement>("#tag-filter [data-tag]"),
+    );
+    const emptyPosts = root.querySelector<HTMLElement>("#empty-posts");
+    const emptyMatch = root.querySelector<HTMLElement>("#empty-match");
+
+    // 状态：已选标签集合（多选，OR 语义）+ 搜索词
+    const active = new Set<string>(
+      JSON.parse(root.dataset.initialTags ?? "[]") as string[],
+    );
+
+    const tagsOf = (row: HTMLLIElement) => (row.dataset.tags ?? "").split(",");
+
+    // 命中判定：标签"任一命中即显示"（OR）；搜索是标题子串、不区分大小写
+    const isMatch = (row: HTMLLIElement, tagSet: Set<string>, query: string) => {
+      const tags = tagsOf(row);
+      const tagOk = tagSet.size === 0 || tags.some((tag) => tagSet.has(tag));
+      const queryOk = !query || (row.dataset.title ?? "").includes(query);
+      return tagOk && queryOk;
+    };
+
+    // 匹配度 = 命中的已选标签数量（用于排序）
+    const hitCount = (row: HTMLLIElement, tagSet: Set<string>) =>
+      tagsOf(row).filter((tag) => tagSet.has(tag)).length;
+
+    const apply = () => {
+      const query = (search?.value ?? "").trim().toLowerCase();
+
+      const visible = rows.filter((row) => isMatch(row, active, query));
+
+      // 排序：命中标签多的在前 → 日期倒序 → 标题，保证顺序稳定
+      visible.sort((a, b) => {
+        const byHits = hitCount(b, active) - hitCount(a, active);
+        if (byHits !== 0) return byHits;
+        const byDate = (b.dataset.date ?? "").localeCompare(a.dataset.date ?? "");
+        if (byDate !== 0) return byDate;
+        return (a.dataset.title ?? "").localeCompare(b.dataset.title ?? "");
+      });
+
+      const visibleSet = new Set(visible);
+      for (const row of rows) {
+        const show = visibleSet.has(row);
+        row.hidden = !show;
+        if (show) row.classList.remove("is-enter");
+      }
+
+      visible.forEach((row, index) => {
+        // 第一条可见项没有上分隔线
+        row.classList.toggle("is-first", index === 0);
+        list.append(row);
+      });
+
+      // 重排后给新出现的行一次淡入，让"多出来的几条"被看见
+      requestAnimationFrame(() => {
+        visible.forEach((row) => row.classList.add("is-enter"));
+      });
+
+      // 标签计数按当前选择重算："点一下会得到几条"
+      for (const button of tagButtons) {
+        const tag = button.dataset.tag ?? "";
+        const hypothetical =
+          tag === "" ? new Set<string>() : new Set([...active, tag]);
+        const count = rows.filter((row) =>
+          isMatch(row, hypothetical, query),
+        ).length;
+        const countEl = button.querySelector("[data-count]");
+        if (countEl) countEl.textContent = String(count);
+        button.setAttribute(
+          "aria-pressed",
+          String(tag === "" ? active.size === 0 : active.has(tag)),
+        );
+      }
+
+      const nothingAtAll = rows.length === 0;
+      if (emptyPosts) emptyPosts.hidden = !nothingAtAll;
+      if (emptyMatch) emptyMatch.hidden = nothingAtAll || visible.length > 0;
+      list.hidden = visible.length === 0;
+    };
+
+    for (const button of tagButtons) {
+      button.addEventListener("click", () => {
+        const tag = button.dataset.tag ?? "";
+        if (tag === "") {
+          active.clear();
+        } else if (active.has(tag)) {
+          active.delete(tag);
+        } else {
+          active.add(tag);
+        }
+        apply();
+      });
+    }
+
+    search?.addEventListener("input", apply);
+    apply();
+  }
+</script>
+
+<style is:global>
+  /* 重排时的轻量淡入；开启"减少动态效果"时由全局规则压成瞬时 */
+  .post-row {
+    opacity: 1;
+  }
+
+  .post-row.is-enter {
+    animation: post-row-in var(--dur-base) var(--ease-out) both;
+  }
+
+  @keyframes post-row-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

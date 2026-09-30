@@ -1,0 +1,41 @@
+---
+/**
+ * 项目列表页（docs/01-design-spec.md §4.5.3）。
+ * 页头保留 kicker / 标题 / 说明，但**没有按钮**（页面级开关 noCta）。
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/ui/Container.astro";
+import ProjectShelf from "../../components/projects/ProjectShelf.astro";
+import { getProjects } from "../../lib/posts";
+
+const projects = await getProjects();
+
+const items = projects.map((project) => ({
+  id: project.id,
+  title: project.data.title,
+  summary: project.data.summary,
+  tags: project.data.tags,
+  date: project.data.date,
+  href: `/projects/${project.id}/`,
+  repo: project.data.repo,
+  video: project.data.video,
+  links: project.data.links,
+}));
+---
+
+<BaseLayout title="项目" description="做过的东西：工具、系统与实验。">
+  <Container width="content" class="pt-14 pb-20">
+    <div class="mx-auto max-w-[1120px]">
+      <header class="mb-10">
+        <p class="font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">
+          Selected Work
+        </p>
+        <h1 class="mt-4 text-step-3 leading-[1.2] font-semibold tracking-[-0.02em] text-fg-0">
+          项目
+        </h1>
+      </header>
+
+      <ProjectShelf items={items} />
+    </div>
+  </Container>
+</BaseLayout>

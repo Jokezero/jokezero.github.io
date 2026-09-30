@@ -1,0 +1,101 @@
+---
+/**
+ * giscus 评论区（docs/06-content-model.md §1）。
+ *
+ * 关键约束（P2 验收项）：**关掉 features.comments 后，页面不加载任何第三方脚本**。
+ * 做法是双保险：
+ *   1. 构建期：开关关掉、或四个 ID 没填全 → 组件什么都不渲染；
+ *   2. 运行期：脚本先找容器，找不到直接 return，giscus 的 <script> 只在
+ *      "容器接近视口"时才被创建 —— 也就是滚动到评论区才加载。
+ */
+import { SITE } from "../../config/site";
+
+interface Props {
+  /** 是否启用评论（站级开关 + 单页开关，取与） */
+  enabled?: boolean;
+}
+
+const { enabled = true } = Astro.props;
+const config = SITE.comments;
+
+const ready =
+  SITE.features.comments &&
+  enabled &&
+  Boolean(config.repo && config.repoId && config.categoryId);
+---
+
+{
+  ready && (
+    <section class="mt-20" aria-labelledby="comments-title">
+      <div class="divider-fade" />
+      <h2
+        id="comments-title"
+        class="mt-8 font-mono text-micro tracking-[0.16em] text-fg-3 uppercase"
+      >
+        Comments
+      </h2>
+      <div
+        id="giscus-container"
+        class="mt-6"
+        data-repo={config.repo}
+        data-repo-id={config.repoId}
+        data-category={config.category}
+        data-category-id={config.categoryId}
+        data-mapping={config.mapping}
+        data-reactions={config.reactionsEnabled}
+        data-input-position={config.inputPosition}
+        data-lang="zh-CN"
+      />
+    </section>
+  )
+}
+
+<script>
+  const container = document.getElementById("giscus-container");
+
+  // 没有容器 = 评论被关闭或未配置 → 不加载任何第三方脚本。
+  if (container) {
+    const mount = () => {
+      const script = document.createElement("script");
+      script.src = "https://giscus.app/client.js";
+      script.async = true;
+      script.crossOrigin = "anonymous";
+
+      const map: Record<string, string> = {
+        "data-repo": "data-repo",
+        "data-repo-id": "data-repo-id",
+        "data-category": "data-category",
+        "data-category-id": "data-category-id",
+        "data-mapping": "data-mapping",
+        "data-reactions": "data-reactions",
+        "data-input-position": "data-input-position",
+        "data-lang": "data-lang",
+      };
+
+      for (const key of Object.keys(map)) {
+        const value = container.getAttribute(key);
+        if (value) script.setAttribute(key, value);
+      }
+
+      script.setAttribute("data-theme", "transparent_dark");
+      script.setAttribute("data-loading", "lazy");
+      container.append(script);
+    };
+
+    // 滚动到评论区附近（提前 300px）才开始请求 giscus。
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            observer.disconnect();
+            mount();
+          }
+        },
+        { rootMargin: "300px 0px" },
+      );
+      observer.observe(container);
+    } else {
+      mount();
+    }
+  }
+</script>

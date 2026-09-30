@@ -1,0 +1,88 @@
+---
+/**
+ * 代码块增强：给每个代码块加语言标签与复制按钮。
+ *
+ * 渐进增强：没有 JS 时就是一段普通高亮代码，阅读不受影响（§4.7）。
+ * 语言名取自 Shiki 输出的 data-language。
+ */
+---
+
+<script>
+  const blocks = Array.from(document.querySelectorAll<HTMLPreElement>(".prose pre"));
+
+  blocks.forEach((pre) => {
+    const code = pre.querySelector("code");
+    if (!code) return;
+
+    const language = pre.getAttribute("data-language") ?? "";
+    pre.classList.add("has-code-bar");
+
+    const bar = document.createElement("div");
+    bar.className = "code-bar";
+
+    const label = document.createElement("span");
+    label.className = "code-lang";
+    label.textContent = language;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "code-copy";
+    button.textContent = "COPY";
+    button.setAttribute("aria-label", "复制这段代码");
+
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(code.textContent ?? "");
+        button.textContent = "COPIED";
+      } catch {
+        button.textContent = "FAILED";
+      }
+      setTimeout(() => {
+        button.textContent = "COPY";
+      }, 1200);
+    });
+
+    bar.append(label, button);
+    pre.prepend(bar);
+  });
+</script>
+
+<style is:global>
+  .prose pre.has-code-bar {
+    position: relative;
+    padding-top: 2.4rem;
+  }
+
+  .code-bar {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.55rem 0.9rem;
+    border-bottom: 1px solid var(--color-line-0);
+  }
+
+  .code-lang,
+  .code-copy {
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-fg-3);
+  }
+
+  .code-copy {
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    transition: color var(--dur-base) var(--ease-out);
+  }
+
+  .code-copy:hover {
+    color: var(--color-fg-0);
+  }
+</style>

@@ -112,6 +112,9 @@
   --dur-base: 220ms;
   --dur-slow: 400ms;
 
+  /* 两头渐隐的分隔线颜色（列表行、索引栏、竖向标记统一用它） */
+  --divider-color: rgba(255, 255, 255, 0.2);
+
   /* 版式宽度（§4.6）：measure 是中文阅读舒适区，layout 是页面主容器 */
   --measure: 68ch;
   --width-layout: 1120px;
@@ -140,6 +143,8 @@ html[data-theme="light"] {
   --color-line-2: rgba(0, 0, 0, 0.28);
 
   --color-accent: rgba(0, 0, 0, 0.85);
+
+  --divider-color: rgba(0, 0, 0, 0.18);
 
   color-scheme: light;
 }

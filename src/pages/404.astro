@@ -25,8 +25,14 @@ import Button from "../components/ui/Button.astro";
       &gt; 文件不存在，或它已经被移动、改名。
     </p>
 
-    <div class="mt-10 flex flex-wrap gap-3">
+    <div class="mt-10 flex flex-wrap items-center gap-3">
       <Button href="/">返回首页</Button>
+      <a
+        href="/search/"
+        class="tap font-mono text-micro tracking-[0.14em] text-fg-3 uppercase no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
+      >
+        或者搜一下 →
+      </a>
     </div>
   </Container>
 </BaseLayout>
