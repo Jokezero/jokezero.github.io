@@ -137,14 +137,15 @@ const linksOf = (item: ProjectItem) => [
             {String(index + 1).padStart(2, "0")}
           </p>
 
-          <h3 class="mt-3 text-[16px] leading-[1.5] font-normal">
+          <!-- 卡片标题用 h2：页面只有 h1（"项目"），用 h3 会跳级，axe 的 heading-order 不喜欢 -->
+          <h2 class="mt-3 text-[16px] leading-[1.5] font-normal">
             <a
               href={item.href}
               class="text-fg-2 no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
             >
               {item.title}
             </a>
-          </h3>
+          </h2>
 
           <p class="mt-2 text-[13px] leading-[1.7] text-fg-3">{item.summary}</p>
 
