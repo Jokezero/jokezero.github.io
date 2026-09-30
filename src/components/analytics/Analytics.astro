@@ -1,0 +1,38 @@
+---
+/**
+ * 访问统计（Cookie-less，二选一）。
+ *
+ * 与评论同一条安全规则：没填配置就不渲染任何东西，页面里连标签都不会出现。
+ * 换服务 = 换这里的 provider 与 token（配置在 src/config/site.ts）。
+ */
+import { SITE } from "../../config/site";
+
+const { provider, token, umami } = SITE.analytics;
+
+const enabled =
+  SITE.features.analytics &&
+  ((provider === "cloudflare" && Boolean(token)) ||
+    (provider === "umami" && Boolean(umami.scriptUrl && umami.websiteId)));
+---
+
+{
+  enabled && provider === "cloudflare" && (
+    <script
+      is:inline
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon={JSON.stringify({ token })}
+    />
+  )
+}
+
+{
+  enabled && provider === "umami" && (
+    <script
+      is:inline
+      defer
+      src={umami.scriptUrl}
+      data-website-id={umami.websiteId}
+    />
+  )
+}

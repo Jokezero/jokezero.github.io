@@ -1,0 +1,393 @@
+---
+/**
+ * 项目列表：左侧控制栏（搜索 / 技术栈 / 页码 / 每页数量 / 滚动提示）+ 右侧分页网格。
+ *
+ * 规范：docs/01-design-spec.md §4.5.3；筛选语义：docs/06-content-model.md §4
+ * （OR 多选 + 命中数排序 + 重排后页码归零）。
+ *
+ * 与文章列表的差异化（用户要求"相似但不要完全一样"）：
+ *   文章索引栏 = 搜索 + 标签（带计数）
+ *   项目控制栏 = 搜索 + 技术栈（不带计数）+ 页码 + 每页数量
+ */
+import { externalAttrs } from "../../lib/url";
+
+interface ProjectItem {
+  id: string;
+  title: string;
+  summary: string;
+  tags: string[];
+  date: string;
+  href: string;
+  repo?: string;
+  video?: string;
+  links: { label: string; url: string }[];
+}
+
+interface Props {
+  items: ProjectItem[];
+  /** 每页数量的可选值 */
+  pageSizes?: number[];
+  /** 默认每页数量 */
+  perPage?: number;
+}
+
+const { items, pageSizes = [3, 4, 6], perPage = 6 } = Astro.props;
+
+const tags = [...new Set(items.flatMap((item) => item.tags))].sort((a, b) =>
+  a.localeCompare(b, "zh-Hans-CN"),
+);
+
+// 卡片上的外链标记：REPO / VIDEO / 自定义标签（06-content-model.md §3）
+const linksOf = (item: ProjectItem) => [
+  ...(item.repo ? [{ label: "REPO", url: item.repo }] : []),
+  ...(item.video ? [{ label: "VIDEO", url: item.video }] : []),
+  ...item.links.map((link) => ({ label: link.label, url: link.url })),
+];
+---
+
+<div
+  id="project-shelf"
+  class="grid gap-12 min-[900px]:grid-cols-[224px_1fr] min-[900px]:gap-[60px]"
+  data-per-page={String(perPage)}
+>
+  <!-- 控制栏：自上而下 = 搜索 → 技术栈 → 页码 → 每页数量 → 滚动提示 -->
+  <aside class="min-[900px]:sticky min-[900px]:top-24 min-[900px]:self-start">
+    <input
+      id="project-search"
+      class="search-input"
+      type="search"
+      placeholder="搜索项目…"
+      aria-label="按标题与描述搜索项目"
+      autocomplete="off"
+    />
+
+    <div class="divider-fade my-6"></div>
+
+    <div
+      id="stack-filter"
+      class="flex flex-wrap gap-x-5 gap-y-3 min-[900px]:flex-col"
+      role="group"
+      aria-label="按技术栈筛选（可多选）"
+    >
+      <button type="button" class="text-btn" data-tag="" aria-pressed="true">
+        全部
+      </button>
+      {
+        tags.map((tag) => (
+          <button type="button" class="text-btn" data-tag={tag} aria-pressed="false">
+            {tag}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="divider-fade my-6"></div>
+
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-2" role="group" aria-label="页码">
+      <span class="font-mono text-micro tracking-[0.1em] text-fg-3">PAGE</span>
+      <div id="page-list" class="flex flex-wrap items-center gap-x-3 gap-y-2"></div>
+    </div>
+
+    <div class="divider-fade my-6"></div>
+
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-2" role="group" aria-label="每页数量">
+      <span class="font-mono text-micro tracking-[0.1em] text-fg-3">PER PAGE</span>
+      <div id="size-list" class="flex flex-wrap items-center gap-x-3 gap-y-2">
+        {
+          pageSizes.map((size) => (
+            <button
+              type="button"
+              class="text-btn"
+              data-size={String(size)}
+              aria-pressed={size === perPage ? "true" : "false"}
+            >
+              {size}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="divider-fade my-6"></div>
+
+    <!-- 滚轮翻页不是直觉操作，必须给出提示（§4.5.3） -->
+    <p class="font-mono text-micro leading-[1.9] tracking-[0.06em] text-fg-3">
+      在项目页任意位置滚动 ↑↓ 切换页
+    </p>
+  </aside>
+
+  <!-- 网格：无卡片、无边框，每项左侧一条两头渐隐的竖线 -->
+  <section>
+    <div
+      id="project-grid"
+      class="grid grid-cols-1 gap-x-[44px] gap-y-[52px] min-[620px]:grid-cols-[repeat(auto-fill,minmax(300px,1fr))]"
+    >
+      {
+        items.map((item, index) => (
+          <article
+            class="proj-item relative pl-5"
+            data-title={`${item.title.toLowerCase()} ${item.summary.toLowerCase()}`}
+            data-tags={item.tags.join(",")}
+            data-date={item.date}
+          >
+            <span class="divider-fade-v absolute inset-y-1 left-0" aria-hidden="true" />
+
+            <p class="font-mono text-micro tracking-[0.1em] text-fg-3" data-index>
+              {String(index + 1).padStart(2, "0")}
+            </p>
+
+            <h3 class="mt-3 text-[16px] leading-[1.5] font-normal">
+              <a
+                href={item.href}
+                class="text-fg-2 no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
+              >
+                {item.title}
+              </a>
+            </h3>
+
+            <p class="mt-2 text-[13px] leading-[1.7] text-fg-3">{item.summary}</p>
+
+            <p class="mt-3 font-mono text-micro tracking-[0.1em] text-fg-3 uppercase">
+              {item.tags.join(" · ")} · {item.date}
+            </p>
+
+            {
+              linksOf(item).length > 0 && (
+                <p class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                  {linksOf(item).map((link) => (
+                    <a
+                      href={link.url}
+                      class="font-mono text-micro tracking-[0.1em] text-fg-3 uppercase no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-1"
+                      {...externalAttrs(link.url)}
+                    >
+                      {link.label} ↗
+                    </a>
+                  ))}
+                </p>
+              )
+            }
+          </article>
+        ))
+      }
+    </div>
+
+    <p
+      id="empty-projects"
+      class="font-mono text-micro tracking-[0.1em] text-fg-3"
+      hidden={items.length > 0}
+    >
+      暂无项目喵～正在努力学习
+    </p>
+    <p
+      id="empty-project-match"
+      class="font-mono text-micro tracking-[0.1em] text-fg-3"
+      hidden
+    >
+      没有匹配的项目…
+    </p>
+  </section>
+</div>
+
+<script>
+  const root = document.getElementById("project-shelf");
+
+  if (root) {
+    const grid = root.querySelector<HTMLElement>("#project-grid")!;
+    const items = Array.from(root.querySelectorAll<HTMLElement>(".proj-item"));
+    const search = root.querySelector<HTMLInputElement>("#project-search");
+    const tagButtons = Array.from(
+      root.querySelectorAll<HTMLButtonElement>("#stack-filter [data-tag]"),
+    );
+    const sizeButtons = Array.from(
+      root.querySelectorAll<HTMLButtonElement>("#size-list [data-size]"),
+    );
+    const pageList = root.querySelector<HTMLElement>("#page-list")!;
+    const emptyAll = root.querySelector<HTMLElement>("#empty-projects");
+    const emptyMatch = root.querySelector<HTMLElement>("#empty-project-match");
+
+    const active = new Set<string>();
+    let perPage = Number(root.dataset.perPage ?? 6);
+    let page = 0;
+    let switching = false;
+
+    const tagsOf = (item: HTMLElement) => (item.dataset.tags ?? "").split(",");
+
+    const isMatch = (item: HTMLElement, tagSet: Set<string>, query: string) => {
+      const tags = tagsOf(item);
+      const tagOk = tagSet.size === 0 || tags.some((tag) => tagSet.has(tag));
+      const queryOk = !query || (item.dataset.title ?? "").includes(query);
+      return tagOk && queryOk;
+    };
+
+    const hitCount = (item: HTMLElement, tagSet: Set<string>) =>
+      tagsOf(item).filter((tag) => tagSet.has(tag)).length;
+
+    /** 当前可见集合：OR 筛选 + 命中数排序（并列按日期倒序、再按标题） */
+    const visibleItems = () => {
+      const query = (search?.value ?? "").trim().toLowerCase();
+      return items
+        .filter((item) => isMatch(item, active, query))
+        .sort((a, b) => {
+          const byHits = hitCount(b, active) - hitCount(a, active);
+          if (byHits !== 0) return byHits;
+          const byDate = (b.dataset.date ?? "").localeCompare(a.dataset.date ?? "");
+          if (byDate !== 0) return byDate;
+          return (a.dataset.title ?? "").localeCompare(b.dataset.title ?? "");
+        });
+    };
+
+    const pageCount = (total: number) => Math.max(1, Math.ceil(total / perPage));
+
+    const renderPageButtons = (total: number) => {
+      pageList.replaceChildren();
+      for (let i = 0; i < total; i += 1) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "text-btn";
+        button.dataset.page = String(i);
+        button.textContent = String(i + 1).padStart(2, "0");
+        button.setAttribute("aria-current", i === page ? "true" : "false");
+        button.addEventListener("click", () => goTo(i));
+        pageList.append(button);
+      }
+    };
+
+    const paint = (animate: boolean) => {
+      const visible = visibleItems();
+      const total = pageCount(visible.length);
+      page = Math.min(page, total - 1);
+
+      const start = page * perPage;
+      const slice = visible.slice(start, start + perPage);
+      const shown = new Set(slice);
+
+      for (const item of items) {
+        const show = shown.has(item);
+        item.hidden = !show;
+        item.classList.remove("is-enter");
+      }
+
+      slice.forEach((item, index) => {
+        const indexEl = item.querySelector("[data-index]");
+        if (indexEl) indexEl.textContent = String(start + index + 1).padStart(2, "0");
+        grid.append(item);
+        if (animate) {
+          item.style.setProperty("--enter-delay", `${index * 55}ms`);
+          item.classList.add("is-enter");
+        }
+      });
+
+      renderPageButtons(total);
+
+      const nothingAtAll = items.length === 0;
+      if (emptyAll) emptyAll.hidden = !nothingAtAll;
+      if (emptyMatch) emptyMatch.hidden = nothingAtAll || slice.length > 0;
+      grid.hidden = slice.length === 0;
+
+      for (const button of tagButtons) {
+        const tag = button.dataset.tag ?? "";
+        button.setAttribute(
+          "aria-pressed",
+          String(tag === "" ? active.size === 0 : active.has(tag)),
+        );
+      }
+    };
+
+    const goTo = (next: number) => {
+      const total = pageCount(visibleItems().length);
+      if (next < 0 || next >= total || switching) return;
+      switching = true;
+      page = next;
+      paint(true);
+      // 让"旧条目滑出 + 新条目逐条归位"播完再解除屏蔽（§4.5.3）
+      setTimeout(() => {
+        switching = false;
+      }, 360 + 55 * perPage);
+    };
+
+    for (const button of tagButtons) {
+      button.addEventListener("click", () => {
+        const tag = button.dataset.tag ?? "";
+        if (tag === "") active.clear();
+        else if (active.has(tag)) active.delete(tag);
+        else active.add(tag);
+
+        // 重排后页码归零，否则会停在一个不存在的页（06-content-model.md §4）
+        page = 0;
+        paint(true);
+      });
+    }
+
+    for (const button of sizeButtons) {
+      button.addEventListener("click", () => {
+        perPage = Number(button.dataset.size ?? 6);
+        page = 0;
+        for (const other of sizeButtons) {
+          other.setAttribute(
+            "aria-pressed",
+            String(other === button ? "true" : "false"),
+          );
+        }
+        paint(false);
+      });
+    }
+
+    search?.addEventListener("input", () => {
+      page = 0;
+      paint(false);
+    });
+
+    // ── 滚轮翻页：本页任意位置滚动都生效，但到边界就把滚动交还给页面 ──
+    let lastWheel = 0;
+
+    addEventListener(
+      "wheel",
+      (event) => {
+        if (event.ctrlKey) return; // 缩放手势不拦截
+        if (matchMedia("(hover: none)").matches) return; // 触屏走页码按钮
+        if (Math.abs(event.deltaY) < 4) return;
+
+        const total = pageCount(visibleItems().length);
+        if (total <= 1) return; // 只有一页 = 不拦，正常滚动页面
+
+        // 切换动画进行中直接返回，避免惯性滚动又触发一次（§10 常见坑）
+        if (switching) return;
+
+        const direction = event.deltaY > 0 ? 1 : -1;
+        const next = page + direction;
+        if (next < 0 || next >= total) return; // 首页/末页：交还给页面滚动
+
+        const now = Date.now();
+        if (now - lastWheel < 780) {
+          event.preventDefault();
+          return;
+        }
+
+        lastWheel = now;
+        event.preventDefault();
+        goTo(next);
+      },
+      { passive: false },
+    );
+
+    paint(false);
+  }
+</script>
+
+<style is:global>
+  .proj-item.is-enter {
+    animation: proj-in 360ms var(--ease-spring) both;
+    animation-delay: var(--enter-delay, 0ms);
+  }
+
+  @keyframes proj-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

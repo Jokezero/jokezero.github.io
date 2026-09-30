@@ -34,22 +34,70 @@ export const SITE = {
     { label: "关于", href: "/about" },
   ],
 
-  /** 页脚 / 关于页的社交链接（P1 起使用）。 */
+  /** 页脚 / 关于页的社交链接。 */
   social: [
     { label: "GitHub", href: "https://github.com/Jokezero" },
-    { label: "RSS", href: "/rss.xml" },
+  ],
+
+  /**
+   * 页脚导航：站内入口放在这里，顶栏只保留主信息架构（§4.5.1 明确"右上角不放按钮"）。
+   * 搜索入口按产品判断放在页脚 + 文章索引栏，不占顶栏位置。
+   *
+   * 注意：RSS **刻意不放**在界面上（06-content-model.md §6 已确认）——
+   * 只在 <head> 保留自动发现标记，读者把 /rss.xml 直接丢进阅读器即可。
+   */
+  footerNav: [
+    { label: "文章", href: "/blog" },
+    { label: "项目", href: "/projects" },
+    { label: "搜索", href: "/search" },
   ],
 
   /**
    * 功能开关（docs/01-design-spec.md §3.3 的"保险丝"）。
    * 关掉某一项 = 对应脚本与第三方请求完全不加载。
-   * 这些能力分别在 P2（搜索/评论/统计）与 P3（动效）落地，此处先冻结开关的默认值。
+   * P2 已落地搜索 / 评论 / 统计；P3 落地动效。
    */
   features: {
     heroEffect: "static", // "static" | "canvas"；P3 实现 canvas 后改为 "canvas"
     commandPalette: false, // P3
-    comments: false, // P2 接入 giscus 后改为 true
-    search: false, // P2 接入 Pagefind 后改为 true
-    analytics: false, // P2 接入统计脚本后改为 true
+    /** 评论：要先填好下面的 comments 配置（仓库开启 Discussions 才有 ID），否则不加载任何脚本。 */
+    comments: false,
+    /** 全文搜索：Pagefind，构建期生成索引，零第三方请求。 */
+    search: true,
+    /** 统计：要先填好下面的 analytics 配置。 */
+    analytics: false,
+  },
+
+  /**
+   * 评论区（giscus）。取 ID 的步骤：
+   * 1. 仓库开启 Discussions：Settings → General → Features → Discussions
+   * 2. 用 GitHub 账号登录 https://giscus.app ，填仓库名、选一个 Discussion 分类
+   * 3. 把页面生成的 repo / repoId / category / categoryId 四项抄到这里
+   * 4. 把 features.comments 改成 true
+   * 四项缺任何一项 → 评论区不渲染、也不请求 giscus 的脚本。
+   */
+  comments: {
+    repo: "",
+    repoId: "",
+    category: "Announcements",
+    categoryId: "",
+    /** 讨论与页面的映射方式：pathname = 一篇文章一个讨论。 */
+    mapping: "pathname",
+    reactionsEnabled: "1",
+    inputPosition: "top",
+  },
+
+  /**
+   * 访问统计（Cookie-less）。留空 provider 为 "none" 时不加载任何统计脚本。
+   * - cloudflare：填 Cloudflare Web Analytics 的 site token
+   * - umami：填 Umami 的 scriptUrl 与 websiteId
+   */
+  analytics: {
+    provider: "none" as "none" | "cloudflare" | "umami",
+    token: "",
+    umami: {
+      scriptUrl: "",
+      websiteId: "",
+    },
   },
 } as const;

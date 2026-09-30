@@ -1,0 +1,45 @@
+---
+/**
+ * 文章详情页 /blog/<slug>/。
+ * slug 直接用内容集合的 id（= src/content/posts 下的文件路径去掉扩展名）。
+ */
+import { render } from "astro:content";
+import PostLayout from "../../layouts/PostLayout.astro";
+import { getPosts } from "../../lib/posts";
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+
+  return posts.map((post, index) => {
+    // 已按日期倒序：index-1 是更新的那篇，index+1 是更旧的那篇
+    const newer = posts[index - 1];
+    const older = posts[index + 1];
+
+    return {
+      params: { slug: post.id },
+      props: {
+        post,
+        next: newer
+          ? { title: newer.data.title, href: `/blog/${newer.id}/` }
+          : undefined,
+        prev: older
+          ? { title: older.data.title, href: `/blog/${older.id}/` }
+          : undefined,
+      },
+    };
+  });
+}
+
+const { post, prev, next } = Astro.props;
+const { Content, headings } = await render(post);
+---
+
+<PostLayout
+  post={post}
+  headings={headings}
+  body={post.body ?? ""}
+  prev={prev}
+  next={next}
+>
+  <Content />
+</PostLayout>

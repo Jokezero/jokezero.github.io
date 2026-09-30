@@ -1,0 +1,43 @@
+---
+/**
+ * 标签聚合页 /tags/<tag>/：复用文章列表组件，只是预选了该标签。
+ * 标签页本身不引入新样式，筛选仍由同一个脚本负责（API 与体验完全一致）。
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/ui/Container.astro";
+import BlogIndex from "../../components/blog/BlogIndex.astro";
+import { getPosts } from "../../lib/posts";
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
+
+  return tags.map((tag) => {
+    const items = posts
+      .filter((post) => post.data.tags.includes(tag))
+      .map((post) => ({
+        id: post.id,
+        title: post.data.title,
+        summary: post.data.summary,
+        pubDate: post.data.pubDate,
+        tags: post.data.tags,
+        href: `/blog/${post.id}/`,
+      }));
+
+    return { params: { tag }, props: { tag, items } };
+  });
+}
+
+const { tag, items } = Astro.props;
+---
+
+<BaseLayout title={`标签：${tag}`} description={`所有带 #${tag} 标签的文章。`}>
+  <Container width="content" class="py-14">
+    <div class="mx-auto max-w-[1120px]">
+      <p class="mb-8 font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">
+        标签 · {items.length} 篇
+      </p>
+      <BlogIndex items={items} initialTags={[tag]} />
+    </div>
+  </Container>
+</BaseLayout>

@@ -14,5 +14,9 @@
 | [0006](./0006-self-hosted-font.md) | 自托管等宽字体（JetBrains Mono 拉丁子集） | 已采纳 |
 | [0007](./0007-theme-switching.md) | 主题切换与"防闪烁"策略 | 已采纳 |
 | [0008](./0008-p1-visual-defaults.md) | P1 的视觉默认值与待办取舍 | 已采纳 |
+| [0009](./0009-content-fields-follow-06.md) | 内容字段以 `06-content-model.md` 为准 | 已采纳 |
+| [0010](./0010-client-side-filtering.md) | 筛选、排序与分页放在客户端 | 已采纳 |
+| [0011](./0011-pagefind-search-entry.md) | 全文搜索用 Pagefind，入口在页脚与文章索引栏 | 已采纳 |
+| [0012](./0012-comments-analytics-default-off.md) | 评论与统计默认关闭，配置留空即不加载 | 已采纳 |
 
 新增记录时直接续号，**不要修改历史记录**——改主意就新写一条并标注"取代 00XX"。

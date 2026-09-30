@@ -1,0 +1,32 @@
+---
+/**
+ * 文章列表页（docs/01-design-spec.md §4.5.2）。
+ *
+ * 这一页**没有大标题**（原型里整块 Hero 被隐藏），但为了让屏幕阅读器有明确
+ * 的页面标题，标题以 sr-only 形式保留。
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/ui/Container.astro";
+import BlogIndex from "../../components/blog/BlogIndex.astro";
+import { getPosts } from "../../lib/posts";
+
+const posts = await getPosts();
+
+const items = posts.map((post) => ({
+  id: post.id,
+  title: post.data.title,
+  summary: post.data.summary,
+  pubDate: post.data.pubDate,
+  tags: post.data.tags,
+  href: `/blog/${post.id}/`,
+}));
+---
+
+<BaseLayout title="文章" description="全部文章，可按标签与标题筛选。">
+  <Container width="content" class="py-14">
+    <h1 class="sr-only">文章</h1>
+    <div class="mx-auto max-w-[1120px]">
+      <BlogIndex items={items} />
+    </div>
+  </Container>
+</BaseLayout>

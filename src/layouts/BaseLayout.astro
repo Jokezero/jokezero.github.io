@@ -11,6 +11,7 @@ import "../styles/global.css";
 import { SITE } from "../config/site";
 import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
+import Analytics from "../components/analytics/Analytics.astro";
 
 interface Props {
   /** 页面标题；站点名会自动追加在后。 */
@@ -111,5 +112,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
     </main>
 
     <Footer />
+
+    <!-- 统计脚本：开关关闭或没填 token 时什么都不渲染 -->
+    <Analytics />
   </body>
 </html>

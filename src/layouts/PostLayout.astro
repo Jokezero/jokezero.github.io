@@ -1,0 +1,158 @@
+---
+/**
+ * 文章正文页排版（docs/07-layout-post-project.md §1）。
+ *
+ * 核心取舍：正文页**不放动效背景**，第一任务是读字 —— 纯黑底 + 顶栏 +
+ * 顶部 1px 阅读进度线 + 页脚。
+ *
+ * 组成：页头（kicker → h1 → 简介 → 渐隐线）→ 右侧 TOC + 正文 →
+ *       文末（标签 → 更新时间 → 上下篇）→ 评论区。
+ */
+import type { CollectionEntry } from "astro:content";
+import BaseLayout from "./BaseLayout.astro";
+import Container from "../components/ui/Container.astro";
+import Prose from "../components/ui/Prose.astro";
+import ReadingProgress from "../components/effects/ReadingProgress.astro";
+import CodeCopy from "../components/effects/CodeCopy.astro";
+import Lightbox from "../components/effects/Lightbox.astro";
+import Giscus from "../components/comments/Giscus.astro";
+import { formatDate, readingMinutes } from "../lib/format";
+
+interface Props {
+  post: CollectionEntry<"posts">;
+  headings: { depth: number; slug: string; text: string }[];
+  body: string;
+  prev?: { title: string; href: string };
+  next?: { title: string; href: string };
+}
+
+const { post, headings, body, prev, next } = Astro.props;
+const meta = post.data;
+
+const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const minutes = readingMinutes(body);
+const tags = meta.tags;
+---
+
+<BaseLayout title={meta.title} description={meta.summary}>
+  <ReadingProgress />
+
+  <Container width="content" class="py-16">
+    <!-- 正文 68ch 居中；>=1100px 时右侧留出 200px 放 TOC -->
+    <div class="mx-auto grid max-w-[1120px] gap-12 min-[1100px]:grid-cols-[minmax(0,68ch)_200px]">
+      <article class="min-w-0">
+        <!-- 页头：等宽 kicker（日期 · 时长 · 标签）→ 标题 → 一句话简介 -->
+        <header>
+          <p class="font-mono text-micro tracking-[0.14em] text-fg-3 uppercase">
+            {formatDate(meta.pubDate)} · {minutes} MIN · {tags.join(" · ")}
+          </p>
+
+          <h1
+            class="mt-5 text-[clamp(1.75rem,4vw,2.5rem)] leading-[1.2] font-semibold tracking-[-0.02em] text-fg-0"
+          >
+            {meta.title}
+          </h1>
+
+          <p class="mt-5 max-w-[46ch] text-step-0 leading-[1.9] text-fg-2">
+            {meta.summary}
+          </p>
+
+          <div class="divider-fade mt-10"></div>
+        </header>
+
+        <!-- 正文：Markdown 渲染结果，图片交给灯箱处理 -->
+        <div class="mt-10" data-lightbox>
+          <Prose class="!max-w-none">
+            <slot />
+          </Prose>
+        </div>
+
+        <!-- 文末：标签 → 更新时间 → 上下篇 -->
+        <footer class="mt-16">
+          <div class="divider-fade"></div>
+
+          <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2">
+            {
+              tags.map((tag) => (
+                <a
+                  href={`/tags/${encodeURIComponent(tag)}/`}
+                  class="font-mono text-micro tracking-[0.1em] text-fg-3 no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
+                >
+                  #{tag}
+                </a>
+              ))
+            }
+          </div>
+
+          {
+            meta.updatedDate && (
+              <p class="mt-4 font-mono text-micro tracking-[0.1em] text-fg-3">
+                更新于 {formatDate(meta.updatedDate)}
+              </p>
+            )
+          }
+
+          <nav class="mt-10 grid gap-4 sm:grid-cols-2" aria-label="上下篇">
+            {
+              prev && (
+                <a href={prev.href} class="group no-underline">
+                  <span class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase">
+                    上一篇
+                  </span>
+                  <span class="mt-2 block text-[15px] text-fg-2 transition-colors group-hover:text-fg-0">
+                    {prev.title}
+                  </span>
+                </a>
+              )
+            }
+            {
+              next && (
+                <a href={next.href} class="group no-underline sm:text-right">
+                  <span class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase">
+                    下一篇
+                  </span>
+                  <span class="mt-2 block text-[15px] text-fg-2 transition-colors group-hover:text-fg-0">
+                    {next.title}
+                  </span>
+                </a>
+              )
+            }
+          </nav>
+        </footer>
+
+        <Giscus enabled={meta.comments} />
+      </article>
+
+      <!-- 目录：桌面端粘在右侧；窄屏收成一个可展开的列表（不隐藏功能） -->
+      {
+        toc.length > 0 && (
+          <aside class="min-[1100px]:sticky min-[1100px]:top-24 min-[1100px]:self-start">
+            <details class="min-[1100px]:open" open>
+              <summary class="cursor-pointer font-mono text-micro tracking-[0.14em] text-fg-3 uppercase">
+                目录
+              </summary>
+              <nav class="mt-4 flex flex-col gap-2.5" aria-label="文章目录">
+                {toc.map((heading) => (
+                  <a
+                    href={`#${heading.slug}`}
+                    class:list={[
+                      "text-[12.5px] no-underline transition-colors duration-[var(--dur-base)]",
+                      heading.depth === 3
+                        ? "pl-3 text-fg-3 hover:text-fg-1"
+                        : "text-fg-2 hover:text-fg-0",
+                    ]}
+                  >
+                    {heading.text}
+                  </a>
+                ))}
+              </nav>
+            </details>
+          </aside>
+        )
+      }
+    </div>
+  </Container>
+
+  <CodeCopy />
+  <Lightbox />
+</BaseLayout>

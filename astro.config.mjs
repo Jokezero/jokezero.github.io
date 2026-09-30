@@ -27,10 +27,11 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
 
-  // 代码高亮：Shiki + VS Code 默认主题。亮色主题的切换在 P1 接入。
+  // 代码高亮：Shiki + VS Code 默认主题（暗 dark-plus / 亮 light-plus，见 06-content-model.md）。
+  // 两套主题同时输出，用哪套由 CSS 的 data-theme 决定，切换主题不需要重新构建。
   markdown: {
     shikiConfig: {
-      theme: "dark-plus",
+      themes: { light: "light-plus", dark: "dark-plus" },
       wrap: false,
     },
   },

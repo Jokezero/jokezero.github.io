@@ -1,0 +1,145 @@
+---
+/**
+ * 全文搜索页（Pagefind）。
+ *
+ * Pagefind 在 `pnpm build` 之后由 postbuild 步骤扫描 dist/ 生成索引，
+ * 索引是纯静态文件，没有任何第三方请求；这里只在用户开始输入时才动态加载它。
+ * 本地 `pnpm dev` 环境没有索引，会给出明确提示而不是静默失败。
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/ui/Container.astro";
+import { SITE } from "../config/site";
+---
+
+<BaseLayout title="搜索" description={`在 ${SITE.name} 全站搜索文章与项目。`}>
+  <Container width="layout" class="py-16">
+    <p class="font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">
+      Full-text Search
+    </p>
+    <h1 class="mt-4 text-step-3 font-semibold tracking-[-0.02em] text-fg-0">搜索</h1>
+
+    {
+      SITE.features.search ? (
+        <>
+          <input
+            id="search-input"
+            class="search-input mt-10 max-w-[520px]"
+            type="search"
+            placeholder="输入关键词…"
+            aria-label="全站搜索"
+            autocomplete="off"
+          />
+
+          <div
+            id="search-results"
+            class="mt-10 flex max-w-[720px] flex-col"
+            aria-live="polite"
+          />
+
+          <p
+            id="search-message"
+            class="mt-6 max-w-[60ch] font-mono text-micro leading-[1.9] text-fg-3"
+          >
+            索引在构建期生成；本地 pnpm dev 环境下不可用，运行 pnpm build 后再预览即可。
+          </p>
+        </>
+      ) : (
+        <p class="mt-10 font-mono text-micro text-fg-3">
+          搜索当前处于关闭状态（src/config/site.ts 的 features.search）。
+        </p>
+      )
+    }
+  </Container>
+</BaseLayout>
+
+<!--
+  注意：这里必须用 is:inline（原样输出，不经过打包器）。
+  原因：Astro 会把体积小的脚本内联进 HTML，而 Vite 处理过的动态 import 会引用
+  一个只在独立脚本文件里存在的辅助变量（__VITE_PRELOAD__），内联后就变成
+  ReferenceError。Pagefind 的模块只能在运行时从 /pagefind/ 动态加载，
+  所以这条路必须走原生 import。
+-->
+<script is:inline>
+  const input = document.getElementById("search-input");
+  const results = document.getElementById("search-results");
+  const message = document.getElementById("search-message");
+
+  if (input && results) {
+    let pagefind = null;
+    let timer = 0;
+
+    const load = async () => {
+      if (!pagefind) {
+        // 索引文件只在构建产物里存在（由 postbuild 的 pagefind 步骤生成）
+        pagefind = await import("/pagefind/pagefind.js");
+        if (typeof pagefind.init === "function") await pagefind.init();
+      }
+      return pagefind;
+    };
+
+    const render = async (query) => {
+      results.replaceChildren();
+
+      if (!query) {
+        if (message) message.hidden = false;
+        return;
+      }
+
+      try {
+        const pf = await load();
+        const found = await pf.search(query);
+        const items = await Promise.all(
+          found.results.slice(0, 20).map((result) => result.data()),
+        );
+
+        if (message) message.hidden = items.length > 0;
+
+        for (const item of items) {
+          const link = document.createElement("a");
+          link.href = item.url;
+          link.className =
+            "block border-b border-line-0 py-5 no-underline transition-colors hover:border-line-2";
+
+          const title = document.createElement("h2");
+          title.className = "text-[15px] font-normal text-fg-1";
+          title.textContent = item.meta?.title ?? item.url;
+
+          const excerpt = document.createElement("p");
+          excerpt.className = "mt-2 text-[13px] leading-[1.8] text-fg-3";
+          // Pagefind 自己转义过正文，这里只额外插入它生成的 <mark> 高亮
+          excerpt.innerHTML = item.excerpt ?? "";
+
+          link.append(title, excerpt);
+          results.append(link);
+        }
+      } catch (error) {
+        // 本地开发环境没有索引，这里会走到；顺手把原因留给排查用
+        console.warn("[search] Pagefind 不可用：", error);
+        if (message) {
+          message.hidden = false;
+          message.textContent =
+            "全文搜索在本地开发环境不可用（索引只在构建时生成）。运行 pnpm build 后预览即可。";
+        }
+      }
+    };
+
+    // 支持 /search/?q=关键词 直接带参进入
+    const initial = new URLSearchParams(location.search).get("q");
+    if (initial) {
+      input.value = initial;
+      render(initial);
+    }
+
+    input.addEventListener("input", () => {
+      clearTimeout(timer);
+      const query = input.value.trim();
+      timer = window.setTimeout(() => {
+        const url = new URL(location.href);
+        if (query) url.searchParams.set("q", query);
+        else url.searchParams.delete("q");
+        history.replaceState(null, "", url);
+        render(query);
+      }, 150);
+    });
+  }
+</script>

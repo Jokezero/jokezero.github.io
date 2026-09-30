@@ -1,0 +1,171 @@
+---
+/**
+ * 全屏图片灯箱（docs/07-layout-post-project.md §"灯箱（已确认使用）"）。
+ *
+ * 规则：不引第三方库；只处理带 data-lightbox 容器里的图片；
+ * 支持左右方向键切换、Esc 关闭、焦点回到原图、关闭时不动滚动位置。
+ * 页面没有图片时脚本直接返回，零开销。
+ */
+---
+
+<dialog id="lightbox" class="lightbox" aria-label="图片查看">
+  <div class="lightbox-stage">
+    <img id="lightbox-image" alt="" />
+  </div>
+
+  <div class="lightbox-bar">
+    <span id="lightbox-counter" class="font-mono text-micro text-fg-3" aria-live="polite"></span>
+    <span class="font-mono text-micro text-fg-3">← → 切换 · ESC 关闭</span>
+  </div>
+
+  <button id="lightbox-prev" type="button" class="lightbox-nav lightbox-prev" aria-label="上一张">
+    ←
+  </button>
+  <button id="lightbox-next" type="button" class="lightbox-nav lightbox-next" aria-label="下一张">
+    →
+  </button>
+</dialog>
+
+<style is:global>
+  .lightbox {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    padding: 0;
+    border: 0;
+    background-color: var(--color-bg-0);
+    color: var(--color-fg-1);
+  }
+
+  .lightbox::backdrop {
+    background-color: rgba(0, 0, 0, 0.92);
+  }
+
+  .lightbox-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100dvh - 64px);
+    padding: 24px;
+  }
+
+  .lightbox-stage img {
+    max-width: 100%;
+    max-height: 100%;
+    border: 1px solid var(--color-line-0);
+  }
+
+  .lightbox-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 24px 20px;
+  }
+
+  .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    translate: 0 -50%;
+    padding: 12px 16px;
+    border: 0;
+    background: none;
+    color: var(--color-fg-2);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: color var(--dur-base) var(--ease-out);
+  }
+
+  .lightbox-nav:hover {
+    color: var(--color-fg-0);
+  }
+
+  .lightbox-prev {
+    left: 8px;
+  }
+
+  .lightbox-next {
+    right: 8px;
+  }
+
+  /* 正文里的图片：包一层按钮，保留原排版（无边框、无内边距、块级） */
+  .lightbox-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+
+  .lightbox-trigger img {
+    display: block;
+    width: 100%;
+  }
+</style>
+
+<script>
+  const images = Array.from(
+    document.querySelectorAll<HTMLImageElement>("[data-lightbox] img"),
+  );
+  const dialog = document.getElementById("lightbox") as HTMLDialogElement | null;
+
+  // 没有图片、或浏览器不支持原生 dialog → 整段逻辑不启动。
+  if (images.length > 0 && dialog?.showModal) {
+    const modal = dialog as HTMLDialogElement;
+    const stage = modal.querySelector<HTMLImageElement>("#lightbox-image")!;
+    const counter = modal.querySelector("#lightbox-counter")!;
+    let index = 0;
+    let lastTrigger: HTMLElement | null = null;
+
+    // 把每张图包进一个按钮，键盘可用、点击热区也正确。
+    images.forEach((image, i) => {
+      const trigger = document.createElement("button");
+      trigger.type = "button";
+      trigger.className = "lightbox-trigger";
+      trigger.setAttribute("aria-label", `放大图片：${image.alt || i + 1}`);
+      image.replaceWith(trigger);
+      trigger.append(image);
+      trigger.addEventListener("click", () => open(i, trigger));
+    });
+
+    function render() {
+      const image = images[index];
+      stage.src = image.currentSrc || image.src;
+      stage.alt = image.alt;
+      counter.textContent = `${String(index + 1).padStart(2, "0")} / ${String(images.length).padStart(2, "0")}`;
+    }
+
+    function open(i: number, trigger: HTMLElement) {
+      index = i;
+      lastTrigger = trigger;
+      render();
+      modal.showModal();
+    }
+
+    function step(delta: number) {
+      index = (index + delta + images.length) % images.length;
+      render();
+    }
+
+    modal.querySelector("#lightbox-prev")?.addEventListener("click", () => step(-1));
+    modal.querySelector("#lightbox-next")?.addEventListener("click", () => step(1));
+
+    modal.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") step(-1);
+      if (event.key === "ArrowRight") step(1);
+    });
+
+    // 点击图片以外的空白处关闭（Esc 由浏览器原生处理）。
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) modal.close();
+    });
+
+    // 关闭后把焦点还给触发的图片 —— 键盘用户不会"掉到文档开头"。
+    modal.addEventListener("close", () => {
+      lastTrigger?.focus();
+    });
+  }
+</script>

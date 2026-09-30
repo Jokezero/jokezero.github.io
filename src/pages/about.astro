@@ -1,0 +1,282 @@
+---
+/**
+ * 关于页（docs/01-design-spec.md §4.5.4 v2）。
+ *
+ * 结构最简、每一项都可预测：
+ *   第 1 屏 = 标题（kicker + 大标题 + 说明 + 滚动提示）
+ *   之后 4 屏各占满一屏，切换完全交给浏览器原生滚动吸附（不做自定义滚轮）
+ *   顶部有分节导航，右下角有 NN / 04 计数 —— 两者在标题屏隐藏
+ * 内容来自 src/content/pages/about.md（改内容不用碰这个文件）。
+ */
+import { getEntry } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/ui/Container.astro";
+import { externalAttrs } from "../lib/url";
+
+const about = await getEntry("pages", "about");
+
+if (!about) {
+  throw new Error("缺少 src/content/pages/about.md —— 关于页的内容源。");
+}
+
+const data = about.data;
+
+const sections = [
+  { id: "profile", index: "01", label: "PROFILE", name: "简介" },
+  { id: "experience", index: "02", label: "EXPERIENCE", name: "经历" },
+  { id: "stack", index: "03", label: "STACK", name: "技能" },
+  { id: "contact", index: "04", label: "CONTACT", name: "联系" },
+];
+---
+
+<BaseLayout title={data.title} description={data.summary}>
+  <!-- 分节导航：吸在顶栏下方；标题屏隐藏 -->
+  <nav
+    id="about-nav"
+    class="sticky top-14 z-40 border-b border-line-0 bg-bg-0 transition-opacity duration-[var(--dur-base)]"
+    aria-label="关于页分节"
+  >
+    <div
+      class="mx-auto flex max-w-[1200px] flex-wrap items-center gap-x-7 gap-y-2 px-6 py-3"
+    >
+      {
+        sections.map((section) => (
+          <a
+            href={`#${section.id}`}
+            class="about-nav-link flex items-center gap-2 font-mono text-micro tracking-[0.1em] text-fg-3 uppercase no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
+            data-section={section.id}
+          >
+            <span
+              class="block h-px w-2 bg-current transition-[width] duration-[var(--dur-base)]"
+              aria-hidden="true"
+            />
+            {section.index} {section.name}
+          </a>
+        ))
+      }
+    </div>
+  </nav>
+
+  <!-- 右下角计数：标题屏隐藏 -->
+  <p
+    id="about-count"
+    class="fixed right-6 bottom-6 z-40 font-mono text-micro tracking-[0.14em] text-fg-3 transition-opacity duration-[var(--dur-base)]"
+    aria-hidden="true"
+  >
+    01 / 04
+  </p>
+
+  <!-- 第 1 屏：标题 -->
+  <section id="about-top" class="asection">
+    <Container width="layout">
+      <p class="font-mono text-micro tracking-[0.2em] text-fg-3 uppercase">
+        About · Profile
+      </p>
+      <h1
+        class="mt-6 text-step-5 leading-[1.05] font-semibold tracking-[-0.02em] text-fg-0"
+      >
+        {data.title}
+      </h1>
+      <p class="mt-8 max-w-[52ch] text-step-0 leading-[1.9] text-fg-2">
+        {data.summary}
+      </p>
+
+      <div class="mt-16 flex items-center gap-3" aria-hidden="true">
+        <span class="block h-10 w-px bg-line-1"></span>
+        <span class="font-mono text-micro tracking-[0.2em] text-fg-3 uppercase">Scroll</span>
+      </div>
+    </Container>
+  </section>
+
+  <!-- 01 简介 -->
+  <section id="profile" class="asection">
+    <Container width="layout">
+      <p class="font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">
+        01 / Profile
+      </p>
+      <h2 class="mt-5 text-step-3 font-semibold tracking-[-0.02em] text-fg-0">简介</h2>
+
+      <div class="mt-10 max-w-[62ch] space-y-5">
+        {
+          data.intro.map((paragraph) => (
+            <p class="text-step-0 leading-[2] text-fg-1">{paragraph}</p>
+          ))
+        }
+      </div>
+    </Container>
+  </section>
+
+  <!-- 02 经历 -->
+  <section id="experience" class="asection">
+    <Container width="layout">
+      <p class="font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">
+        02 / Experience
+      </p>
+      <h2 class="mt-5 text-step-3 font-semibold tracking-[-0.02em] text-fg-0">经历</h2>
+
+      <ul class="mt-10 max-w-[62ch] list-none p-0">
+        {
+          data.experience.map((item, index) => (
+            <li class:list={["flex flex-col gap-2 py-4 sm:flex-row sm:gap-8", index > 0 && "border-t border-line-0"]}>
+              <span class="w-[10ch] shrink-0 font-mono text-micro tracking-[0.1em] text-fg-3 tabular-nums">
+                {item.year}
+              </span>
+              <span class="text-step-0 leading-[1.9] text-fg-1">{item.text}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  </section>
+
+  <!-- 03 技能 -->
+  <section id="stack" class="asection">
+    <Container width="layout">
+      <p class="font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">
+        03 / Stack
+      </p>
+      <h2 class="mt-5 text-step-3 font-semibold tracking-[-0.02em] text-fg-0">技能</h2>
+
+      <dl class="mt-10 grid max-w-[62ch] gap-8 sm:grid-cols-2">
+        {
+          data.skills.map((group) => (
+            <div>
+              <dt class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase">
+                {group.group}
+              </dt>
+              <dd class="mt-4 m-0 flex flex-wrap gap-x-5 gap-y-2">
+                {group.items.map((item) => (
+                  <span class="font-mono text-[12.5px] tracking-[0.06em] text-fg-1">
+                    {item}
+                  </span>
+                ))}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </Container>
+  </section>
+
+  <!-- 04 联系 -->
+  <section id="contact" class="asection">
+    <Container width="layout">
+      <p class="font-mono text-micro tracking-[0.16em] text-fg-3 uppercase">
+        04 / Contact
+      </p>
+      <h2 class="mt-5 text-step-3 font-semibold tracking-[-0.02em] text-fg-0">联系</h2>
+
+      <ul class="mt-10 max-w-[62ch] list-none p-0">
+        {
+          data.contacts.map((contact, index) => (
+            <li class:list={["flex flex-col gap-2 py-4 sm:flex-row sm:gap-8", index > 0 && "border-t border-line-0"]}>
+              <span class="w-[10ch] shrink-0 font-mono text-micro tracking-[0.1em] text-fg-3 uppercase">
+                {contact.label}
+              </span>
+              {contact.url ? (
+                <a
+                  href={contact.url}
+                  class="text-step-0 text-fg-1 no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-0"
+                  {...externalAttrs(contact.url)}
+                >
+                  {contact.value}
+                </a>
+              ) : (
+                <span class="text-step-0 text-fg-1">{contact.value}</span>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  </section>
+</BaseLayout>
+
+<style is:global>
+  /* 原生滚动吸附：整页一次一屏（§4.5.4 v2） */
+  html.is-about {
+    scroll-snap-type: y mandatory;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html.is-about {
+      scroll-snap-type: none;
+    }
+  }
+
+  .asection {
+    display: flex;
+    min-height: 100dvh;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: var(--space-10);
+    /* 吸顶顶栏 + 分节导航会盖住内容，用 scroll-margin 补偿 */
+    scroll-margin-top: 6.5rem;
+    scroll-snap-align: start;
+  }
+
+  .about-nav-link[aria-current="true"] {
+    color: var(--color-fg-0);
+  }
+
+  .about-nav-link[aria-current="true"] span {
+    width: 14px;
+  }
+</style>
+
+<script>
+  // 只在关于页打开滚动吸附（html.is-about），避免影响其他页面。
+  document.documentElement.classList.add("is-about");
+
+  const nav = document.getElementById("about-nav");
+  const counter = document.getElementById("about-count");
+  const topScreen = document.getElementById("about-top");
+  const sections = Array.from(document.querySelectorAll<HTMLElement>(".asection"));
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>(".about-nav-link"));
+
+  // 标题屏：隐藏分节导航与计数
+  const toggleChrome = (visible: boolean) => {
+    nav?.style.setProperty("opacity", visible ? "1" : "0");
+    nav?.style.setProperty("pointer-events", visible ? "auto" : "none");
+    counter?.style.setProperty("opacity", visible ? "1" : "0");
+  };
+
+  // 当前屏：高亮分节导航 + 更新 01 / 04 计数
+  const syncActive = () => {
+    const middle = window.scrollY + window.innerHeight / 2;
+    let currentIndex = -1;
+
+    sections.forEach((section, index) => {
+      const start = section.offsetTop;
+      const end = start + section.offsetHeight;
+      if (middle >= start && middle < end) currentIndex = index;
+    });
+
+    const onTitleScreen = currentIndex <= 0;
+    toggleChrome(!onTitleScreen);
+
+    if (currentIndex > 0 && counter) {
+      const label = sections[currentIndex].id;
+      const position = links.findIndex((link) => link.dataset.section === label) + 1;
+      counter.textContent = `${String(position).padStart(2, "0")} / ${String(sections.length - 1).padStart(2, "0")}`;
+    }
+
+    for (const link of links) {
+      const isActive = link.dataset.section === sections[currentIndex]?.id;
+      link.setAttribute("aria-current", isActive ? "true" : "false");
+    }
+  };
+
+  let frame = 0;
+  const schedule = () => {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      syncActive();
+    });
+  };
+
+  addEventListener("scroll", schedule, { passive: true });
+  addEventListener("resize", schedule, { passive: true });
+  if (topScreen) syncActive();
+</script>

@@ -10,9 +10,11 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
     "check": "astro check",
+    "index:search": "pagefind --site dist",
+    "new:post": "node scripts/new-post.mjs",
     "astro": "astro"
   },
   "dependencies": {

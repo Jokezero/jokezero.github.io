@@ -7,7 +7,17 @@
 
 ## 当前阶段
 
-P0（打通"提交 → 上线"链路）已就绪，等待首次推送与开启 Pages。
+P0（部署链路）、P1（设计系统与骨架）、P2（内容系统）已就绪，等待首次推送与开启 Pages。
+
+## 写一篇新文章
+
+```bash
+pnpm new:post 文章标题      # 生成 src/content/posts/日期-标题.md，默认是草稿
+```
+
+写完把 frontmatter 里的 `draft: true` 改成 `false`，提交推送即可上线。
+字段定义见 `src/content.config.ts`，字段语义见 `docs/06-content-model.md`。
+项目条目同理：在 `src/content/projects/` 里加一个 `.md`。
 
 ## 本地命令
 

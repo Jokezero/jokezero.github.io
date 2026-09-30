@@ -60,6 +60,130 @@
 }
 
 @layer components {
+  /* 两头渐隐的 1px 分隔线（§4.5.2）：横向与竖向两个版本，全站共用 */
+  .divider-fade {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--divider-color) 16%,
+      var(--divider-color) 84%,
+      transparent
+    );
+  }
+
+  .divider-fade-v {
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      var(--divider-color) 12%,
+      var(--divider-color) 88%,
+      transparent
+    );
+  }
+
+  /* 索引栏搜索框：透明底、无圆角、只保留下边框（§4.5.2） */
+  .search-input {
+    width: 100%;
+    padding: 6px 0 8px;
+    border: 0;
+    border-bottom: 1px solid var(--color-line-1);
+    border-radius: 0;
+    background-color: transparent;
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: 0.08em;
+    color: var(--color-fg-1);
+    transition: border-color var(--dur-base) var(--ease-out);
+  }
+
+  .search-input::placeholder {
+    color: var(--color-fg-3);
+  }
+
+  .search-input:focus {
+    border-bottom-color: var(--color-line-2);
+  }
+
+  /* 隐藏浏览器自带的清除按钮，保持索引栏干净 */
+  .search-input::-webkit-search-cancel-button,
+  .search-input::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* 纯文字按钮：标签、技术栈、页码、每页数量都用它 */
+  .text-btn {
+    padding: 2px 0;
+    border: 0;
+    background: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: 0.1em;
+    color: var(--color-fg-3);
+    text-align: left;
+    cursor: pointer;
+    transition:
+      color var(--dur-base) var(--ease-out),
+      transform var(--dur-base) var(--ease-spring);
+  }
+
+  .text-btn:hover {
+    color: var(--color-fg-1);
+    transform: translateX(3px);
+  }
+
+  .text-btn[aria-pressed="true"],
+  .text-btn[aria-current="true"] {
+    color: var(--color-fg-0);
+  }
+
+  /* 列表行：悬停时整行右移 6px（§4.5.2） */
+  .post-row-link {
+    transition: transform var(--dur-slow) var(--ease-spring);
+  }
+
+  .post-row:hover .post-row-link {
+    transform: translateX(6px);
+  }
+
+  /* 行分隔线位于每行顶部、两头渐隐；第一条可见项由脚本打上 .is-first（§4.5.2） */
+  .post-row {
+    position: relative;
+  }
+
+  .post-row:not(.is-first)::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--divider-color) 16%,
+      var(--divider-color) 84%,
+      transparent
+    );
+  }
+
+  /* 代码块：底色用站点自己的面板色，只取 Shiki 的 token 配色（06-content-model.md） */
+  .prose pre.astro-code {
+    background-color: var(--color-bg-1) !important;
+  }
+
+  /* Shiki 双主题：暗色取 --shiki-dark，亮色取 --shiki-light */
+  html[data-theme="light"] .astro-code,
+  html[data-theme="light"] .astro-code span {
+    color: var(--shiki-light) !important;
+  }
+
+  html:not([data-theme="light"]) .astro-code,
+  html:not([data-theme="light"]) .astro-code span {
+    color: var(--shiki-dark) !important;
+  }
+
   /* 粗指针设备（手机/平板）上的可点元素至少要 44×44px 热区（§4.6.2 第 4 条）。 */
   @media (pointer: coarse) {
     .tap {

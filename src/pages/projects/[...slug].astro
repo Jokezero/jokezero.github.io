@@ -1,0 +1,24 @@
+---
+/**
+ * 项目详情页 /projects/<slug>/（docs/07-layout-post-project.md §2）。
+ */
+import { render } from "astro:content";
+import ProjectLayout from "../../layouts/ProjectLayout.astro";
+import { getProjects } from "../../lib/posts";
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+---
+
+<ProjectLayout project={project}>
+  <Content />
+</ProjectLayout>
