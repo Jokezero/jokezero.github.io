@@ -41,24 +41,21 @@ export function initIntro(): void {
     return;
   }
 
-  let n = 0;
   let markup = "";
   for (const line of ART) {
     // 去掉行尾空格：它们看不见，但会白白占用级联时间
     for (const ch of line.replace(/\s+$/, "")) {
-      markup += `<span class="la-ch" style="--n:${n}">${ch === " " ? "&nbsp;" : ch}</span>`;
-      n += 1;
+      markup += `<span class="la-ch">${ch === " " ? "&nbsp;" : ch}</span>`;
     }
     markup += "\n";
   }
   art.innerHTML = markup;
 
-  // 级联速度按字符总数自适应：无论字样多长，整幅字都在约 0.7 秒内画完，
-  // 留出约 0.3 秒让人看清完整字样，再开始淡出（遮罩停留时间见下面的 980ms）。
-  // 写死 13ms/字的老做法只适合 50 字左右的三角；换成整词会拖到 2 秒以上，
-  // 结果是"还没画完就开始淡出"。
-  const step = Math.max(3, Math.min(13, Math.round(700 / Math.max(1, n))));
-  boot.style.setProperty("--intro-step", `${step}ms`);
+  // 给每个字符一个随机点亮时刻：笔画因此是"零散地冒出来"、逐渐拼成字样的。
+  // 窗口取 0-620ms，配合每个字符 280ms 的点亮动画，整幅字约 0.9 秒拼齐。
+  for (const ch of art.querySelectorAll<HTMLElement>(".la-ch")) {
+    ch.style.setProperty("--d", `${Math.round(Math.random() * 620)}ms`);
+  }
 
   try {
     sessionStorage.setItem(INTRO_KEY, "1");
@@ -71,9 +68,14 @@ export function initIntro(): void {
   // 遮罩还全黑，此时把滚动位置复位不会被看见
   window.scrollTo(0, 0);
 
-  window.requestAnimationFrame(() => {
-    boot.classList.add("is-draw");
-  });
+  // 强制一次样式计算，让"字符初始不可见"先成为已提交的状态
+  void art.offsetWidth;
+  boot.classList.add("is-draw");
+
+  // 字样拼齐 → 整屏闪一下 → 淡出，露出网站
+  window.setTimeout(() => {
+    boot.classList.add("is-settle");
+  }, 900);
 
   window.setTimeout(() => {
     boot.classList.add("is-gone");
@@ -82,9 +84,9 @@ export function initIntro(): void {
       void titleEl.offsetWidth;
       window.requestAnimationFrame(() => titleEl.classList.remove("is-in"));
     }
-  }, 980);
+  }, 1340);
 
   window.setTimeout(() => {
     boot.style.display = "none";
-  }, 1760);
+  }, 2050);
 }
