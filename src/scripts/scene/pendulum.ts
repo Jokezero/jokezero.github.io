@@ -5,7 +5,7 @@
  * 积分器：四阶龙格-库塔（RK4），dt = 1/600 —— 双摆对积分器很敏感，
  * RK4 才能让能量长期不漂；轨迹缓存 700 点。
  */
-import type { Scene } from "./core";
+import { LINE_WIDTH, type Scene } from "./core";
 
 const DT = 1 / 600;
 const G = 9.81;
@@ -98,7 +98,7 @@ export function createPendulum(): Scene {
         }
         const fade = (i + 1) / chunks;
         ctx.strokeStyle = `rgba(255,255,255,${(0.26 * k * fade * fade).toFixed(3)})`;
-        ctx.lineWidth = 1;
+        ctx.lineWidth = LINE_WIDTH;
         ctx.stroke();
       }
 
@@ -112,7 +112,7 @@ export function createPendulum(): Scene {
       ctx.lineTo(p1x, p1y);
       ctx.lineTo(p2x, p2y);
       ctx.strokeStyle = `rgba(255,255,255,${(0.5 * k).toFixed(3)})`;
-      ctx.lineWidth = 1;
+      ctx.lineWidth = LINE_WIDTH;
       ctx.stroke();
 
       api.dot(cx, cy, 2, 0.5 * k);

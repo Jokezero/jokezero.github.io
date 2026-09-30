@@ -4,7 +4,7 @@
  * 三条互成 60° 的椭圆轨道（经典原子图标）+ 每圈一个带短拖尾的电子 + 中心原子核。
  * 常亮、铺满视口，靠低透明度保证不抢正文。
  */
-import type { Scene } from "./core";
+import { LINE_WIDTH, type Scene } from "./core";
 
 export function createAtom(): Scene {
   let coarse = false;
@@ -42,7 +42,7 @@ export function createAtom(): Scene {
           else ctx.lineTo(X, Y);
         }
         ctx.strokeStyle = `rgba(255,255,255,${(0.17 * k).toFixed(3)})`;
-        ctx.lineWidth = 1;
+        ctx.lineWidth = LINE_WIDTH;
         ctx.stroke();
 
         // 电子 + 短拖尾
@@ -58,7 +58,7 @@ export function createAtom(): Scene {
           ctx.moveTo(cx + q1x * co - q1y * si, cy + q1x * si + q1y * co);
           ctx.lineTo(cx + q2x * co - q2y * si, cy + q2x * si + q2y * co);
           ctx.strokeStyle = `rgba(255,255,255,${((1 - j / 8) * 0.3 * k).toFixed(3)})`;
-          ctx.lineWidth = 1;
+          ctx.lineWidth = LINE_WIDTH;
           ctx.stroke();
         }
 
@@ -72,7 +72,7 @@ export function createAtom(): Scene {
       ctx.beginPath();
       ctx.arc(cx, cy, 11, 0, Math.PI * 2);
       ctx.strokeStyle = `rgba(255,255,255,${(0.14 * k).toFixed(3)})`;
-      ctx.lineWidth = 1;
+      ctx.lineWidth = LINE_WIDTH;
       ctx.stroke();
     },
   };

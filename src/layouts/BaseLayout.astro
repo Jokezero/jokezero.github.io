@@ -37,6 +37,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      跨文档跳转时，浏览器在新文档首帧之前会先铺一层"底色"；
+      不声明颜色方案时那层底色是白的 —— 深色站点上就会闪一下白
+      （也就是"切换页面时露出浏览器的底"）。
+      声明 color-scheme 后，浏览器知道本站深色优先，首帧底色直接是黑的。
+    -->
+    <meta name="color-scheme" content="dark" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -97,13 +104,15 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
         }
       })();
     </script>
-    <!-- 关键 CSS 内联：样式表到达之前，底色已经是正确的 -->
+    <!-- 关键 CSS 内联：样式表到达之前，底色与配色方案就已经是对的 -->
     <style is:inline>
       html {
         background: #000;
+        color-scheme: dark;
       }
       html[data-theme="light"] {
         background: #fff;
+        color-scheme: light;
       }
     </style>
 

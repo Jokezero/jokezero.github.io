@@ -50,6 +50,12 @@ const MIN_FPS = 26;
 const DRIFT_X = 27;
 const DRIFT_Y = 12;
 
+/**
+ * 所有模拟的线条宽度（单位：CSS 像素）。
+ * 想让背景线条更粗或更细，改这一个数字即可 —— 四个模拟共用它。
+ */
+export const LINE_WIDTH = 1.5;
+
 function prefersReduced(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }

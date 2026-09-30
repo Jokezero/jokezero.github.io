@@ -12,9 +12,6 @@ import { SITE_VERSION } from "../../lib/version";
 
 const year = new Date().getFullYear();
 
-// 构建时间戳：每次部署都会更新，用来给"长期维护中"提供真实信号（P5 的定时重建也会刷新它）。
-const buildStamp = new Date().toISOString().slice(0, 10);
-
 // 版本号：v<年>.<月>.<当月功能更新次数>.<当月修复与维护次数>，由 git 历史自动算出
 const versionHint = "版本号：年.月.当月功能更新次数.当月修复与维护次数";
 
@@ -52,7 +49,7 @@ const utilityLinks = SITE.footerLinks;
         class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase"
         title={versionHint}
       >
-        {SITE_VERSION.label} · Build {buildStamp}
+        {SITE_VERSION.label}
       </span>
     </div>
   </div>

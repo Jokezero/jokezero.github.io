@@ -174,6 +174,15 @@ export function initPageTransition(): void {
 
     if (label) label.textContent = labelFor(url.pathname);
 
+    // 立刻把目标文档拉进缓存：幕布覆盖的这 540ms 足够下载完一份 HTML。
+    // 目标页因此几乎立即开始绘制 —— 这是"跨文档导航露出浏览器底色"那一下的关键：
+    // 不预取时新文档要现下载，空档就从一两帧变成几百毫秒。
+    const prefetch = document.createElement("link");
+    prefetch.rel = "prefetch";
+    prefetch.as = "document";
+    prefetch.href = url.href;
+    document.head.append(prefetch);
+
     // 标题逐字飞出（只有当前页确实有可见大标题时才播）
     if (titleEl) {
       splitTitle(titleEl);
