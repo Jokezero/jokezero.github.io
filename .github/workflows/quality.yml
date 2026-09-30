@@ -20,7 +20,7 @@ jobs:
           # 取完整历史：页脚版本号由 git 历史算出
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
 
