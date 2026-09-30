@@ -84,6 +84,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
             html.classList.add("no-intro");
           } else if (arriving) {
             html.classList.add("is-arriving");
+            // 关键：转场进来时也要把"进场遮罩"永久关掉。
+            // 只靠 is-arriving 不够 —— 动效脚本会在下一帧摘掉这个类，
+            // 而字符绘制脚本这时可能还没执行完，于是黑遮罩会闪一帧。
+            html.classList.add("no-intro");
             if ("scrollRestoration" in history) history.scrollRestoration = "manual";
           } else if (sessionStorage.getItem("zw-intro")) {
             html.classList.add("no-intro");

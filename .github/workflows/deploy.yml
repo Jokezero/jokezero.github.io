@@ -20,6 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # 取完整历史：页脚版本号由 git 历史算出（当月第几次功能更新 / 修复）
+          fetch-depth: 0
       # pnpm 版本取自 package.json 的 packageManager 字段（pnpm@11.25.0），
       # 与本地、锁文件保持一致，避免依赖腐化。
       - uses: pnpm/action-setup@v4
