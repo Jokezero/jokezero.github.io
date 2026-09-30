@@ -1,0 +1,31 @@
+---
+/**
+ * P0 首页：只证明"提交 → 构建 → 上线"这条链路是通的。
+ *
+ * 这里是刻意的最小骨架 —— 招牌视觉（三体运动背景、页面切换、滚动特效）
+ * 属于 P3，排版与设计令牌属于 P1；本页届时会被 Hero 组件替换。
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { SITE } from "../config/site";
+---
+
+<BaseLayout>
+  <main class="mx-auto flex min-h-dvh max-w-[1120px] flex-col justify-center px-6 py-24">
+    <p class="font-mono text-[11px] tracking-[0.2em] text-white/40 uppercase">
+      Personal Site · Static Build
+    </p>
+
+    <h1 class="mt-6 text-[clamp(2.25rem,8vw,4rem)] leading-[1.05] font-semibold tracking-tight">
+      {SITE.name}
+    </h1>
+
+    <p class="mt-8 max-w-[52ch] text-[15px] leading-[1.9] text-white/60">
+      {SITE.description}
+    </p>
+
+    <!-- 质量说明：这一行只在 P0 出现，P1 起由真正的 Hero 文案取代。 -->
+    <p class="mt-14 font-mono text-[11px] tracking-[0.12em] text-white/30">
+      P0 · 部署链路就绪 · 视觉系统在 P1–P3 逐层落地
+    </p>
+  </main>
+</BaseLayout>
