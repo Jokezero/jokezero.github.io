@@ -1,13 +1,16 @@
 ---
 /**
- * 站点基础骨架。
+ * 站点基础骨架：所有页面共用的外壳。
  *
- * P0 的职责很窄：把 <head> 的元信息、站点语言、favicon 与全局样式接好，
- * 保证每个页面共用同一套外壳、且控制台不出现 404 请求。
- * P1 会在此基础上补：设计令牌、字体 preload、防闪烁主题脚本、顶栏与页脚。
+ * 顺序在这个文件里很重要：
+ *   1. 主题初始化内联脚本 —— 必须在样式表之前同步执行，否则首帧会闪一下白/黑
+ *   2. 首屏兜底内联样式 —— 保证 CSS 还没下载完时底色就已经是对的
+ *   3. 字体 preload —— 只预加载首屏真正会用到的那一个字重（400）
  */
 import "../styles/global.css";
 import { SITE } from "../config/site";
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
 
 interface Props {
   /** 页面标题；站点名会自动追加在后。 */
@@ -39,6 +42,43 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
     <meta name="theme-color" content="#000000" />
     <meta name="generator" content={Astro.generator} />
 
+    <!--
+      主题初始化（防闪烁）：同步执行、约 200 字节。
+      优先级：本地记忆 > 系统偏好 > 深色兜底。
+      存储键与 src/config/site.ts 的 themeStorageKey 保持一致。
+    -->
+    <script is:inline>
+      (() => {
+        try {
+          const saved = localStorage.getItem("zeroweb-theme");
+          const theme =
+            saved === "light" || saved === "dark"
+              ? saved
+              : matchMedia("(prefers-color-scheme: light)").matches
+                ? "light"
+                : "dark";
+          document.documentElement.dataset.theme = theme;
+        } catch {
+          document.documentElement.dataset.theme = "dark";
+        }
+      })();
+    </script>
+
+    <!-- 关键 CSS 内联：样式表到达之前，底色已经是正确的 -->
+    <style is:inline>
+      html { background: #000; }
+      html[data-theme="light"] { background: #fff; }
+    </style>
+
+    <!-- 只预加载首屏必需的 400 字重；600 用到时才下载 -->
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/jetbrains-mono-latin-400.woff2"
+      crossorigin
+    />
+
     <!-- 社交分享（P2 会补每篇文章的 OG 图） -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content={pageTitle} />
@@ -55,7 +95,21 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
     />
   </head>
 
-  <body>
-    <slot />
+  <body class="flex min-h-dvh flex-col bg-bg-0 text-fg-1">
+    <!-- 跳转正文：键盘用户按 Tab 的第一站（不是视觉装饰，是无障碍必需品） -->
+    <a
+      href="#main"
+      class="sr-only-focusable tap absolute left-6 top-3 z-[100] rounded-full border border-line-1 bg-bg-1 px-4 py-2 font-mono text-micro tracking-[0.14em] uppercase text-fg-1 no-underline"
+    >
+      跳到正文
+    </a>
+
+    <Header />
+
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+
+    <Footer />
   </body>
 </html>

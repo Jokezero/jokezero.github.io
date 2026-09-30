@@ -1,0 +1,43 @@
+---
+/**
+ * 页脚：社交链接 + 版权 + 构建戳。
+ * 全部使用等宽微标签，与顶栏同一套语言；不引入卡片、不做底色填充。
+ */
+import { SITE } from "../../config/site";
+import { externalAttrs } from "../../lib/url";
+
+const year = new Date().getFullYear();
+
+// 构建时间戳：每次部署都会更新，用来给"长期维护中"提供真实信号（P5 的定时重建也会刷新它）。
+const buildStamp = new Date().toISOString().slice(0, 10);
+
+// 过滤掉没有填写的社交链接（例如邮箱暂时为空）。
+const socials = SITE.social.filter((item) => item.href);
+---
+
+<footer class="mt-24 border-t border-line-0">
+  <div
+    class="mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-6 py-8 md:flex-row md:items-center md:justify-between"
+  >
+    <p class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase">
+      © {year} {SITE.name} · Built with Astro
+    </p>
+
+    <nav class="flex flex-wrap items-center gap-x-6 gap-y-3" aria-label="页脚链接">
+      {
+        socials.map((item) => (
+          <a
+            href={item.href}
+            class="tap font-mono text-micro tracking-[0.12em] text-fg-3 uppercase no-underline transition-colors duration-[var(--dur-base)] hover:text-fg-1"
+            {...externalAttrs(item.href)}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+      <span class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase">
+        Build {buildStamp}
+      </span>
+    </nav>
+  </div>
+</footer>

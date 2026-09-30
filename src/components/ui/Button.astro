@@ -1,0 +1,44 @@
+---
+/**
+ * 胶囊按钮：1px 发丝边框、等宽大写微标签，属"极简线条"语言。
+ * 传 href 时渲染成 <a>，否则渲染成 <button>。
+ *
+ * 注意：项目页与关于页的页头按钮已按规范删除（§4.5.3 / §4.5.4），
+ * 这里保留组件供首页 Hero 与 404 页使用。
+ */
+import { externalAttrs } from "../../lib/url";
+
+interface Props {
+  href?: string;
+  /** solid = 白底黑字（用于唯一的主操作）；ghost = 描边 */
+  variant?: "solid" | "ghost";
+  class?: string;
+}
+
+const { href, variant = "ghost", class: className } = Astro.props;
+
+const base =
+  "tap inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 " +
+  "font-mono text-micro tracking-[0.14em] uppercase no-underline " +
+  "transition-colors duration-[var(--dur-base)] ease-out";
+
+const variants = {
+  solid: "bg-fg-0 text-bg-0 border border-transparent hover:bg-fg-1",
+  ghost: "border border-line-1 text-fg-2 hover:border-line-2 hover:text-fg-0",
+} as const;
+
+const classes = [base, variants[variant], className].filter(Boolean).join(" ");
+const attrs = href ? externalAttrs(href) : {};
+---
+
+{
+  href ? (
+    <a href={href} class={classes} {...attrs}>
+      <slot />
+    </a>
+  ) : (
+    <button type="button" class={classes}>
+      <slot />
+    </button>
+  )
+}

@@ -1,0 +1,88 @@
+---
+/**
+ * 主题切换按钮。
+ *
+ * 工作方式：切换 <html> 上的 data-theme 属性，并写入 localStorage。
+ * 首帧的主题由 BaseLayout 里的内联脚本决定（那段脚本负责"防闪烁"），
+ * 这里只负责用户点击之后的事。
+ *
+ * 无 JS 时：按钮不响应，但页面仍然是完整的深色主题，内容不受影响。
+ */
+---
+
+<button
+  id="theme-toggle"
+  type="button"
+  class="tap inline-flex h-9 w-9 items-center justify-center rounded-full text-fg-3 transition-colors duration-[var(--dur-base)] hover:text-fg-0"
+  aria-label="切换主题"
+  title="切换主题"
+>
+  <!-- 太阳：当前是深色时显示（点了会变亮） -->
+  <svg
+    class="theme-icon-sun"
+    width="15"
+    height="15"
+    viewBox="0 0 15 15"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.1"
+    stroke-linecap="round"
+    aria-hidden="true"
+  >
+    <circle cx="7.5" cy="7.5" r="3"></circle>
+    <path d="M7.5 1v1.8M7.5 12.2V14M1 7.5h1.8M12.2 7.5H14"></path>
+    <path d="M2.9 2.9l1.3 1.3M10.8 10.8l1.3 1.3M12.1 2.9l-1.3 1.3M4.2 10.8l-1.3 1.3"></path>
+  </svg>
+
+  <!-- 月亮：当前是亮色时显示（点了会变暗） -->
+  <svg
+    class="theme-icon-moon"
+    width="15"
+    height="15"
+    viewBox="0 0 15 15"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.1"
+    stroke-linecap="round"
+    aria-hidden="true"
+  >
+    <path d="M12.5 9.2A5.6 5.6 0 0 1 5.8 2.5 5.6 5.6 0 1 0 12.5 9.2Z"></path>
+  </svg>
+</button>
+
+<style is:global>
+  /* 默认（含没有 data-theme 的无 JS 情况）显示太阳图标 */
+  html:not([data-theme="light"]) .theme-icon-moon {
+    display: none;
+  }
+  html[data-theme="light"] .theme-icon-sun {
+    display: none;
+  }
+</style>
+
+<script>
+  // 这段脚本会被 Astro 打包；体积很小，且只在页面存在按钮时运行。
+  const storageKey = "zeroweb-theme"; // 与 src/config/site.ts 的 themeStorageKey 一致
+  const root = document.documentElement;
+  const button = document.getElementById("theme-toggle");
+
+  function syncLabel() {
+    if (!button) return;
+    const isLight = root.dataset.theme === "light";
+    button.setAttribute("aria-label", isLight ? "切换到深色主题" : "切换到浅色主题");
+    button.setAttribute("title", isLight ? "切换到深色主题" : "切换到浅色主题");
+  }
+
+  button?.addEventListener("click", () => {
+    const next = root.dataset.theme === "light" ? "dark" : "light";
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem(storageKey, next);
+    } catch {
+      // 隐私模式下 localStorage 可能不可写：忽略即可，主题在当前页面仍然切换成功。
+    }
+    syncLabel();
+  });
+
+  syncLabel();
+</script>

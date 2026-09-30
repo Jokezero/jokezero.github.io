@@ -1,0 +1,106 @@
+---
+/**
+ * 顶栏：左侧三角形线稿标记 + 等宽站点名（点击回首页），中部次级灰导航，
+ * 右侧主题切换；窄屏时导航折进 MENU 面板，入口不隐藏（§4.6.1）。
+ *
+ * 按 §4.5.1 的规定，右上角不放任何按钮（⌘K 与订阅按钮已移除）。
+ */
+import { SITE } from "../../config/site";
+import ThemeToggle from "./ThemeToggle.astro";
+
+const currentPath = Astro.url.pathname;
+
+// 判断当前项：首页要精确匹配，其余按前缀匹配（/blog/xxx 也算文章页）。
+function isCurrent(href: string) {
+  if (href === "/") return currentPath === "/";
+  return currentPath === href || currentPath.startsWith(`${href}/`);
+}
+---
+
+<header class="sticky top-0 z-50 border-b border-line-0 bg-bg-0">
+  <div class="mx-auto flex h-14 w-full max-w-[1200px] items-center gap-6 px-6">
+    <!-- 站点标记：三角形线稿 + 等宽名字，整块可点，回到首页 -->
+    <a
+      href="/"
+      class="tap flex items-center gap-2.5 no-underline"
+      aria-label={`${SITE.name} 首页`}
+    >
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 14 14"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.1"
+        stroke-linejoin="round"
+        class="shrink-0 text-fg-2"
+        aria-hidden="true"
+      >
+        <path d="M7 1.4 12.7 11.3H1.3Z"></path>
+      </svg>
+      <span class="font-mono text-micro tracking-[0.16em] uppercase">{SITE.name}</span>
+    </a>
+
+    <div class="ml-auto flex items-center gap-4">
+      <nav class="hidden items-center gap-6 md:flex" aria-label="主导航">
+        {
+          SITE.nav.map((item) => (
+            <a
+              href={item.href}
+              class:list={[
+                "tap font-mono text-micro tracking-[0.14em] uppercase no-underline transition-colors duration-[var(--dur-base)]",
+                isCurrent(item.href)
+                  ? "text-fg-0"
+                  : "text-fg-3 hover:text-fg-1",
+              ]}
+              aria-current={isCurrent(item.href) ? "page" : undefined}
+            >
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+
+      <ThemeToggle />
+
+      <button
+        id="nav-toggle"
+        type="button"
+        class="tap font-mono text-micro tracking-[0.14em] uppercase text-fg-3 transition-colors hover:text-fg-0 md:hidden"
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+      >
+        MENU
+      </button>
+    </div>
+  </div>
+
+  <!-- 窄屏菜单面板：默认隐藏，点 MENU 展开 -->
+  <div id="mobile-nav" hidden class="border-t border-line-0 md:hidden">
+    <nav class="mx-auto flex max-w-[1200px] flex-col px-6 py-2" aria-label="移动端导航">
+      {
+        SITE.nav.map((item) => (
+          <a
+            href={item.href}
+            class="tap border-b border-line-0 py-3 font-mono text-micro tracking-[0.14em] uppercase text-fg-2 no-underline last:border-b-0"
+            aria-current={isCurrent(item.href) ? "page" : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>
+
+<script>
+  const toggle = document.getElementById("nav-toggle");
+  const panel = document.getElementById("mobile-nav");
+
+  toggle?.addEventListener("click", () => {
+    const isOpen = toggle.getAttribute("aria-expanded") === "true";
+    toggle.setAttribute("aria-expanded", String(!isOpen));
+    toggle.textContent = isOpen ? "MENU" : "CLOSE";
+    if (panel) panel.hidden = isOpen;
+  });
+</script>

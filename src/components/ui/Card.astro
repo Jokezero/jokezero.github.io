@@ -1,0 +1,39 @@
+---
+/**
+ * 极简卡片：只有一条发丝边框，没有底色、没有阴影、没有圆角装饰。
+ *
+ * 使用限制：文章列表与项目网格**禁止**用卡片（§4.5.2 / §4.5.3 明确要求
+ * "无卡片、无边框、无背景填充"）。此组件只服务于确实需要分组的少数场景
+ * （例如将来的首页精选块、文档索引）。
+ */
+interface Props {
+  href?: string;
+  class?: string;
+}
+
+import { externalAttrs } from "../../lib/url";
+
+const { href, class: className } = Astro.props;
+
+const classes = [
+  "block border border-line-0 p-5 no-underline",
+  "transition-colors duration-[var(--dur-base)] ease-out hover:border-line-2",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+
+const attrs = href ? externalAttrs(href) : {};
+---
+
+{
+  href ? (
+    <a href={href} class={classes} {...attrs}>
+      <slot />
+    </a>
+  ) : (
+    <div class={classes}>
+      <slot />
+    </div>
+  )
+}

@@ -1,0 +1,21 @@
+---
+/**
+ * 标签：等宽大写微标签，1px 描边胶囊。
+ * 文章列表行内的标签是纯文本（§4.5.2），这个组件用于需要强调的少数位置。
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<span
+  class:list={[
+    "inline-flex items-center rounded-full border border-line-0 px-2.5 py-0.5",
+    "font-mono text-micro tracking-[0.1em] uppercase text-fg-3",
+    className,
+  ]}
+>
+  <slot />
+</span>

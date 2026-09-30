@@ -12,6 +12,11 @@ export const SITE = {
   url: "https://jokezero.github.io",
   /** 站点语言。 */
   lang: "zh-CN",
+  /**
+   * 主题偏好的存储键。BaseLayout 的防闪烁内联脚本与 ThemeToggle 必须用同一个字符串；
+   * 内联脚本为了保持极小体积（约 200 字节）写的是字面量，改这里时两处都要改。
+   */
+  themeStorageKey: "zeroweb-theme",
   /** 一句话描述：用于 <meta description>、RSS 与 OG。 */
   description: "个人网站 —— 技术长文、项目记录与长期维护日志。",
 

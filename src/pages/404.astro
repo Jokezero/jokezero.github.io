@@ -1,0 +1,32 @@
+---
+/**
+ * 404 页：终端风格报错 + 救援入口（§2.1）。
+ * 用同一套 BaseLayout，所以顶栏、页脚、主题切换都自动可用。
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/ui/Container.astro";
+import Button from "../components/ui/Button.astro";
+---
+
+<BaseLayout title="404" description="这个地址没有对应的页面。">
+  <Container width="layout" class="flex min-h-[60dvh] flex-col justify-center py-24">
+    <p class="font-mono text-micro tracking-[0.2em] text-fg-3 uppercase">
+      Error 404 · Not Found
+    </p>
+
+    <h1
+      class="mt-6 text-step-4 leading-[1.1] font-semibold tracking-[-0.02em] text-fg-0"
+    >
+      这个地址没有对应的页面
+    </h1>
+
+    <p class="mt-6 max-w-[46ch] font-mono text-micro leading-[2] text-fg-3">
+      $ cat /dev/requested-path<br />
+      &gt; 文件不存在，或它已经被移动、改名。
+    </p>
+
+    <div class="mt-10 flex flex-wrap gap-3">
+      <Button href="/">返回首页</Button>
+    </div>
+  </Container>
+</BaseLayout>
