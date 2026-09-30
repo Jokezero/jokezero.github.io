@@ -26,7 +26,7 @@ jobs:
       # pnpm 版本取自 package.json 的 packageManager 字段（pnpm@11.25.0），
       # 与本地、锁文件保持一致，避免依赖腐化。
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
       # 构建期抓取 GitHub 动态数据需要 token；抓取失败不会中断构建（脚本内部会保留旧数据）
