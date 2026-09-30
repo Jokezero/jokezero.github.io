@@ -4,7 +4,7 @@
  * 经纬网格球体绕倾斜轴自转，按深度分段着色形成体积感，
  * 球面上有 7 个缓慢呼吸的数据点。整页、常亮。
  */
-import type { Scene } from "./core";
+import { LINE_WIDTH, type Scene } from "./core";
 
 export function createSphere(): Scene {
   let coarse = false;
@@ -59,7 +59,7 @@ export function createSphere(): Scene {
           }
           const zAvg = (zSum / (to - from + 1) + 1) / 2;
           ctx.strokeStyle = `rgba(255,255,255,${(base * (0.3 + 0.9 * zAvg) * k).toFixed(3)})`;
-          ctx.lineWidth = 1;
+          ctx.lineWidth = LINE_WIDTH;
           ctx.stroke();
         }
       };

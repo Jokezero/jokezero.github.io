@@ -8,7 +8,7 @@
  * 积分器：速度 Verlet，dt = 1/1000，软化长度 0.08，G = 1。
  * 呈现：径向渐变的发光光源点 + 短拖尾，低亮度，不抢文本。
  */
-import type { Scene, SceneApi } from "./core";
+import { LINE_WIDTH, type Scene, type SceneApi } from "./core";
 
 const STEP = 1 / 1000;
 const ESCAPE = 9;
@@ -175,7 +175,7 @@ export function createThreeBody(): Scene {
         }
         const fade = (seg + 1) / chunks;
         ctx.strokeStyle = `rgba(255,255,255,${(alpha * fade * fade).toFixed(3)})`;
-        ctx.lineWidth = 1;
+        ctx.lineWidth = LINE_WIDTH;
         ctx.stroke();
       }
     }
