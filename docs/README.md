@@ -8,6 +8,9 @@
 
 ## 文档索引
 
+> **只想知道怎么干活？** 跳到 [维护手册（四件事）](#维护手册四件事) —— 那里有四条可复制的
+> 操作路径：本地启动、发一篇文章、改一次视觉、部署一次。下面的索引是"遇到具体问题该翻哪一份"。
+
 | 文档 | 内容 | 读者 | 何时读 |
 | --- | --- | --- | --- |
 | [01-design-spec.md](./01-design-spec.md) | 定位、目标、信息架构、内容模型、视觉与交互语言、技术架构、性能预算、可访问性、SEO、维护机制、风险、里程碑 | 所有参与者 | 开工前通读 |
@@ -38,7 +41,17 @@
 | P2 内容系统 | 🟡 代码与配置已就绪（文章 / 项目 / 标签 / 关于 / 搜索 / RSS 全文 / new:post 脚本），用示例内容实测通过；评论与统计等拿到 ID 后开启 |
 | P3 招牌视觉 | 🟡 代码与配置已就绪（四套实时背景、页面切换幕布 + 逐字、滚动特效、鼠标视差、进场字符绘制、完整降级链路），本地实测通过；`prefers-reduced-motion` 与省流量两条降级待真机确认 |
 | P4 质量门禁 | 🟡 已就绪（quality.yml：astro check / Prettier / ESLint / size-limit / 死链 / Lighthouse CI；打印样式；63 项尺寸矩阵走查通过），Lighthouse 跑分与真机抽查需在 CI 与真机上完成 |
-| P5 维护机制 | ⬜ 未开始 |
+| P5 维护机制 | 🟡 已就绪（README + 本文件的维护手册与维护日历、每日定时重建、Dependabot） |
+
+### 还需要站点主人完成的事
+
+| 事项 | 怎么做 | 什么时候 |
+| --- | --- | --- |
+| 建仓库并推送 | 见 [02-build-and-deploy.md](./02-build-and-deploy.md) §7.5 的六步 | 越早越好，推送后部署链路才算真的跑通 |
+| 开启评论 | 仓库开 Discussions → 去 giscus.app 取四个 ID → 填进 `src/config/site.ts` → `features.comments: true` | 想要评论时 |
+| 开启统计 | 填 `analytics` 的 provider 与 token | 想统计时 |
+| 改写真实内容 | `src/content/pages/about.md`（关于页）与 `src/config/site.ts` 的 `hero`（首页文案） | 上线前 |
+| 真机抽查 | iOS Safari / Firefox / 中端 Android 各走一遍（转场流畅度、背景帧率、打印预览） | 上线后一周内 |
 
 ---
 
@@ -49,6 +62,118 @@
 3. **硬核科技感、有炫技成分**，但不得以牺牲可读性、可访问性与性能为代价。
 
 外加一条长期约束：**必须能被长期维护**——依赖尽量少、内容与代码分离、关键决策有记录、质量有自动化门禁。
+
+---
+
+## 维护手册（四件事）
+
+> 这一节就是"一个人只读 `docs/README.md` 也能把站维护下去"的那部分。每一步都可以照着复制。
+> 想知道某一步背后的原因，再翻上面索引里的具体文档。
+
+### 1. 本地启动
+
+```bash
+# 第一次（机器上还没有 Node 时）：装 Node LTS 与 pnpm
+nvm install --lts && nvm use --lts && corepack enable && corepack prepare pnpm@latest --activate
+
+# 每次开工
+cd ~/桌面/web/weblog
+pnpm install          # 装依赖（第一次要一两分钟）
+pnpm dev              # 打开 http://localhost:4321
+```
+
+本地开发时搜索页不可用是正常的：全文搜索索引只在 `pnpm build` 时生成。
+
+### 2. 发一篇文章
+
+```bash
+pnpm new:post 我的文章标题        # 生成 src/content/posts/2026-09-30-我的文章标题.md
+```
+
+打开这个文件写正文，并确认开头的 frontmatter：
+
+```yaml
+---
+title: "我的文章标题"
+summary: "一句话简介：出现在列表行、RSS 与分享卡片上。"
+pubDate: 2026-09-30
+tags: [astro, 性能]        # 至少一个；列表页的标签筛选就靠它
+draft: false               # 写完了改成 false，否则线上不出现
+---
+```
+
+```bash
+pnpm build                 # 本地先确认能构建（会顺带生成搜索索引）
+git add -A && git commit -m "post: 我的文章标题" && git push
+```
+
+推送后约一分钟线上就能看到。文章图片放在 `src/content/posts/images/` 下，用
+`![说明](./images/xxx.png)` 引用；**alt 必填**，构建期会自动压缩成多尺寸。
+项目条目同理：在 `src/content/projects/` 加一个 `.md`（字段见 `src/content.config.ts`）。
+
+### 3. 改一次视觉
+
+| 想改什么 | 改哪里 |
+| --- | --- |
+| 颜色、灰度、字号阶梯、间距、动效时长 | `src/styles/tokens.css`（对照 `01-design-spec.md` §4.2 的令牌表） |
+| 首页文案（kicker / 大标题 / 说明 / 按钮 / 背景说明） | `src/config/site.ts` 的 `hero` |
+| 站点名、描述、导航、社交链接、功能开关 | `src/config/site.ts` |
+| 顶栏、页脚 | `src/components/layout/` |
+| 列表页 / 关于页 / 详情页版式 | `src/components/blog/`、`src/components/projects/`、`src/layouts/` |
+| 背景动效本身（每个模拟一个文件） | `src/scripts/scene/*.ts` |
+
+三个"保险丝"——改一个值就回退，不用动逻辑：
+
+```ts
+features.heroEffect = "static";   // 关掉四套实时背景，回到纯黑
+features.pageTransition = false;  // 关掉页面切换幕布
+features.introArt = false;        // 关掉首次进入的字符绘制
+```
+
+改完先过一遍门禁再推：
+
+```bash
+pnpm verify        # 类型 + 格式 + Lint + 构建 + 体积预算 + 死链
+```
+
+**不要引入**：玻璃拟态、彩色渐变、投影、发光边框、等宽 0/1 字符场、横贯画面的波动线、
+跟随光标的制图十字（都在 §4.5 的排除清单里，试过并被否决）。
+
+### 4. 部署一次
+
+- **日常**：`git push` 就够了 —— `deploy.yml` 自动构建并部署，不需要任何手工操作。
+- **手动重跑**：仓库 → Actions → 选 `Deploy to GitHub Pages` → Run workflow。
+- **首次上线（六步，照着做即可）**：
+  1. 打开 <https://github.com/new>，Owner 选 `Jokezero`，Repository name 填
+     `jokezero.github.io`（一字不差），选 **Public**；
+     README / .gitignore / license **三个都不要勾**，否则第一次推送会冲突 → Create repository
+  2. 新仓库 → **Settings** → 左侧 **Pages** → **Build and deployment** 的 Source
+     选 **GitHub Actions**（不要选 Deploy from a branch）
+  3. 本地执行：`git remote add origin https://github.com/Jokezero/jokezero.github.io.git`
+  4. `git push -u origin main`（要密码时用 Personal Access Token，或用 SSH 地址）
+  5. 仓库 → **Actions**：看到 `Deploy to GitHub Pages` 变绿即部署完成
+  6. 打开 <https://jokezero.github.io/> 确认首页能打开、控制台无 404
+
+  更细的字段说明见 [02-build-and-deploy.md](./02-build-and-deploy.md) §7.5。
+- **回滚**：Actions 页找到上一次成功的运行 → Re-run all jobs；或本地 `git revert` 后推送。
+- **每日自动重建**：`deploy.yml` 里带一条定时任务（北京时间 11:10），用于刷新构建期抓取的
+  GitHub 数据（star 数、最近提交）与页脚构建戳。
+
+### 维护日历
+
+| 频率 | 做什么 |
+| --- | --- |
+| 每次改完 | `pnpm verify`（或等 PR 上的 `quality.yml` 变绿）再合并 |
+| 每周一 | 处理 Dependabot 的依赖 / Actions 更新 PR：**确认 quality 全绿**再合并 |
+| 每周 | 至少写一篇文章或做一次小的视觉微调 —— 让"长期维护中"这条信号保持真实 |
+| 每月 | 扫一眼 CI 里的 Lighthouse 报告与体积数据（基线记在 `docs/adr/0016`） |
+| 每季度 | 本地完整跑一次 `pnpm verify`；升级依赖时**先本地跑通再推**，并补一条 ADR |
+| 每年 | 检查域名与 HTTPS、清理不再使用的依赖、把文档改成与实现一致 |
+
+### 遇到文档没写到的取舍
+
+先按 `03-open-questions.md` 里的**推荐默认值**做，然后**补一条 ADR**（`docs/adr/` 续号），
+写清背景、决策与影响。改主意时不要修改历史记录，新写一条并标注"取代 00XX"。
 
 ---
 

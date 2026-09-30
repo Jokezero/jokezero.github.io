@@ -1,0 +1,31 @@
+# Dependabot：每周检查一次依赖与 Actions 版本，开成 PR 走质量门禁。
+#
+# 为什么不用每天：本站是个人站，依赖更新不是紧急事项；每周一次既不会堆积 PR，
+# 也不会让版本落后太多。PR 必须等 quality.yml 全绿再合并（见 docs/README.md 的维护日历）。
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Shanghai
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      # 把同一批次的补丁更新合成一个 PR，避免 PR 刷屏
+      patch-updates:
+        applies-to: version-updates
+        update-types: [patch]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Shanghai
+    commit-message:
+      prefix: "chore(ci)"

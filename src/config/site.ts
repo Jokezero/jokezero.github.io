@@ -10,6 +10,8 @@ export const SITE = {
   name: "zeroweb",
   /** 站点地址（用户站仓库 → 根路径，不需要 base）。 */
   url: "https://jokezero.github.io",
+  /** 本站仓库（owner/name）：用于构建期抓取动态数据。 */
+  repo: "Jokezero/jokezero.github.io",
   /** 站点语言。 */
   lang: "zh-CN",
   /**
