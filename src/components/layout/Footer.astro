@@ -5,6 +5,9 @@
  *
  * 这里**不放导航**：顶栏已经承担了信息架构，页脚再放一份就是重复的导览条。
  * 页脚只留三类信息：版权、顶栏没有的入口（全文搜索）、元信息（GitHub / 构建戳）。
+ *
+ * 版权行**不带 "Built with Astro"**：页脚不放技术栈署名，只留站点自身的信息
+ * （规范见 docs/01-design-spec.md 的页脚条目）。
  */
 import { SITE } from "../../config/site";
 import { externalAttrs } from "../../lib/url";
@@ -23,7 +26,7 @@ const utilityLinks = SITE.footerLinks;
 <footer class="relative z-[2] mt-24 border-t border-line-0">
   <div class="mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-6 py-8 md:flex-row md:items-center md:justify-between">
     <p class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase">
-      © {year} {SITE.name} · Built with Astro
+      © {year} {SITE.name}
     </p>
 
     <div class="flex flex-wrap items-center gap-x-5 gap-y-2 md:gap-x-6">
