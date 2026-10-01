@@ -17,6 +17,19 @@ html.is-arriving #curtain {
   animation: none;
 }
 
+/*
+ * 跨文档 View Transitions（渐进增强）。
+ * 支持的浏览器（Chrome 126+ / Safari 18.2+ / 新版 Firefox）会在导航期间
+ * **保留上一页的快照**，直到新页面准备好 —— 正好补上"两个文档之间"那一瞬间
+ * 浏览器铺底色的空档（也就是"切换页面时闪一下、露出浏览器的底"）。
+ * 不支持的浏览器会忽略这两行，行为与现在完全一致。
+ */
+@supports (view-transition-name: none) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
 /* 亮色主题：画布上的白线整体反转成黑线，底色透明不受影响
    （模拟本身不用关心主题，只有这一条规则在切换） */
 html[data-theme="light"] canvas[data-scene] {

@@ -192,7 +192,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
     <Header />
 
     <!-- 内容层压 z-index：整页背景是 fixed + z-0，静态内容必须抬到它上面（§10 第 2 条坑） -->
-    <main id="main" class="relative z-[2] flex-1">
+    <!--
+      data-pagefind-body：只把 <main> 里的内容交给搜索索引。
+      不写这一条时，Pagefind 会把整份 HTML 都索引进去 —— 幕布上的 "LOADING"、
+      跳转链接、顶栏导航、页脚社交链接都会变成可被搜到的"词条"，
+      搜索结果里就会出现一堆 LOADING.xxx 这种本该被忽略的噪声。
+    -->
+    <main id="main" data-pagefind-body class="relative z-[2] flex-1">
       <slot />
     </main>
 
