@@ -116,6 +116,40 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
         background: #fff;
         color-scheme: light;
       }
+      /*
+       * 幕布与开机遮罩的"关键样式"也内联在这里。
+       * 原因：它们原来是靠外部样式表定位的，而缓存命中时浏览器可能在样式表生效前
+       * 就画出了第一帧 —— 那一刻幕布只是个没背景、没定位的普通 div，完全不可见，
+       * 用户看到的就是"页面闪一下、动效还短了一截"。这几行保证它们从第一帧起就是
+       * 一块盖满屏幕的黑幕（浅色主题下是白幕）。
+       */
+      #curtain {
+        position: fixed;
+        inset: 0;
+        z-index: 70;
+        background-color: #000;
+        transform: translate3d(0, -100%, 0);
+      }
+      html[data-theme="light"] #curtain {
+        background-color: #fff;
+      }
+      html.is-arriving #curtain {
+        transform: translate3d(0, 0, 0);
+      }
+      #boot {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        background-color: #000;
+      }
+      html[data-theme="light"] #boot {
+        background-color: #fff;
+      }
+      /* 不该播进场动画时，遮罩从第一帧起就不存在 */
+      html.no-intro #boot,
+      html.is-arriving #boot {
+        display: none;
+      }
     </style>
 
     <!-- 只预加载首屏必需的 400 字重；600 用到时才下载 -->
@@ -139,6 +173,14 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
   </head>
 
   <body class="flex min-h-dvh flex-col bg-bg-0 text-fg-1">
+    <!--
+      幕布与开机遮罩放在 <body> 最前面，而不是页脚之后。
+      文档是边解析边绘制的：放在最后意味着"快速加载（缓存命中）"
+      时页面可能已经画出来、而幕布还没被解析到 —— 那就是闪一下的来源。
+    -->
+    <PageTransition />
+    <Intro />
+
     <!-- 跳转正文：键盘用户按 Tab 的第一站（不是视觉装饰，是无障碍必需品） -->
     <a
       href="#main"
@@ -159,9 +201,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
     <!-- 统计脚本：开关关闭或没填 token 时什么都不渲染 -->
     <Analytics />
 
-    <!-- 动效层：滚动特效常驻；幕布与进场遮罩由 features 开关控制 -->
+    <!-- 滚动进度线：位置无关，放在最后即可 -->
     <ScrollEffects />
-    <PageTransition />
-    <Intro />
   </body>
 </html>
