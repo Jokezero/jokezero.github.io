@@ -62,6 +62,21 @@
 }
 
 @layer components {
+  /* 项目页的两条操作提示按设备二选一：
+     触屏没有滚轮翻页（脚本里对该情况直接返回），所以不能显示"滚动切换页"。 */
+  .touch-hint {
+    display: none;
+  }
+
+  @media (hover: none) {
+    .wheel-hint {
+      display: none;
+    }
+    .touch-hint {
+      display: block;
+    }
+  }
+
   /* 两头渐隐的 1px 分隔线（§4.5.2）：横向与竖向两个版本，全站共用 */
   .divider-fade {
     height: 1px;

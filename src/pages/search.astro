@@ -35,11 +35,12 @@ import { SITE } from "../config/site";
           aria-live="polite"
         />
 
+        <!-- 面向访客的提示：只说"怎么用"，不出现任何本机命令或构建细节 -->
         <p
           id="search-message"
           class="mt-6 max-w-[60ch] font-mono text-micro leading-[1.9] text-fg-3"
         >
-          索引在构建期生成；本地 pnpm dev 环境下不可用，运行 pnpm build 后再预览即可。
+          输入关键词，即可搜索全站的文章与项目。
         </p>
       </>
     ) : (
@@ -111,12 +112,12 @@ import { SITE } from "../config/site";
           results.append(link);
         }
       } catch (error) {
-        // 本地开发环境没有索引，这里会走到；顺手把原因留给排查用
+        // 技术细节只留给控制台（本地开发时索引不存在会走到这里），
+        // 页面上只说人话，不出现 pnpm / 构建之类的字眼。
         console.warn("[search] Pagefind 不可用：", error);
         if (message) {
           message.hidden = false;
-          message.textContent =
-            "全文搜索在本地开发环境不可用（索引只在构建时生成）。运行 pnpm build 后预览即可。";
+          message.textContent = "搜索暂时不可用，请稍后重试。";
         }
       }
     };

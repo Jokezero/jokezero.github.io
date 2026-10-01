@@ -112,9 +112,14 @@ const linksOf = (item: ProjectItem) => [
 
     <div class="divider-fade my-6"></div>
 
-    <!-- 滚轮翻页不是直觉操作，必须给出提示（§4.5.3） -->
-    <p class="font-mono text-micro leading-[1.9] tracking-[0.06em] text-fg-3">
+    <!-- 滚轮翻页不是直觉操作，必须给出提示（§4.5.3）。
+         触屏设备上滚轮翻页是关闭的（见脚本里的 hover: none 判断），
+         所以那台设备上看不到这条提示，改说"用页码切换"。 -->
+    <p class="wheel-hint font-mono text-micro leading-[1.9] tracking-[0.06em] text-fg-3">
       在项目页任意位置滚动 ↑↓ 切换页
+    </p>
+    <p class="touch-hint font-mono text-micro leading-[1.9] tracking-[0.06em] text-fg-3">
+      触屏设备请用上方页码切换
     </p>
   </aside>
 
