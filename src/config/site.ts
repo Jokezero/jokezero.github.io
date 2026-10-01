@@ -25,16 +25,15 @@ export const SITE = {
 
   /**
    * 首页 Hero 文案。
-   * 注意：这一段目前是**设计原型里的占位文案**（对应 03-open-questions.md 的 B12，
-   * 还没确认）。改这里一处，首页与分享卡片都会跟着变。
-   * `title` 里的 <br> 是换行符，标题会自动按行拆成单字做动效。
+   * 这里是站点主人的真实文案（不是原型占位了）：改这一处，首页立刻生效。
+   * `title` 里的 <br> 是换行符，标题会自动按行拆成单字做切换动效。
    */
   hero: {
     /** 首屏最上面那行小字：全站唯一的自我介绍开场白。 */
     kicker: "The personal website of an ordinary student",
     /** `<br>` 是换行；标题会按行拆成单字做切换动效。 */
-    title: "欢迎登陆<br>zeroweb",
-    lede: "个人博客？项目技术分享站？还没想好...",
+    title: "这里是<br>zeroweb",
+    lede: "个人博客？项目技术分享站？还没想好……",
     ctas: [
       { label: "读文章", href: "/blog/" },
       { label: "关于我", href: "/about/" },
@@ -42,7 +41,7 @@ export const SITE = {
     note: "背景：实时三体引力模拟（混沌解）",
   },
   /** 一句话描述：用于 <meta description>、RSS 与 OG。 */
-  description: "个人网站 —— 技术长文、项目记录与长期维护日志。",
+  description: "zeroweb —— 一个暂时还没想好具体干什么的小项目",
 
   author: {
     name: "Jokezero",
