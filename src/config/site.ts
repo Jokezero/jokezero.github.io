@@ -30,9 +30,11 @@ export const SITE = {
    * `title` 里的 <br> 是换行符，标题会自动按行拆成单字做动效。
    */
   hero: {
-    kicker: "BACKEND ENGINEER · SYSTEMS & PERFORMANCE",
-    title: "把复杂的系统<br>做简单。",
-    lede: "这里记录我做过的事、踩过的坑，以及正在折腾的东西。",
+    /** 首屏最上面那行小字：全站唯一的自我介绍开场白。 */
+    kicker: "The personal website of an ordinary student",
+    /** `<br>` 是换行；标题会按行拆成单字做切换动效。 */
+    title: "欢迎登陆<br>zeroweb",
+    lede: "个人博客？项目技术分享站？还没想好...",
     ctas: [
       { label: "读文章", href: "/blog/" },
       { label: "关于我", href: "/about/" },
