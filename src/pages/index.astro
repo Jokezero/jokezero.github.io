@@ -44,7 +44,7 @@ const status = [
 <BaseLayout>
   <section
     data-hero
-    class="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden"
+    class="relative flex min-h-[100dvh] flex-col justify-start overflow-hidden"
   >
     <Background
       scene="three-body"
@@ -52,11 +52,14 @@ const status = [
       description="背景：实时三体引力模拟（混沌解），纯装饰元素。"
     />
 
-    <Container width="layout" class="relative z-[2] py-[16vh]">
+    <!--
+      文案位置：整块的中心略高于屏幕中线（"居中偏上"）。
+      顶部留 16vh —— 加上顶栏 57px 之后，文案块顶部大约落在视口的 22% 处。
+    -->
+    <Container width="layout" class="relative z-[2] pt-[16vh] pb-[10vh]">
       <div class="hero-copy max-w-[62ch]">
-        <p class="font-mono text-micro tracking-[0.2em] text-fg-3 uppercase">
-          {SITE.hero.kicker}
-        </p>
+        <!-- 这是完整句子而不是标签，所以不加 uppercase（全大写读起来像在喊） -->
+        <p class="font-mono text-micro tracking-[0.16em] text-fg-3">{SITE.hero.kicker}</p>
 
         <!-- 标题会被拆成单字做切换动效；<br> 由配置里的换行符决定 -->
         <h1
