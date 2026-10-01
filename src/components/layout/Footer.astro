@@ -22,13 +22,8 @@ const utilityLinks = SITE.footerLinks;
 
 <footer class="relative z-[2] mt-24 border-t border-line-0">
   <div class="mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-6 py-8 md:flex-row md:items-center md:justify-between">
-    <!--
-      版本号跟版权放在同一行（左侧）：窄屏上文字放大/换行时，
-      它不会孤零零掉到下一行去，看起来像"多出来的一块"。
-    -->
-    <p class="font-mono text-micro leading-[1.9] tracking-[0.12em] text-fg-3 uppercase">
+    <p class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase">
       © {year} {SITE.name} · Built with Astro
-      <span title={versionHint}> · {SITE_VERSION.label}</span>
     </p>
 
     <div class="flex flex-wrap items-center gap-x-5 gap-y-2 md:gap-x-6">
@@ -50,6 +45,13 @@ const utilityLinks = SITE.footerLinks;
           {item.label}
         </a>
       ))}
+      <!-- 版本号：与站内链接同列（右下角），与重构前的排布一致 -->
+      <span
+        class="font-mono text-micro tracking-[0.12em] text-fg-3 uppercase"
+        title={versionHint}
+      >
+        {SITE_VERSION.label}
+      </span>
     </div>
   </div>
 </footer>

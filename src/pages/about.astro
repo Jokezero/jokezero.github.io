@@ -193,19 +193,16 @@ const sections = [
 </BaseLayout>
 
 <style is:global>
-  /* 原生滚动吸附：整页一次一屏（§4.5.4 v2） */
+  /*
+   * 原生滚动吸附：整页一次一屏（§4.5.4 v2）。
+   * 桌面端保留 mandatory —— 这是"一屏一节"那股干脆手感的来源；
+   * 触屏设备则完全关掉：手指滑动 + 强制吸附会把人卡住（滑不到页脚、也滑不进分节），
+   * 移动端本来就该用顶部的分节按钮跳屏（§4.5.4 的移动端约定）。
+   */
   html.is-about {
-    /*
-     * 用 proximity（就近吸附）而不是 mandatory（强制吸附）：
-     * mandatory 会把滚动**死死拽回**分节起点 —— 最末一节之后是页脚，
-     * 于是"滚到底也看不到页脚"，手指滑动还会被反复弹回，手机上尤其明显。
-     * proximity 只在停得足够近时才吸附，既不丢"一屏一节"的手感，也不困住滚动。
-     */
-    scroll-snap-type: y proximity;
+    scroll-snap-type: y mandatory;
   }
 
-  /* 触屏设备完全关掉吸附：手指滑动 + 吸附是最难受的组合，
-     移动端本来就该用顶部的分节按钮跳屏（§4.5.4 的移动端约定）。 */
   @media (hover: none) {
     html.is-about {
       scroll-snap-type: none;
@@ -234,6 +231,14 @@ const sections = [
     /* 吸顶顶栏 + 分节导航会盖住内容，用 scroll-margin 补偿 */
     scroll-margin-top: 6.5rem;
     scroll-snap-align: start;
+  }
+
+  /*
+   * 页脚也要有一个吸附停靠点（对齐到滚动容器底部）。
+   * 不加这一条时，强制吸附永远停在最后一个分节，页脚被留在视口下方 —— 怎么滚都看不到。
+   */
+  html.is-about footer {
+    scroll-snap-align: end;
   }
 
   .about-nav-link[aria-current="true"] {

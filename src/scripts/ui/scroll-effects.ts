@@ -7,12 +7,15 @@
 export function initScrollEffects(): void {
   const root = document.documentElement;
   const bar = document.getElementById("scroll-progress");
-  const hero = document.querySelector<HTMLElement>("[data-hero]");
   let queued = false;
 
   const read = () => {
     queued = false;
     const y = window.scrollY || root.scrollTop || 0;
+    // 每次现查首屏元素：SPA 换页后 [data-hero] 是新的节点，
+    // 缓存旧引用会拿到高度 0，滚动进度一下子顶到最大值 ——
+    // 表现就是"首屏标题一滚就没了"，而不是渐隐。
+    const hero = document.querySelector<HTMLElement>("[data-hero]");
     const heroHeight = hero?.offsetHeight ?? window.innerHeight;
     // 首屏文案在约 55% 首屏高度的滚动距离内淡出（§4.5.1 第 5 条）
     const progress = Math.max(0, Math.min(1.4, y / Math.max(1, heroHeight * 0.55)));
