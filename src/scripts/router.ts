@@ -153,15 +153,26 @@ export function initRouter({ remount }: RouterHooks): void {
 
   /** 把新页面搬进当前文档（脚本不会执行，全部由 remount 负责） */
   async function applyPage(next: Document): Promise<void> {
-    const persistent = PERSISTENT_IDS.map((id) => document.getElementById(id));
-    for (const el of persistent) el?.remove();
+    /*
+     * 常驻层（幕布 / 进场遮罩 / 进度线）**原地不动**。
+     * 这一点很关键：早先的写法是把它们摘下来、换完内容再插回去，而"重新插入 DOM"
+     * 会让元素身上的 CSS 动画从头再播一遍 —— 表现就是切换动效被触发两次。
+     * 现在改成"只换其余节点"：常驻层始终留在原地，动画状态不会被打断。
+     */
+    const keep = new Set(PERSISTENT_IDS);
+
+    for (const child of [...document.body.children]) {
+      if (child.id && keep.has(child.id)) continue;
+      child.remove();
+    }
+
+    for (const child of [...next.body!.children]) {
+      // 新页面里也带着同样的常驻层副本，直接丢掉，保留下正在跑动画的那一份
+      if (child.id && keep.has(child.id)) continue;
+      document.body.append(child);
+    }
 
     document.body.className = next.body!.className;
-    document.body.innerHTML = next.body!.innerHTML;
-
-    // 新内容里也带着同样的常驻层副本，删掉它们，再把我们自己的放回最前面
-    for (const id of PERSISTENT_IDS) document.getElementById(id)?.remove();
-    for (const el of [...persistent].reverse()) if (el) document.body.prepend(el);
 
     document.title = next.title;
     syncHead(next);

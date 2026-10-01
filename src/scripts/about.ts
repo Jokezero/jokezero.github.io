@@ -28,6 +28,8 @@ export function initAbout(): () => void {
     counter?.style.setProperty("opacity", visible ? "1" : "0");
   };
 
+  const footer = document.querySelector("footer");
+
   // 当前屏：高亮分节导航 + 更新 01 / 04 计数
   const syncActive = () => {
     const middle = window.scrollY + window.innerHeight / 2;
@@ -39,8 +41,13 @@ export function initAbout(): () => void {
       if (middle >= start && middle < end) currentIndex = index;
     });
 
+    // 滚到页脚时把右下角计数藏起来：它固定在视口右下，
+    // 否则会正好压在页脚的版本号与链接上（手机上尤其明显）。
+    const footerVisible = footer
+      ? footer.getBoundingClientRect().top < window.innerHeight
+      : false;
     const onTitleScreen = currentIndex <= 0;
-    toggleChrome(!onTitleScreen);
+    toggleChrome(!onTitleScreen && !footerVisible);
 
     if (currentIndex > 0 && counter) {
       const label = sections[currentIndex].id;
