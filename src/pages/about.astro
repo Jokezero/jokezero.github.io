@@ -207,6 +207,19 @@ const sections = [
     html.is-about {
       scroll-snap-type: none;
     }
+
+    /*
+     * 手机上的关于页不强行"一屏一节"。
+     * 手机可视高度本来就小，顶部还压着两层固定导航（顶栏 57px + 分节导航 ~45px），
+     * 再让每节撑满整屏，滚动就会又长又别扭、内容还容易被固定导航压住。
+     * 这里改成按内容自然高度排布、节间留正常间距；分节导航与右下角计数照旧可用。
+     * 首屏（标题）仍保持整屏高度 —— 那是"第一印象"，值得占满。
+     * 桌面端不受影响：这些规则都在 media query 内，桌面仍是一屏一节 + 强制吸附。
+     */
+    .asection:not(#about-top) {
+      min-height: auto;
+      padding-block: var(--space-8) var(--space-10);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
