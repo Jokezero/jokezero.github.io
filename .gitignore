@@ -27,3 +27,6 @@ yarn-error.log*
 # 本地质量门禁产物
 .lighthouseci/
 tmp/
+
+# 本地专用资料（编辑手册、草稿笔记等）——不推送到 GitHub
+local/
