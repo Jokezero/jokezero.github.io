@@ -152,6 +152,18 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
       }
     </style>
 
+    <!--
+      无 JS 时必须让开机遮罩失效：它平时靠脚本关掉，
+      而"无 JS 也能完整阅读"是设计规范的硬约束（§6.2 / P3 验收项）。
+    -->
+    <noscript>
+      <style>
+        #boot {
+          display: none !important;
+        }
+      </style>
+    </noscript>
+
     <!-- 只预加载首屏必需的 400 字重；600 用到时才下载 -->
     <link
       rel="preload"
@@ -198,7 +210,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
       跳转链接、顶栏导航、页脚社交链接都会变成可被搜到的"词条"，
       搜索结果里就会出现一堆 LOADING.xxx 这种本该被忽略的噪声。
     -->
-    <main id="main" data-pagefind-body class="relative z-[2] flex-1">
+    <!-- tabindex="-1"：SPA 换页后把焦点移到正文，屏幕阅读器才知道"换页了" -->
+    <main
+      id="main"
+      data-pagefind-body
+      tabindex="-1"
+      class="relative z-[2] flex-1 outline-none"
+    >
       <slot />
     </main>
 
@@ -209,5 +227,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
 
     <!-- 滚动进度线：位置无关，放在最后即可 -->
     <ScrollEffects />
+
+    <!-- 客户端唯一入口：首次加载挂载、之后接管所有站内跳转（SPA 式，不换文档） -->
+    <script>
+      import "../scripts/app";
+    </script>
   </body>
 </html>

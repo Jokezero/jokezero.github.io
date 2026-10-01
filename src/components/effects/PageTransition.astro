@@ -9,14 +9,8 @@ const enabled = SITE.features.pageTransition;
 ---
 
 {enabled && (
-  <>
-    <div id="curtain" aria-hidden="true" data-pagefind-ignore>
-      <span>LOADING</span>
-      <i />
-    </div>
-    <script>
-      import { initPageTransition } from "../../scripts/page-transition";
-      initPageTransition();
-    </script>
-  </>
+  <div id="curtain" aria-hidden="true" data-pagefind-ignore>
+    <span>LOADING</span>
+    <i />
+  </div>
 )}
