@@ -10,7 +10,7 @@ links:
   - label: 线上地址
     url: https://jokezero.github.io/
 featured: true
-draft: false
+draft: true
 ---
 
 这是本站本身。它既是一个能长期写下去的博客，也是一次完整工程实践的记录 ——
