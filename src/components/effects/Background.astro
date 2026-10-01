@@ -34,7 +34,10 @@ const enabled = SITE.features.heroEffect === "canvas";
     >
       <canvas data-scene={scene} data-mode={mode} class="block h-full w-full" />
     </div>
-    <p class="sr-only">{description}</p>
+    <!-- 装饰性描述的说明文字：给屏幕阅读器用，但不该进搜索索引 -->
+    <p class="sr-only" data-pagefind-ignore>
+      {description}
+    </p>
   </>
 )}
 
