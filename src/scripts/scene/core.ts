@@ -77,9 +77,12 @@ export function mountScene(
   canvas: HTMLCanvasElement,
   scene: Scene,
   options: MountOptions = {},
-): void {
+): () => void {
   const ctx = canvas.getContext("2d");
-  if (!ctx) return; // 没有 Canvas 2D：保持纯黑，正文照常阅读
+  if (!ctx) return () => {}; // 没有 Canvas 2D：保持纯黑，正文照常阅读
+
+  // 换页时要收摊的东西（监听器 / 观察器 / 循环）都登记在这里
+  const cleanups: Array<() => void> = [];
 
   const mode = options.mode ?? "hero";
   const followPointer = options.parallax !== false;
@@ -244,7 +247,7 @@ export function mountScene(
   if (staticOnly) {
     // 只画一帧静态画面：视觉仍在，CPU 成本为零
     paint(6);
-    return;
+    return () => {};
   }
 
   // 指针事件：只记录位置，真正的位移在绘制时计算
@@ -261,17 +264,19 @@ export function mountScene(
       }
       pointer.active = true;
     };
-    window.addEventListener("pointermove", (e) => setPointer(e.clientX, e.clientY), {
-      passive: true,
-    });
-    window.addEventListener("pointerdown", (e) => setPointer(e.clientX, e.clientY), {
-      passive: true,
-    });
-    document.addEventListener("pointerleave", () => {
+    const onPointerMove = (event: PointerEvent) => setPointer(event.clientX, event.clientY);
+    const onPointerLeave = () => {
       pointer.active = false;
-    });
-    window.addEventListener("blur", () => {
-      pointer.active = false;
+    };
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("pointerdown", onPointerMove, { passive: true });
+    document.addEventListener("pointerleave", onPointerLeave);
+    window.addEventListener("blur", onPointerLeave);
+    cleanups.push(() => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerdown", onPointerMove);
+      document.removeEventListener("pointerleave", onPointerLeave);
+      window.removeEventListener("blur", onPointerLeave);
     });
   }
 
@@ -281,15 +286,13 @@ export function mountScene(
     scrollQueued = false;
     scrollY = window.scrollY || document.documentElement.scrollTop || 0;
   };
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (scrollQueued) return;
-      scrollQueued = true;
-      window.requestAnimationFrame(readScroll);
-    },
-    { passive: true },
-  );
+  const onScroll = () => {
+    if (scrollQueued) return;
+    scrollQueued = true;
+    window.requestAnimationFrame(readScroll);
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  cleanups.push(() => window.removeEventListener("scroll", onScroll));
   readScroll();
 
   // 尺寸变化：ResizeObserver 跟随容器（横竖屏切换也能重新量）
@@ -300,29 +303,42 @@ export function mountScene(
       }
     });
     observer.observe(canvas);
+    cleanups.push(() => observer.disconnect());
   } else {
-    window.addEventListener("resize", () => resize(), { passive: true });
+    const onResize = () => resize();
+    window.addEventListener("resize", onResize, { passive: true });
+    cleanups.push(() => window.removeEventListener("resize", onResize));
   }
 
   // 页面不可见时暂停渲染循环，省电
-  document.addEventListener("visibilitychange", () => {
+  const onVisibilityChange = () => {
     if (document.hidden) stop();
     else start();
-  });
+  };
+  document.addEventListener("visibilitychange", onVisibilityChange);
+  cleanups.push(() => document.removeEventListener("visibilitychange", onVisibilityChange));
 
   // 用户中途打开"减少动态效果"：停掉循环，保留当前帧
-  window
-    .matchMedia("(prefers-reduced-motion: reduce)")
-    .addEventListener("change", (event) => {
-      if (event.matches) {
-        stop();
-        downgraded = true;
-      }
-    });
+  const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const onReducedChange = (event: MediaQueryListEvent) => {
+    if (event.matches) {
+      stop();
+      downgraded = true;
+    }
+  };
+  reducedQuery.addEventListener("change", onReducedChange);
+  cleanups.push(() => reducedQuery.removeEventListener("change", onReducedChange));
 
   // 等首屏内容渲染完再开始，避免和首屏抢主线程
   const idle = (window as Window & { requestIdleCallback?: (cb: () => void) => number })
     .requestIdleCallback;
   if (typeof idle === "function") idle(() => start());
   else window.setTimeout(() => start(), 120);
+
+  // 换页（SPA 导航）时必须调用：停掉循环、摘掉监听，避免旧画布一直空转
+  return () => {
+    stop();
+    downgraded = true;
+    for (const cleanup of cleanups) cleanup();
+  };
 }

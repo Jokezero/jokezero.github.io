@@ -48,6 +48,7 @@
 | 事项 | 怎么做 | 什么时候 |
 | --- | --- | --- |
 | 建仓库并推送 | 见 [02-build-and-deploy.md](./02-build-and-deploy.md) §7.5 的六步 | 越早越好，推送后部署链路才算真的跑通 |
+| 验收 SPA 换页 | 站内跳转不再刷新文档（同一份文档里换内容）；反复进出同一栏目时幕布轨迹应完全一致 | 每次改动导航相关代码后 |
 | 开启评论 | 仓库开 Discussions → 去 giscus.app 取四个 ID → 填进 `src/config/site.ts` → `features.comments: true` | 想要评论时 |
 | 开启统计 | 填 `analytics` 的 provider 与 token | 想统计时 |
 | 改写真实内容 | `src/content/pages/about.md`（关于页）与 `src/config/site.ts` 的 `hero`（首页文案） | 上线前 |
@@ -185,7 +186,7 @@ pnpm verify        # 类型 + 格式 + Lint + 构建 + 体积预算 + 死链
 
 ## 一句话技术画像
 
-> Astro 5（全静态预渲染）+ TypeScript + Tailwind v4 + Markdown/MDX 内容集合 + 纯黑极简视觉 + Canvas 2D 代码绘制的线条动画（延迟加载、可降级）+ Pagefind 搜索 + giscus 评论 + GitHub Actions 部署到 GitHub Pages。
+> Astro（全静态预渲染）+ TypeScript + Tailwind v4 + Markdown/MDX 内容集合 + 纯黑极简视觉 + Canvas 2D 代码绘制的线条动画（延迟加载、可降级）+ 不换文档的站内导航（SPA 式，见 [adr/0019](./adr/0019-spa-navigation.md)）+ Pagefind 搜索 + giscus 评论 + GitHub Actions 部署到 GitHub Pages。
 
 更细的取舍理由见 [01-design-spec.md](./01-design-spec.md) §5。
 

@@ -15,8 +15,9 @@ import { createAtom } from "./scene/atom";
 import { createSphere } from "./scene/sphere";
 import { createPendulum } from "./scene/pendulum";
 
-export function mountBackgrounds(): void {
+export function mountBackgrounds(): () => void {
   const canvases = document.querySelectorAll<HTMLCanvasElement>("canvas[data-scene]");
+  const teardowns: Array<() => void> = [];
 
   canvases.forEach((canvas) => {
     const kind = canvas.dataset.scene;
@@ -34,6 +35,11 @@ export function mountBackgrounds(): void {
               : null;
 
     if (!scene) return;
-    mountScene(canvas, scene, { mode });
+    teardowns.push(mountScene(canvas, scene, { mode }));
   });
+
+  // 换页时把上一页的所有模拟停掉
+  return () => {
+    for (const teardown of teardowns) teardown();
+  };
 }

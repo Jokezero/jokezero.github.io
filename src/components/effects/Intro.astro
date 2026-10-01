@@ -8,13 +8,7 @@ const enabled = SITE.features.introArt;
 ---
 
 {enabled && (
-  <>
-    <div id="boot" aria-hidden="true" data-pagefind-ignore>
-      <pre id="boot-art" />
-    </div>
-    <script>
-      import { initIntro } from "../../scripts/intro";
-      initIntro();
-    </script>
-  </>
+  <div id="boot" aria-hidden="true" data-pagefind-ignore>
+    <pre id="boot-art" />
+  </div>
 )}
