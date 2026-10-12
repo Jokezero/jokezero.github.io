@@ -26,11 +26,11 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.3.5"
+    "astro": "^7.3.8"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "@astrojs/mdx": "^8.0.2",
+    "@astrojs/mdx": "^8.0.3",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
     "@lhci/cli": "^0.15.1",
@@ -48,6 +48,6 @@
     "size-limit": "^14.1.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.71.0"
+    "typescript-eslint": "^8.71.1"
   }
 }
