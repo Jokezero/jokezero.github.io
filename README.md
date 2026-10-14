@@ -29,10 +29,6 @@ pnpm build       # 构建（含搜索索引）到 dist/
 pnpm preview     # 预览构建结果
 ```
 
-> 机器上还没有 Node 时：`nvm install --lts && nvm use --lts && corepack enable`。
-
-                  |
-
 ## 页脚那串版本号怎么读
 
 ```
