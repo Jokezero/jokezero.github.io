@@ -47,7 +47,7 @@ jobs:
         run: pnpm links
 
       # 6. Lighthouse CI：性能 / 可访问性（内部就是 axe-core）/ 最佳实践 / SEO
-      #    阈值见 lighthouserc.json，取自 docs/01-design-spec.md §6.1
+      #    阈值见 lighthouserc.json，取自 local/docs/01-design-spec.md §6.1
       - name: Lighthouse CI
         run: pnpm lhci
 

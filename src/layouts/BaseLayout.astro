@@ -55,7 +55,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
 
     <!--
       主题初始化（防闪烁）：同步执行、约 200 字节。
-      优先级：本地记忆 > 深色兜底（**不跟随系统偏好**，见 docs/adr/0020）。
+      优先级：本地记忆 > 深色兜底（**不跟随系统偏好**，见 local/docs/adr/0020）。
       站点的默认外观是深色 —— 只有读者自己点过切换按钮并留下记忆，才会是亮色。
       存储键与 src/config/site.ts 的 themeStorageKey 保持一致。
     -->

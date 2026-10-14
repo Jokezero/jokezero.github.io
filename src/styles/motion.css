@@ -2,8 +2,8 @@
  * P3 动效层：页面切换幕布（E9）、首次进入的字符绘制、首屏滚动特效（E10）、
  * 以及标题逐字飞出／归位。
  *
- * 与设计规范的对应关系见 docs/01-design-spec.md §4.5 与
- * docs/04-reference-motion-study.md §4（时序与缓动都来自那里）。
+ * 与设计规范的对应关系见 local/docs/01-design-spec.md §4.5 与
+ * local/docs/04-reference-motion-study.md §4（时序与缓动都来自那里）。
  * 颜色一律走令牌，所以亮色主题下幕布自动变成白底黑线。
  */
 

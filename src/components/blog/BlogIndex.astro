@@ -2,8 +2,8 @@
 /**
  * 文章列表：左侧索引栏（搜索 + 标签）+ 右侧无框竖直列表。
  *
- * 规范：docs/01-design-spec.md §4.5.2（版式）；
- *       docs/06-content-model.md §4（多选 OR + 命中数排序的语义）。
+ * 规范：local/docs/01-design-spec.md §4.5.2（版式）；
+ *       local/docs/06-content-model.md §4（多选 OR + 命中数排序的语义）。
  *
  * 实现要点：列表和标签在**构建期**就渲染成真实 HTML（无 JS 也能读、也能被
  * Pagefind 索引），JS 只负责筛选、重排与空状态切换。

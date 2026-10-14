@@ -19,7 +19,9 @@
 | 门禁 | GitHub Actions                    | 部署 + 质量检查（类型 / 格式 / 体积 / 死链 / Lighthouse） |
 
 **三条不可动摇的约束**：部署在 GitHub（无后端）、尽最大可能轻量、硬核科技感但不牺牲
-可读性与性能。完整说明见 [`docs/`](./docs/README.md)。
+可读性与性能。
+
+> 设计与施工文档（信息架构、视觉规范、技术决策记录）为**本地私有资料**，不随仓库分发。
 
 ---
 
@@ -43,8 +45,6 @@ pnpm preview     # 预览构建结果
 | 改视觉            | 改 `src/styles/tokens.css`（颜色/字号/间距）或对应组件；改完跑 `pnpm verify` |
 | 上线              | `git push` 即可；Actions 自动构建并部署到 GitHub Pages                       |
 
-**每一步的详细路径（含首次建仓库的点击位置）都在 [docs/README.md 的维护手册](./docs/README.md#维护手册四件事) 里。**
-
 ## 全部命令
 
 ```bash
@@ -52,7 +52,7 @@ pnpm dev          # 开发服务器
 pnpm build        # 抓取 GitHub 数据 → 构建 → 生成搜索索引
 pnpm preview      # 预览 dist/
 pnpm check        # TypeScript / Astro 类型与内容校验
-pnpm format       # 用 Prettier 格式化（docs/ 与 src/content/ 不动）
+pnpm format       # 用 Prettier 格式化（local/ 与 src/content/ 不动）
 pnpm lint         # ESLint
 pnpm size         # 体积预算（超出即失败）
 pnpm links        # 内部死链检查
@@ -66,7 +66,6 @@ pnpm data:github  # 手动刷新 src/data/github.json（需要 GITHUB_TOKEN）
 
 | 路径                 | 作用                                                                                                        |
 | -------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `docs/`              | 设计与施工文档，**唯一事实来源**；`docs/adr/` 是技术决策记录                                                |
 | `src/config/site.ts` | 站点级单一配置源：名称、地址、导航、Hero 文案、功能开关                                                     |
 | `src/content/`       | 全部内容：`posts/`（文章）、`projects/`（项目）、`pages/`（关于页）                                         |
 | `src/layouts/`       | 页面骨架：`BaseLayout`、`PostLayout`、`ProjectLayout`                                                       |
@@ -78,13 +77,7 @@ pnpm data:github  # 手动刷新 src/data/github.json（需要 GITHUB_TOKEN）
 | `scripts/`           | 构建辅助脚本：新建文章、抓取 GitHub 数据、死链检查                                                          |
 | `.github/workflows/` | `deploy.yml`（部署 + 每日重建）、`quality.yml`（质量门禁）                                                  |
 
-## 还需要作者做的事
-
-1. **建仓库并推送**（`jokezero.github.io`，Pages Source 选 GitHub Actions）——
-   六步见 [docs/02-build-and-deploy.md](./docs/02-build-and-deploy.md) §7.5。
-2. **改写真实内容**：`src/content/pages/about.md` 与 `src/config/site.ts` 的 `hero`
-   目前是占位文案。
-3. **想要评论 / 统计**时再按 `src/config/site.ts` 里的注释填 ID。
+> 另有 `local/` 目录（设计与施工文档、维护手册），已写进 `.gitignore`，不会出现在仓库里。
 
 ## 页脚那串版本号怎么读
 
@@ -96,8 +89,8 @@ v2026.09.3.5 · Build 2026-09-30
  └─────────── 年份
 ```
 
-由 git 历史自动算出，不需要手工维护；每月归零。规则与理由见
-[docs/adr/0018](./docs/adr/0018-version-number-scheme.md)。
+由 git 历史自动算出，不需要手工维护；每月归零。判定规则：提交信息以 `feat` 开头记作
+"功能更新"（第 3 位），其余（`fix` / `docs` / `chore` / `style`…）记作"修复与维护"（第 4 位）。
 
 ## 许可
 

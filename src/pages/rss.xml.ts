@@ -1,5 +1,5 @@
 /**
- * RSS 订阅源：**输出全文**（docs/06-content-model.md §6 的结论）。
+ * RSS 订阅源：**输出全文**（local/docs/06-content-model.md §6 的结论）。
  *
  * 界面不放置任何订阅入口，但 <head> 里保留自动发现标记（BaseLayout 已接），
  * 读者把 https://jokezero.github.io/rss.xml 丢进阅读器即可订阅。

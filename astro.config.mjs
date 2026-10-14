@@ -27,7 +27,7 @@ export default defineConfig({
     plugins: [tailwindcss()],
     build: {
       // 0 = 所有脚本/样式都输出成带 hash 的独立文件，不往 HTML 里塞。
-      // 理由（见 docs/adr/0016）：
+      // 理由（见 local/docs/adr/0016）：
       //   1. 共享的交互脚本只下载一次，站内跳转直接命中缓存；
       //   2. 体积预算（§6.1）能对 JS/CSS 逐项度量，而不是混在 HTML 里；
       //   3. 顺带绕开"内联脚本 + 动态 import"会触发 __VITE_PRELOAD__ 报错的坑。

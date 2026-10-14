@@ -3,7 +3,7 @@
  *
  * 只在这些情况下播放：不是从站内转场进来的、没有开启"减少动态效果"、
  * 且本次会话还没播过。遮罩是静态 DOM，从首帧就盖住画面，所以不会闪。
- * 依据：docs/02-build-and-deploy.md §0.5 的 P3 施工单。
+ * 依据：local/docs/02-build-and-deploy.md §0.5 的 P3 施工单。
  */
 const INTRO_KEY = "zw-intro";
 

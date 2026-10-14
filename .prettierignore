@@ -5,7 +5,7 @@ node_modules/
 pnpm-lock.yaml
 
 # 设计文档与内容：都是人写的散文，重排只会让 diff 变得没法看
-docs/
+local/
 src/content/
 
 # 二进制与静态资源

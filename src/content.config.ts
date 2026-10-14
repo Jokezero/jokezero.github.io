@@ -1,8 +1,8 @@
 /**
  * 内容集合定义（Astro Content Layer）。
  *
- * 字段规范以 docs/06-content-model.md 为准（内容模型的最新结论），
- * 视觉呈现见 docs/01-design-spec.md §4.5.2 / §4.5.3 与 docs/07-layout-post-project.md。
+ * 字段规范以 local/docs/06-content-model.md 为准（内容模型的最新结论），
+ * 视觉呈现见 local/docs/01-design-spec.md §4.5.2 / §4.5.3 与 local/docs/07-layout-post-project.md。
  * 所有 frontmatter 都经 zod 校验：写错字段会在构建期直接报错，而不是线上白屏。
  */
 // 注意：zod 要从 "astro/zod" 单独导入。从 "astro:content" 取 z 在 Astro 5+ 已标记废弃。
