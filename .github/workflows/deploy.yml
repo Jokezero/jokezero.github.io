@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
       # pnpm 版本取自 package.json 的 packageManager 字段（pnpm@11.25.0），
       # 与本地、锁文件保持一致，避免依赖腐化。
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
