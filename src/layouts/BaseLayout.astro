@@ -55,20 +55,15 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
 
     <!--
       主题初始化（防闪烁）：同步执行、约 200 字节。
-      优先级：本地记忆 > 系统偏好 > 深色兜底。
+      优先级：本地记忆 > 深色兜底（**不跟随系统偏好**，见 docs/adr/0020）。
+      站点的默认外观是深色 —— 只有读者自己点过切换按钮并留下记忆，才会是亮色。
       存储键与 src/config/site.ts 的 themeStorageKey 保持一致。
     -->
     <script is:inline>
       (() => {
         try {
           const saved = localStorage.getItem("zeroweb-theme");
-          const theme =
-            saved === "light" || saved === "dark"
-              ? saved
-              : matchMedia("(prefers-color-scheme: light)").matches
-                ? "light"
-                : "dark";
-          document.documentElement.dataset.theme = theme;
+          document.documentElement.dataset.theme = saved === "light" ? "light" : "dark";
         } catch {
           document.documentElement.dataset.theme = "dark";
         }
