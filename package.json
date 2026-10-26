@@ -29,7 +29,7 @@
     "astro": "^7.3.5"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.10",
+    "@astrojs/check": "^0.9.12",
     "@astrojs/mdx": "^8.0.2",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
@@ -42,8 +42,8 @@
     "eslint-plugin-astro": "^3.2.1",
     "globals": "^17.12.0",
     "pagefind": "^1.5.2",
-    "prettier": "^3.9.9",
-    "prettier-plugin-astro": "^1.1.0",
+    "prettier": "^3.9.10",
+    "prettier-plugin-astro": "^1.1.1",
     "sharp": "^0.35.5",
     "size-limit": "^14.1.0",
     "tailwindcss": "^4.3.3",
